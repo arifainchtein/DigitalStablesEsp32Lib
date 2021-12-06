@@ -21,7 +21,7 @@ void Esp32SecretManager::saveSecret(String secret, int numberDigits, int periodS
 	preferences.putString("Secret", secret);
 }
 void Esp32SecretManager::readSecret(char *secretCode){
-	preferences.getString("secret"y, secretCode, 10);
+	preferences.getString("secret", secretCode, 10);
 }
 
 Esp32SecretManager::~Esp32SecretManager() {}
