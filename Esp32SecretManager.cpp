@@ -8,13 +8,20 @@
 #include <Esp32SecretManager.h>
 #include <TimeManager.h>
 
+#include <Preferences.h>
+
+Preferences preferences;
 
 
-Esp32SecretManager::Esp32SecretManager(TimeManager& t): timeManager(t){
-
+Esp32SecretManager::Esp32SecretManager(TimeManager& t):SecretManager(t){
+	preferences.begin("SecretManager", false);
 }
 
-Esp32SecretManager::~Esp32SecretManager() {
-	// TODO Auto-generated destructor stub
+void Esp32SecretManager::saveSecret(String secret, int numberDigits, int periodSeconds ){
+	preferences.putString("Secret", secret);
+}
+void Esp32SecretManager::readSecret(char *secretCode){
+	preferences.getString("secret"y, secretCode, 10);
 }
 
+Esp32SecretManager::~Esp32SecretManager() {}

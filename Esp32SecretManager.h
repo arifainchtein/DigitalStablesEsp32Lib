@@ -11,7 +11,7 @@
 #include <TimeManager.h>
 
 class Esp32SecretManager   : public SecretManager{
-	TimeManager & timeManager;
+
 
 public:
 

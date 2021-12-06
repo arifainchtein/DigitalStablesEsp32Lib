@@ -10,14 +10,14 @@
 
 
 class SecretManager{
-		TimeManager & timeManager;
+	protected	TimeManager & timeManager;
 
 
 
 	public:
 		SecretManager(TimeManager & t) ;
-		void saveSecret(String secret, int numberDigits, int periodSeconds );
-		void readSecret(char *secretCode);
+		virtual void saveSecret(String secret, int numberDigits, int periodSeconds )=0;
+		virtual void readSecret(char *secretCode)=0;
 		long generateCode();
 		boolean checkCode(long userCode);
 		static constexpr int SHARED_SECRET_LENGTH=27;
