@@ -10,7 +10,8 @@
 
 
 class SecretManager{
-	protected	TimeManager & timeManager;
+	protected:
+	TimeManager & timeManager;
 
 
 
