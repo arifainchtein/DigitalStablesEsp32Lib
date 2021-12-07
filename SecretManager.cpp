@@ -22,8 +22,8 @@ long SecretManager::generateCode(){
 
 	long timestamp = timeManager.getTimeForCodeGeneration();
 
-	char secretCode[SHARED_SECRET_LENGTH];
-	readSecret(secretCode);
+	//char secretCode[SHARED_SECRET_LENGTH];
+	String secretCode = readSecret();
 	TOTP totp = TOTP(secretCode);
 	long code=totp. gen_code  (timestamp ) ;
 	//
