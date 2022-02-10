@@ -11,6 +11,7 @@
 
 Preferences preferences;
 
+Esp32SecretManager::Esp32SecretManager(TimeManager& t):SecretManager(t){}
 
 
 
