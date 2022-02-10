@@ -5,18 +5,17 @@
  *      Author: arifainchtein
  */
 
-#include <Esp32SecretManager.h>
-#include <TimeManager.h>
+#include <ESP32DataStorageManager.h>
 
 #include <Preferences.h>
 
 Preferences preferences;
 
 
-Esp32SecretManager::Esp32SecretManager(TimeManager& t):SecretManager(t){}
+ESP32DataStorageManager::ESP32DataStorageManager(){}
 
 
-void Esp32SecretManager::saveSecret(String secret, int numberDigits, int periodSeconds ){
+void ESP32DataStorageManager::saveSecret(String secret, int numberDigits, int periodSeconds ){
 
 	preferences.begin("SecretManager", false);
 	preferences.putString("Secret", secret);
@@ -25,17 +24,9 @@ void Esp32SecretManager::saveSecret(String secret, int numberDigits, int periodS
 	preferences.end();
 }
 
-void Esp32SecretManager::readSecret(char *secretCode){
-	preferences.getString("Secret");
-	preferences.begin("SecretManager",false);
-	String ret = preferences.getString("Secret");
 
-	preferences.getString("Secret", secretCode, 27);
-}
 
-String Esp32SecretManager::readSecret(){
-
-	preferences.getString("Secret");
+String Esp3ESP32DataStorageManager2SecretManager::readSecret(){
 	preferences.begin("SecretManager",false);
 	String ret = preferences.getString("Secret");
 	preferences.end();

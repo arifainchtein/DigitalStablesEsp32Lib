@@ -18,8 +18,8 @@ class SecretManager{
 	public:
 		SecretManager(TimeManager & t) ;
 		virtual void saveSecret(String secret, int numberDigits, int periodSeconds )=0;
-		String void readSecret()=0;
-		virtual long generateCode()=0;
+		virtual String  readSecret()=0;
+		long generateCode();
 		boolean checkCode(long userCode);
 		static constexpr int SHARED_SECRET_LENGTH=27;
 

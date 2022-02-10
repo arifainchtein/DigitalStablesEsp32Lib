@@ -31,12 +31,6 @@ bool NoDataStorageManager::start(){
 
 }
 
-bool NoDataStorageManager::readUntransferredFileFromSDCardByDate(int moveData, bool sendToSerial,const char *dirName, int date, int month, int year){
-
-}
-bool NoDataStorageManager::readUntransferredFileFromSDCard(int moveData, bool sendToSerial, const char *dirName){
-
-}
 void NoDataStorageManager::storeRememberedValue(long time, const char *name, float value, String unit){
 
 }
@@ -97,9 +91,7 @@ float NoDataStorageManager::searchRememberedValue(const char *label, int date, i
 void NoDataStorageManager::storeLifeCycleEvent(long time, const char *eventType, int eventValue){
 
 }
-long NoDataStorageManager::printDirectory(File dir, int numTabs){
 
-}
 
 bool NoDataStorageManager::getHistoricalData(const char *dirName, int date, int month, int year){
 

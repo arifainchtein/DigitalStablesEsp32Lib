@@ -42,7 +42,6 @@ public:
 
 	float searchRememberedValue(const char *label, int date, int month, int year, char *whatToSearchFor);
 	void storeLifeCycleEvent(long time, const char *eventType, int eventValue);
-	long printDirectory(File dir, int numTabs);
 	uint32_t getFreeDiskSpace();
 	uint32_t getDiskUsage();
 

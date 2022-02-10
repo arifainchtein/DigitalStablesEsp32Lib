@@ -17,7 +17,6 @@ public:
 
 	Esp32SecretManager(TimeManager & t) ;
 	void saveSecret(String secret, int numberDigits, int periodSeconds );
-	void readSecret(char *secretCode);
 	String readSecret();
 
 	virtual ~Esp32SecretManager();

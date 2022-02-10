@@ -8,7 +8,6 @@
 #ifndef LIBRARIES_DIGITALSTABLES_DATASTORAGEMANAGER_H_
 #define LIBRARIES_DIGITALSTABLES_DATASTORAGEMANAGER_H_
 #include "Arduino.h"
-#include <SD.h>
 #include <GeneralFunctions.h>
 #include <LCDDisplay.h>
 #include <TimeManager.h>
@@ -23,8 +22,6 @@ public:
 
 	DataStorageManager(DataStorageManagerInitParams&  d, TimeManager& t, HardwareSerial& serial, LCDDisplay& l);
 	virtual bool start()=0;
-	virtual bool readUntransferredFileFromSDCardByDate(int moveData, bool sendToSerial,const char *dirName, int date, int month, int year)=0;
-	virtual bool readUntransferredFileFromSDCard(int moveData, bool sendToSerial, const char *dirName)=0;
 	virtual void storeRememberedValue(long time, const char *name, float value, String unit)=0;
 	virtual void storeRememberedValue(long time, const char *name, float value, uint8_t operatingStatus)=0;
 
@@ -41,7 +38,6 @@ public:
 
 	virtual float searchRememberedValue(const char *label, int date, int month, int year, char *whatToSearchFor)=0;
 	virtual void storeLifeCycleEvent(long time, const char *eventType, int eventValue)=0;
-	virtual long printDirectory(File dir, int numTabs)=0;
 	virtual bool getHistoricalData(const char *dirName, int date, int month, int year)=0;
 	virtual void saveWPSSensorRecord(WPSSensorRecord anWPSSensorRecord)=0;
 

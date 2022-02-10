@@ -24,7 +24,7 @@ long SecretManager::generateCode(){
 
 	//char secretCode[SHARED_SECRET_LENGTH];
 	String secretCode = readSecret();
-	TOTP totp = TOTP(secretCode);
+	TOTP totp = TOTP(secretCode.c_str());
 	long code=totp. gen_code  (timestamp ) ;
 	//
 	// now check to see if this code is already in the history
@@ -52,7 +52,7 @@ long SecretManager::generateCode(){
 	return code;
 }
 
-boolean SecretManager::checkCode(long userCode){
+bool SecretManager::checkCode(long userCode){
 	boolean codeOk=false;
 	long code = generateCode();
 	// Serial.print("code=");
