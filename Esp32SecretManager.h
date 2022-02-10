@@ -18,6 +18,10 @@ public:
 	Esp32SecretManager(TimeManager & t) ;
 	void saveSecret(String secret, int numberDigits, int periodSeconds );
 	String readSecret();
+	
+	void saveConfigData(float fieldId, String stationName );
+	float  getFieldId();
+    String getStationName();  
 
 	virtual ~Esp32SecretManager();
 };
