@@ -20,8 +20,15 @@ public:
 	String readSecret();
 	
 	void saveConfigData(float fieldId, String stationName );
+	void saveOperatingStatus(float operatingStatus );
+	float getOperatingStatus();
 	float  getFieldId();
     String getStationName();  
+	void saveSleepPingMinutes(float pingMinutes );
+	float getSleepPingMinutes();
+	void saveWifiParameters(String ssid, String password);
+	String getSSID();
+	String getWifiPassword();
 
 	virtual ~Esp32SecretManager();
 };
