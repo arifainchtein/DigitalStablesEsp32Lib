@@ -24,7 +24,7 @@ String Esp32WifiManager::getAPAddress(){
 	return apAddress;
 }
 
-String Esp32WifiManager::getRSSI(){
+int Esp32WifiManager::getRSSI(){
 	return WiFi.RSSI();
 }
 String Esp32WifiManager::getSoftAPSSID(){
@@ -362,6 +362,7 @@ void Esp32WifiManager::start( ){
 
 	server.begin();
 }
+
 
 void Esp32WifiManager::checkForClient(){
 	WiFiClient client = server.available();   // listen for incoming clients

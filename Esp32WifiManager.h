@@ -13,7 +13,7 @@ class Esp32WifiManager   {
 		void checkForClient();
 		String getSSID();
 		String getSoftAPSSID();
-		String getRSSI();
+		int getRSSI();
 		String getIPAddress();
 		String getAPAddress();
 		virtual ~Esp32WifiManager();
