@@ -12,7 +12,7 @@
     AsyncWebServer asyncWebServer(80);
     WiFiServer server(8080);
 
-Esp32WifiManager::Esp32WifiManager( ( Hardware_HardSerial& _HardSerial): _Hard_HardSerial(_HardSerial){}
+Esp32WifiManager::Esp32WifiManager( Hardware_HardSerial& _HardSerial): _Hard_HardSerial(_HardSerial){}
 
 String Esp32WifiManager::getSSID(){
     return ssid;
