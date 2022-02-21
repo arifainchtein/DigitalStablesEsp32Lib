@@ -68,6 +68,9 @@ void Esp32SecretManager::saveOperatingStatus(float operatingStatus ){
 float Esp32SecretManager::getOperatingStatus(){
 	preferences.begin("OperationalData",false);
 	float operatingStatus = preferences.getFloat("operatingStatus");
+	if(isnan(operatingStatus)){
+		operatingStatus=3;
+	}
 	preferences.end();
 	return operatingStatus;
 }
