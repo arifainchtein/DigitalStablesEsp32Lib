@@ -38,7 +38,7 @@ class TimeManager{
 		//
 		// Functions that represent Serial commands
 		//
-		virtual bool printTimeToSerial()=0;
+		virtual bool printTimeToSerial(RTCInfoRecord)=0;
 		virtual bool setTime(String)=0;
         virtual ~TimeManager();
 
