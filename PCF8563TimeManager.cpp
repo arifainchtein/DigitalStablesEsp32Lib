@@ -125,25 +125,7 @@ bool PCF8563TimeManager::printTimeToSerial(RTCInfoRecord aRTCInfoRecord){
 	return true;
 }
 
-bool PCF8563TimeManager::printTimeToSerial(){
 
-	RTCInfoRecord aRTCInfoRecord = now();
-
-	_HardSerial.print(aRTCInfoRecord.date);
-	_HardSerial.print("/");
-	_HardSerial.print(aRTCInfoRecord.month);
-	_HardSerial.print("/");
-	_HardSerial.print(aRTCInfoRecord.year);
-	_HardSerial.print(" ");
-	_HardSerial.print(aRTCInfoRecord.hour);
-	_HardSerial.print(":");
-	_HardSerial.print(aRTCInfoRecord.minute);
-	_HardSerial.print(":");
-	_HardSerial.print(aRTCInfoRecord.second);
-
-
-	return true;
-}
 //
 // End of Functions that represents commands received via the serial port
 //

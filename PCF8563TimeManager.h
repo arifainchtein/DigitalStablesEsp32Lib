@@ -34,7 +34,7 @@ public:
 	//
 	// Functions that represent Serial commands
 	//
-	bool printTimeToSerial();
+	
 	bool setTime(String);
 	bool setTime(RTCInfoRecord);
 	void setPCF8563alarm(byte am, byte ah);
