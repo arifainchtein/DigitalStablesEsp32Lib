@@ -22,7 +22,7 @@ String sensorString;
 uint8_t delayT=10;
 float fieldId;
 
-WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e) : _HardSerial(serial),timeManager(t),secretManager(e)  {}
+WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  TankFlowData& tf,PanchoConfigData& p) : _HardSerial(serial),timeManager(t),secretManager(e), tankFlowData(tf) ,panchoConfigData(p)  {}
 
 void WifiManager::setCurrentSSID(char* s)
 {
@@ -38,7 +38,7 @@ String WifiManager::getApAddress()
 {
     return apAddress;
 }
-void WifiManager::setCurrentStatusData(RTCInfoRecord &c, TankFlowData* t,PanchoConfigData* p,RTCInfoRecord &l)
+void WifiManager::setCurrentStatusData(RTCInfoRecord c,RTCInfoRecord l)
 {
     currentTimerRecord = c;
     lastReceptionRTCInfoRecord=l;

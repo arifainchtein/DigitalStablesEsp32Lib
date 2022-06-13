@@ -26,9 +26,9 @@ protected:
 
 
 public:
-	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e) ;
+	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, TankFlowData& t, PanchoConfigData& p) ;
 	void start( );
-    void setCurrentStatusData(RTCInfoRecord& c,TankFlowData* t, PanchoConfigData* p , RTCInfoRecord& l);
+    void setCurrentStatusData(RTCInfoRecord c, RTCInfoRecord l);
     void setCurrentSSID(char* c);
     void setSensorString(String s);
     String getApAddress();
