@@ -9,10 +9,10 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 
-char * ssid = "MainRouter24";
-char *password = "";
-char *soft_ap_ssid = "Rosie1";
-char *soft_ap_password = "";
+String ssid = "MainRouter24";
+String password = "";
+String soft_ap_ssid = "Rosie1";
+String soft_ap_password = "";
 AsyncWebServer asyncWebServer(80);
 WiFiServer server(8080);
 
@@ -65,8 +65,8 @@ void WifiManager::start(){
     //  WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
     String hostname = "Rosie";
     WiFi.setHostname(hostname.c_str());
-    WiFi.softAP(soft_ap_ssid, soft_ap_password);
-    WiFi.begin(ssid, password);
+    WiFi.softAP(soft_ap_ssid.c_str(), soft_ap_password.c_str());
+    WiFi.begin(const_cast<char*>(ssid.c_str()), const_cast<char*>(password.c_str()));
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(500);
@@ -250,7 +250,7 @@ void WifiManager::start(){
 
 						// Set values to send
 						stationNameS.toCharArray(tankFlowData.stationName, 20);
-						panchoConfigData->fieldId=fieldId;
+						panchoConfigData.fieldId=fieldId;
 						tankFlowData.fieldId = fieldId;
 						secretManager.saveConfigData(fieldId,  tankFlowData.stationName );
 						toReturn="Ok-SetRosieConfigParams";
@@ -329,16 +329,13 @@ void WifiManager::start(){
 					String toReturn="";
 					if(validCode){
 						p = request->getParam(2);
-						String ssids = p->value();
-
-						ssids.toCharArray(ssid, 20);
+						ssid = p->value();
 						p = request->getParam(3);
-						String pass = p->value();
-						pass.toCharArray(password, 20);
+						password = p->value();
 						secretManager.saveWifiParameters(ssid, password);
 						ipAddress = WiFi.localIP().toString();
 						WiFi.disconnect();
-						WiFi.begin(ssid, password);
+						WiFi.begin(const_cast<char*>(ssid.c_str()), const_cast<char*>(password.c_str()));
 						toReturn="Ok-UpdateWifiParameters";
 					}else{
 						toReturn="Failure-SetRosieConfigParams-Invalid Code";
