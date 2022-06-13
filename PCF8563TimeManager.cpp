@@ -10,8 +10,8 @@
 
 static const byte monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
 #define PCF8563address 0x51
-
-
+#define I2C_SDA 21
+#define I2C_SCL 22
 
 PCF8563TimeManager::PCF8563TimeManager( HardwareSerial& serial):TimeManager(serial ){
 	 Wire.begin();
@@ -133,7 +133,7 @@ bool PCF8563TimeManager::printTimeToSerial(RTCInfoRecord aRTCInfoRecord){
 
 void PCF8563TimeManager::start(){
 
-	 Wire.begin();
+//	 Wire.begin();
 }
 
 
