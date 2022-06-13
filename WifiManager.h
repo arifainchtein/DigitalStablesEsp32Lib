@@ -26,7 +26,7 @@ protected:
 
 
 public:
-	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, TankFlowData& t, PanchoConfigData& p) ;
+	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, TankFlowData& tf, PanchoConfigData& p) ;
 	void start( );
     void setCurrentStatusData(RTCInfoRecord c, RTCInfoRecord l);
     void setCurrentSSID(char* c);

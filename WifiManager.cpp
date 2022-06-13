@@ -22,7 +22,8 @@ String sensorString;
 uint8_t delayT=10;
 float fieldId;
 
-WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  TankFlowData& tf,PanchoConfigData& p) : _HardSerial(serial),timeManager(t),secretManager(e), tankFlowData(tf) ,panchoConfigData(p)  {}
+WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  TankFlowData& tf,PanchoConfigData& p) :
+ _HardSerial(serial),timeManager(t),secretManager(e), tankFlowData(tf) ,panchoConfigData(p)  {}
 
 void WifiManager::setCurrentSSID(char* s)
 {
