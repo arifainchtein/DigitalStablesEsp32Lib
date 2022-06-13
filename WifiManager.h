@@ -21,15 +21,15 @@ protected:
     RTCInfoRecord currentTimerRecord, lastReceptionRTCInfoRecord;
     PCF8563TimeManager& timeManager;
     Esp32SecretManager& secretManager;
-    TankFlowData* tankFlowData;
-    PanchoConfigData* panchoConfigData;
+    TankFlowData& tankFlowData;
+    PanchoConfigData& panchoConfigData;
 
 
 public:
 	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, TankFlowData& tf, PanchoConfigData& p) ;
 	void start( );
     void setCurrentStatusData(RTCInfoRecord c, RTCInfoRecord l);
-    void setCurrentSSID(char* c);
+    void setCurrentSSID(String s);
     void setSensorString(String s);
     String getApAddress();
     String getSoft_ap_ssid();
