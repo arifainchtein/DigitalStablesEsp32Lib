@@ -6,24 +6,32 @@
  */
 
 #include <WifiManager.h>
-#include <WiFi.h>
+
 #include <ESPAsyncWebServer.h>
 
-String ssid = "MainRouter24";
+String ssid = "home";
 String password = "";
-String soft_ap_ssid = "Rosie1";
+String soft_ap_ssid = "PanchoTankFlow_AP";
 String soft_ap_password = "";
 AsyncWebServer asyncWebServer(80);
-WiFiServer server(8080);
+//WiFiServer server(8080);
 
 String apAddress;
 String ipAddress;
 String sensorString;
 uint8_t delayT=10;
 float fieldId;
+String hostname = "PanchoTankFlow";
+bool opmode=false;
 
-WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  TankFlowData& tf,PanchoConfigData& p) :
+WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
  _HardSerial(serial),timeManager(t),secretManager(e), tankFlowData(tf) ,panchoConfigData(p)  {}
+
+
+String WifiManager::getMacAddress( )
+{
+    return WiFi.macAddress();
+}
 
 void WifiManager::setCurrentSSID(String s)
 {
@@ -39,10 +47,11 @@ String WifiManager::getApAddress()
 {
     return apAddress;
 }
-void WifiManager::setCurrentStatusData(RTCInfoRecord c,RTCInfoRecord l)
+void WifiManager::setCurrentStatusData(RTCInfoRecord c,RTCInfoRecord l, bool o)
 {
     currentTimerRecord = c;
     lastReceptionRTCInfoRecord=l;
+    opmode=o;
 }
 
 double WifiManager::getRSSI()
@@ -50,9 +59,25 @@ double WifiManager::getRSSI()
     return WiFi.RSSI();
 }
 
+
+String WifiManager::getSoft_ap_password()
+{
+    return soft_ap_password;
+}
+
+void WifiManager::setSoft_ap_password(String s)
+{
+     soft_ap_password=s;
+}
+
 String WifiManager::getSoft_ap_ssid()
 {
     return soft_ap_ssid;
+}
+
+void WifiManager::setSoft_ap_ssid(String s)
+{
+     soft_ap_ssid=s;
 }
 
 String WifiManager::getIpAddress()
@@ -60,30 +85,117 @@ String WifiManager::getIpAddress()
     return ipAddress;
 }
 
-void WifiManager::start(){
+String WifiManager::getHostName()
+{
+    return hostname;
+}
+
+void  WifiManager::setHostName(String c)
+{
+     hostname=c;
+}
+
+String WifiManager::getSSID()
+{
+    return ssid;
+}
+
+void  WifiManager::setSSID(String c)
+{
+     ssid=c;
+}
+
+uint8_t WifiManager::getWifiStatus(){
+    return WiFi.status();
+}
+void WifiManager::configWifi(String s, String p, String sas, String sap, String h ){
+    ssid = s;
+    password = p;
+    soft_ap_ssid = sas;
+    soft_ap_password = sap;
+    hostname=h;
+    
+    secretManager.saveWifiParameters( ssid,  password, soft_ap_ssid, soft_ap_password,hostname);
+   // secretManager.saveConfigData(float fieldId, stationName );
+    WiFi.disconnect();
+    connect();
+}
+
+void WifiManager::restartWifi(){
+    WiFi.disconnect();
+    connect();
+}
+
+void  OnWiFiEvent(WiFiEvent_t event)
+{
+  switch (event) {
+ 
+    case SYSTEM_EVENT_STA_CONNECTED:
+      _HardSerial.println("ESP32 Connected to WiFi Network");
+      break;
+    case SYSTEM_EVENT_AP_START:
+      _HardSerial.println("ESP32 soft AP started");
+      break;
+    case SYSTEM_EVENT_AP_STACONNECTED:
+      _HardSerial.println("Station connected to ESP32 soft AP");
+      break;
+    case SYSTEM_EVENT_AP_STADISCONNECTED:
+      _HardSerial.println("Station disconnected from ESP32 soft AP");
+      break;
+    default: break;
+  }
+}
+
+void WifiManager::connect(){
     WiFi.mode(WIFI_MODE_APSTA);
     //  WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
-    String hostname = "Rosie";
+    WiFi.onEvent(OnWiFiEvent);
     WiFi.setHostname(hostname.c_str());
     WiFi.softAP(soft_ap_ssid.c_str(), soft_ap_password.c_str());
     WiFi.begin(const_cast<char*>(ssid.c_str()), const_cast<char*>(password.c_str()));
-    while (WiFi.status() != WL_CONNECTED)
-    {
+    bool gotConnection=true;
+    uint8_t counter=0;
+    bool keepGoing=true;
+    while (keepGoing){
+        keepGoing=WiFi.status() != WL_CONNECTED;
         delay(500);
-        _HardSerial.print(".");
+       // _HardSerial.print(".");
+        counter++;
+        if(counter>10){
+            keepGoing=false;
+            gotConnection=false;
+        }
     }
-    _HardSerial.println("");
-    ipAddress = WiFi.localIP().toString();
-    _HardSerial.println("WiFi connected.");
-    _HardSerial.println("IP address: ");
-    _HardSerial.println(ipAddress);
 
-    delay(2000);
-    apAddress = WiFi.softAPIP().toString();
-    _HardSerial.println("Access Point Enabled connected.");
-    _HardSerial.println("Access Point IP address: ");
-    _HardSerial.println(apAddress);
+    if(gotConnection){
+        _HardSerial.println("");
+        ipAddress = WiFi.localIP().toString();
+        _HardSerial.println("WiFi connected.");
+        _HardSerial.println("IP address: ");
+        _HardSerial.println(ipAddress);
 
+        delay(2000);
+        apAddress = WiFi.softAPIP().toString();
+        _HardSerial.println("Access Point Enabled connected.");
+        _HardSerial.println("Access Point IP address: ");
+        _HardSerial.println(apAddress); 
+    }else{
+        _HardSerial.print("Error connecting to wifi router ssid=");
+         _HardSerial.println(ssid);
+    }
+    
+}
+
+void WifiManager::start(){
+   //
+   // get the parameters
+   //
+   ssid = secretManager.getSSID();
+    password = secretManager.getWifiPassword();;
+    soft_ap_ssid = secretManager.getSoftAPSSID();
+    soft_ap_password = secretManager.getSoftAPPASS();
+    hostname=secretManager.getHostName();
+    connect();
     asyncWebServer.begin();
     asyncWebServer.on("/GetSensorData", HTTP_GET, [this](AsyncWebServerRequest *request){
        this->_HardSerial.println("curl request returning");
@@ -249,10 +361,10 @@ void WifiManager::start(){
 						secretManager.saveSleepPingMinutes(sleepPingMinutes);
 
 						// Set values to send
-						stationNameS.toCharArray(tankFlowData.stationName, 20);
-						panchoConfigData.fieldId=fieldId;
-						tankFlowData.fieldId = fieldId;
-						secretManager.saveConfigData(fieldId,  tankFlowData.stationName );
+						//stationNameS.toCharArray(tankFlowData.stationName, 20);
+						//panchoConfigData.fieldId=fieldId;
+						//tankFlowData.fieldId = fieldId;
+						//secretManager.saveConfigData(fieldId,  tankFlowData.stationName );
 						toReturn="Ok-SetRosieConfigParams";
 					}else{
 						toReturn="Failure-SetRosieConfigParams-Invalid Code";
@@ -332,7 +444,8 @@ void WifiManager::start(){
 						ssid = p->value();
 						p = request->getParam(3);
 						password = p->value();
-						secretManager.saveWifiParameters(ssid, password);
+						//secretManager.saveWifiParameters(ssid, password);
+                         secretManager.saveWifiParameters( ssid,  password, soft_ap_ssid, soft_ap_password,hostname);
 						ipAddress = WiFi.localIP().toString();
 						WiFi.disconnect();
 						WiFi.begin(const_cast<char*>(ssid.c_str()), const_cast<char*>(password.c_str()));
@@ -378,7 +491,7 @@ void WifiManager::start(){
             return;
         } });
 
-    server.begin();
+  //  server.begin();
 
 }
 
@@ -388,13 +501,13 @@ String WifiManager::getIndexPage(){
         toReturn += "<meta http-equiv=\"refresh\" content=\"3\">";
         toReturn += "<link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3\" crossorigin=\"anonymous\">";
         toReturn += "<title>";
-        toReturn += tankFlowData.stationName;
+        toReturn += hostname;
         toReturn += "</title>";
         toReturn += "</head>";
         toReturn += "<body><div class=\"container\">";
         toReturn += "<div class=\"row\">";
         toReturn += "<div class=\"col-9\"><h4 style=\"margin-left:50px;margin-right:100px;\">";
-        toReturn += tankFlowData.stationName;
+        toReturn += hostname;
         toReturn += "</h4></div><div class=\"col-3\">";
 
         toReturn += currentTimerRecord.hour;
@@ -450,21 +563,6 @@ String WifiManager::getIndexPage(){
         toReturn += "<div class=\"row\"><div class=\"col-12\"><h5 style=\"margin-left:0px;margin-right:100px;\">Power</h5></div></div>";
         toReturn += "<table style=\"table-layout: fixed;\" class=\"table table-striped\"><tr><th>Data</th><th>Value</th></tr>";
 
-        toReturn += "<tr><td>Low Voltage Alert</td>";
-        if (tankFlowData.lowVoltageAlert)
-            toReturn += "<td style=\"color:red\">ON";
-        else
-            toReturn += "<td>OFF";
-        toReturn += "</td></tr>";
-
-        toReturn += "<tr><td>Solar Voltage</td><td>";
-        toReturn += tankFlowData.solarVoltage;
-        toReturn += "</td></tr>";
-
-        toReturn += "<tr><td>Capacitor Voltage</td><td>";
-        toReturn += tankFlowData.capacitorVoltage;
-        toReturn += "</td></tr>";
-
         toReturn += "<tr><td>RTC Battery Voltage</td><td>";
         toReturn += tankFlowData.rtcBatVolt;
         toReturn += "</td></tr>";
@@ -477,14 +575,9 @@ String WifiManager::getIndexPage(){
         toReturn += "<br><br>";
         toReturn += "<div class=\"row\"><div class=\"col-12\"><h5 style=\"margin-left:0px;margin-right:100px;\">Operational Data</h5></div></div>";
         toReturn += "<table style=\"table-layout: fixed;\" class=\"table table-striped\"><tr><th>Data</th><th>Value</th></tr>";
-        String rosieId = "";
-        for (int i = 0; i < 8; i++)
-        {
-            rosieId += (tankFlowData.rosieId[i], HEX);
-        }
-        toReturn += "<tr><td>Id</td><td>" + rosieId + "</td></tr>";
-        toReturn += "<tr><td>Field Id</td><td>";
-        toReturn += (uint8_t)tankFlowData.fieldId;
+        
+        toReturn += "<tr><td>Serial Number</td><td>";
+        toReturn += getMacAddress();
         toReturn += "</td></tr>";
 
         long now = timeManager.getCurrentTimeInSeconds(currentTimerRecord);
@@ -551,13 +644,18 @@ String WifiManager::getIndexPage(){
         toReturn += "<br><br>";
 
         toReturn += "<div class=\"row\">";
-        toReturn += "<div class=\"col-9\"><h4 style=\"margin-left:0px;margin-right:100px;\">Rosie Radio Info</h4></div><div class=\"col-3\"></div></div>";
+        toReturn += "<div class=\"col-9\"><h4 style=\"margin-left:0px;margin-right:100px;\">Pancho Radio Info</h4></div><div class=\"col-3\"></div></div>";
 
         toReturn += "<table style=\"table-layout: fixed;\" class=\"table table-striped\"><tr><th>Data</th><th>Value</th></tr>";
 
         toReturn += "<tr><td>Wifi Strength</td><td>";
         toReturn += WiFi.RSSI();
         toReturn += "</td></tr>";
+
+        toReturn += "<tr><td>Mac Address</td><td>";
+        toReturn += getMacAddress();
+        toReturn += "</td></tr>";
+
 
         toReturn += "<tr><td>Ip Address</td><td>";
         toReturn += ipAddress;
@@ -575,6 +673,9 @@ String WifiManager::getIndexPage(){
         toReturn += apAddress;
         toReturn += "</td></tr>";
 
+        
+
+
         toReturn += "<tr><td>Lora RSSI</td><td>";
         toReturn += tankFlowData.rssi;
         toReturn += "</td></tr>";
@@ -589,7 +690,7 @@ String WifiManager::getIndexPage(){
         return toReturn;
     }
 
-
+/*
 void WifiManager::checkClient(){
     WiFiClient client = server.available(); // listen for incoming clients
     if (client)
@@ -652,4 +753,5 @@ void WifiManager::checkClient(){
         Serial.println("Client Disconnected.");
     }
 }
+*/
 WifiManager::~WifiManager() {}

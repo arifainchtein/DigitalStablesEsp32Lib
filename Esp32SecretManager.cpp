@@ -88,25 +88,55 @@ float Esp32SecretManager::getSleepPingMinutes(){
 	return pingMinutes;
 }
 
-void Esp32SecretManager::saveWifiParameters(String ssid, String password){
+
+void Esp32SecretManager::saveWifiParameters(String ssid, String password, String softAPSSID, String softAPPASS,  String hostName){
 	preferences.begin("WIFIData",false);
 	preferences.putString("ssid", ssid);
 	preferences.putString("password", password);
+	preferences.putString("softAPSSID", softAPSSID);
+	preferences.putString("softAPPASS", softAPPASS);
+	preferences.putString("hostName", hostName);
 	preferences.end();
 }
 
 String Esp32SecretManager::getSSID(){
 	preferences.begin("WIFIData",false);
-	String ssid = preferences.getString("ssid");
+	String ssid = "";
+	if(preferences.isKey("ssid"))ssid=preferences.getString("ssid");
 	preferences.end();
 	return ssid;
 }
 
 String Esp32SecretManager::getWifiPassword(){
 	preferences.begin("WIFIData",false);
-	String password = preferences.getString("password");
+	String password = "";
+	if(preferences.isKey("password"))password=preferences.getString("password");
 	preferences.end();
 	return password;
+}
+
+String Esp32SecretManager::getSoftAPSSID(){
+	preferences.begin("WIFIData",false);
+	String softAPSSID = "";
+	if(preferences.isKey("softAPSSID"))softAPSSID=preferences.getString("softAPSSID");
+	preferences.end();
+	return softAPSSID;
+}
+
+String Esp32SecretManager::getSoftAPPASS(){
+	preferences.begin("WIFIData",false);
+	String softAPPASS = "";
+	if(preferences.isKey("softAPPASS"))softAPPASS=preferences.getString("softAPPASS");
+	preferences.end();
+	return softAPPASS;
+}
+
+String Esp32SecretManager::getHostName(){
+	preferences.begin("WIFIData",false);
+	String hostName = "";
+	if(preferences.isKey("hostName"))hostName=preferences.getString("hostName");
+	preferences.end();
+	return hostName;
 }
 
 Esp32SecretManager::~Esp32SecretManager() {}

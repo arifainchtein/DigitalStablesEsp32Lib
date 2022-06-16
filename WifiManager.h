@@ -12,6 +12,7 @@
 #include <PCF8563TimeManager.h>
 #include <Esp32SecretManager.h>
 #include <PanchoTankFlowData.h>
+#include <WiFi.h>
 
 class WifiManager{
 
@@ -21,24 +22,40 @@ protected:
     RTCInfoRecord currentTimerRecord, lastReceptionRTCInfoRecord;
     PCF8563TimeManager& timeManager;
     Esp32SecretManager& secretManager;
-    TankFlowData& tankFlowData;
+    PanchoTankFlowData& tankFlowData;
     PanchoConfigData& panchoConfigData;
 
 
 public:
-	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, TankFlowData& tf, PanchoConfigData& p) ;
+	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, PanchoTankFlowData& tf, PanchoConfigData& p) ;
 	void start( );
-    void setCurrentStatusData(RTCInfoRecord c, RTCInfoRecord l);
+    void setCurrentStatusData(RTCInfoRecord c, RTCInfoRecord l, bool opmode);
     void setCurrentSSID(String s);
     void setSensorString(String s);
     String getApAddress();
+    String getMacAddress();
     String getSoft_ap_ssid();
+    void setSoft_ap_ssid(String s);
+    void restartWifi();
+
+    String getSoft_ap_password();
+    void setSoft_ap_password(String s);
+    uint8_t getWifiStatus();
+   
     String getIpAddress();
     double getRSSI();
-    void checkClient();
-	virtual ~WifiManager();
+    //void checkClient();
+	String getHostName();
+    void setHostName(String s);
+    String getSSID();
+    void setSSID(String s);
+    void configWifi(String s, String p, String sas, String sap, String h);
+    virtual ~WifiManager();
+    
 private:
     String getIndexPage();
+    void connect();
+    
 };
 
 #endif /* LIBRARIES_DIGITALSTABLES_WIFIMANAGER_H_ */

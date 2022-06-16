@@ -17,6 +17,7 @@ GeneralFunctions::GeneralFunctions(){
 
 }
 
+  
 String GeneralFunctions::getElapsedTimeHoursMinutesSecondsString(long elapsedTime) {
 	//String seconds = String(elapsedTime % 60);
 	long seconds = elapsedTime/1000;
