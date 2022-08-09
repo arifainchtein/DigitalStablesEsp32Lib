@@ -38,7 +38,7 @@ unsigned long totalMilliLitres2;
 
 
 
-TankAndFlowSensorController::TankAndFlowSensorController(HardwareSerial &serial,  PanchoTankFlowData& tf, TM1637Display d1,TM1637Display d2) :
+TankAndFlowSensorController::TankAndFlowSensorController(HardwareSerial &serial,  PanchoTankFlowData& tf, TM1637Display& d1,TM1637Display& d2) :
  _HardSerial(serial), panchoTankFlowData(tf) , display1(d1), display2(d2)  {}
 
 
@@ -81,32 +81,32 @@ void TankAndFlowSensorController::begin(uint8_t m){
 
 
 /*
- * Mode=0  1 Flowmeter
- * Mode=1  2 Flowmeters
- * Mode=2  1 Flow 1 Tank
- * Mode 3  1 Tank
- * Mode 4  2 Tanks
+ * Mode=1  1 Flowmeter
+ * Mode=2  2 Flowmeters
+ * Mode=3  1 Flow 1 Tank
+ * Mode 4  1 Tank
+ * Mode 5  2 Tanks
 */
 void TankAndFlowSensorController::process(){
 	//_HardSerial.print("processing, mode=");
 	//_HardSerial.println(mode);
 	
     switch(mode){
-        case 0:
-            readFlowMeter1();
-            break;
         case 1:
             readFlowMeter1();
-            readFlowMeter2();
             break;
         case 2:
             readFlowMeter1();
-            readTank1();
+            readFlowMeter2();
             break;
         case 3:
+            readFlowMeter1();
             readTank1();
             break;
         case 4:
+            readTank1();
+            break;
+        case 5:
             readTank1();
             readTank2();
             break;
