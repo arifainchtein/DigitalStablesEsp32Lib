@@ -73,8 +73,8 @@ void TankAndFlowSensorController::begin(uint8_t m){
 	flowMilliLitres = 0;
 	totalMilliLitres = 0;
 	flowMeterPreviousMillis = 0;
-	if(mode<3)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_1), pulseCounter, FALLING);
-	if(mode==2)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_2), pulseCounter2, FALLING);
+	if(mode<3)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_1), TankAndFlowSensorController::pulseCounter, FALLING);
+	if(mode==2)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_2), TankAndFlowSensorController::pulseCounter2, FALLING);
 }
 
 
