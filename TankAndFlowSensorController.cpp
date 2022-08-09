@@ -74,7 +74,7 @@ void TankAndFlowSensorController::begin(uint8_t m){
 	totalMilliLitres = 0;
 	flowMeterPreviousMillis = 0;
 	if(mode<3)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_1), pulseCounter, FALLING);
-	if(mode==1)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_2), pulseCounter2, FALLING);
+	if(mode==2)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_2), pulseCounter2, FALLING);
 }
 
 
@@ -220,8 +220,8 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		pulse1Sec = flowMeterPulseCount;
 
 		flowMeterPulseCount = 0;
-		//  Serial.print(" pulse1Sec=");
-		//  Serial.print(pulse1Sec);
+		  Serial.print(" pulse1Sec=");
+		  Serial.print(pulse1Sec);
 
 		// Because this loop may not complete in exactly 1 second intervals we calculate
 		// the number of milliseconds that have passed since the last execution and use
@@ -231,11 +231,9 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		long lo = millis() - flowMeterPreviousMillis;
 		flowRate = (1000.0 / lo) * pulse1Sec / panchoTankFlowData.qfactor;
 		flowMeterPreviousMillis = millis();
-		//Serial.print("pulse1Sec=");
-		//  Serial.print(pulse1Sec);
-
-		//  Serial.print(" flow=");
-		//  Serial.println(flowRate);
+		
+		  Serial.print(" flow=");
+		  Serial.println(flowRate);
 		// Divide the flow rate in litres/minute by 60 to determine how many litres have
 		// passed through the sensor in this 1 second interval, then multiply by 1000 to
 		// convert to millilitres.
