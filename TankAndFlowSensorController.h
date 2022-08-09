@@ -22,7 +22,7 @@ TM1637Display display2;
     uint8_t mode;
  
 public:
-	TankAndFlowSensorController(HardwareSerial& serial , PanchoTankFlowData& tf, TM1637Display d1,TM1637Display d2 );
+	TankAndFlowSensorController(HardwareSerial& serial , PanchoTankFlowData& tf, TM1637Display& d1,TM1637Display& d2 );
 	void begin(uint8_t m);
     void process();
     void readTank1();
