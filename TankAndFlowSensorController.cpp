@@ -75,8 +75,8 @@ void TankAndFlowSensorController::begin(uint8_t m){
 	flowMilliLitres = 0;
 	totalMilliLitres = 0;
 	flowMeterPreviousMillis = 0;
-	if(mode<3)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_11), TankAndFlowSensorController::pulseCounter, FALLING);
-	if(mode==2)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_12), TankAndFlowSensorController::pulseCounter2, FALLING);
+	if(mode<3)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_1), TankAndFlowSensorController::pulseCounter, FALLING);
+	if(mode==2)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_2), TankAndFlowSensorController::pulseCounter2, FALLING);
 }
 
 
@@ -185,7 +185,7 @@ void TankAndFlowSensorController::readTank1(){
     float average=0.0;
     const float  OffSet = 0.483 ;
     for (int x = 0; x < samples; x++) {           // multiple analogue readings for averaging
-      total = total + analogRead(SENSOR_INPUT_11);  // add each value to a total
+      total = total + analogRead(SENSOR_INPUT_1);  // add each value to a total
      }
     average = total / samples;
 
@@ -210,7 +210,7 @@ void TankAndFlowSensorController::readTank2(){
     float average=0.0;
     const float  OffSet = 0.483 ;
     for (int x = 0; x < samples; x++) {           // multiple analogue readings for averaging
-      total = total + analogRead(SENSOR_INPUT_12);  // add each value to a total
+      total = total + analogRead(SENSOR_INPUT_2);  // add each value to a total
      }
     average = total / samples;
     panchoTankFlowData.tank2PressureVolts=average;
