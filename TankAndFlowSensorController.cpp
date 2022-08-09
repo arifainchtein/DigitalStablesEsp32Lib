@@ -114,6 +114,13 @@ void TankAndFlowSensorController::process(){
 }
 
 void TankAndFlowSensorController::refreshDisplays(){
+	_HardSerial.print( " refresh display, mode=");
+	_HardSerial.print( mode);
+	_HardSerial.print( " anchoTankFlowData.flowRate=");
+	_HardSerial.print( panchoTankFlowData.flowRate);
+	_HardSerial.print( " anchoTankFlowData.flowRate2=");
+	_HardSerial.println( panchoTankFlowData.flowRate2);
+	
     switch(mode){
         case 0:
             
