@@ -86,8 +86,8 @@ void TankAndFlowSensorController::begin(uint8_t m){
  * Mode 4  2 Tanks
 */
 void TankAndFlowSensorController::process(){
-	_HardSerial.print("processing, mode=");
-	_HardSerial.println(mode);
+	//_HardSerial.print("processing, mode=");
+	//_HardSerial.println(mode);
 	
     switch(mode){
         case 0:
