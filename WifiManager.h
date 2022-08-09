@@ -29,7 +29,6 @@ protected:
 public:
 	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, PanchoTankFlowData& tf, PanchoConfigData& p) ;
 	void start( );
-    void setCurrentStatusData(RTCInfoRecord c, RTCInfoRecord l, bool opmode);
     void setCurrentSSID(String s);
     void setSensorString(String s);
     String getApAddress();
@@ -37,11 +36,11 @@ public:
     String getSoft_ap_ssid();
     void setSoft_ap_ssid(String s);
     void restartWifi();
-
+    void scanNetworks();
     String getSoft_ap_password();
     void setSoft_ap_password(String s);
     uint8_t getWifiStatus();
-   
+    String getTeleonomeData(String url, bool b);
     String getIpAddress();
     double getRSSI();
     //void checkClient();
@@ -49,12 +48,22 @@ public:
     void setHostName(String s);
     String getSSID();
     void setSSID(String s);
-    void configWifi(String s, String p, String sas, String sap, String h);
+    bool getStationMode( );
+
+    bool configWifiAP(String sas, String sap, String h);
+    bool configWifiSTA(String s, String p);
+   // void configWifi(String s, String p, String sas, String sap, String h);
+    bool getAPStatus();
+
     virtual ~WifiManager();
     
 private:
+
     String getIndexPage();
     void connect();
+    bool connectAP();
+    bool connectSTA();
+    bool apConnected;
     
 };
 

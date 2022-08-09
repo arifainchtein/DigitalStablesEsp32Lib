@@ -89,14 +89,23 @@ float Esp32SecretManager::getSleepPingMinutes(){
 }
 
 
-void Esp32SecretManager::saveWifiParameters(String ssid, String password, String softAPSSID, String softAPPASS,  String hostName){
+void Esp32SecretManager::saveWifiParameters(String ssid, String password, String softAPSSID, String softAPPASS,  String hostName, bool stationmode){
 	preferences.begin("WIFIData",false);
 	preferences.putString("ssid", ssid);
 	preferences.putString("password", password);
 	preferences.putString("softAPSSID", softAPSSID);
 	preferences.putString("softAPPASS", softAPPASS);
 	preferences.putString("hostName", hostName);
+	preferences.putBool("stationmode", stationmode);
 	preferences.end();
+}
+
+bool Esp32SecretManager::getStationMode(){
+	preferences.begin("WIFIData",false);
+	bool stationmode = false;
+	if(preferences.isKey("stationmode"))stationmode=preferences.getBool("stationmode");
+	preferences.end();
+	return stationmode;
 }
 
 String Esp32SecretManager::getSSID(){

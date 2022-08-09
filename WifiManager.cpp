@@ -8,25 +8,35 @@
 #include <WifiManager.h>
 
 #include <ESPAsyncWebServer.h>
-
-String ssid = "home";
+#include <HTTPClient.h>
+String ssid = "MainRouter24";
 String password = "";
-String soft_ap_ssid = "PanchoTankFlow_AP";
+String soft_ap_ssid = "PanchoVisualizer_AP";
 String soft_ap_password = "";
 AsyncWebServer asyncWebServer(80);
 //WiFiServer server(8080);
-
+HTTPClient http;
 String apAddress;
 String ipAddress;
 String sensorString;
 uint8_t delayT=10;
 float fieldId;
 String hostname = "PanchoTankFlow";
-bool opmode=false;
+
+//
+// stationmode:
+// 0 - AP and STA
+// 1 Serial.print()
+bool stationmode=false;
 
 WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
  _HardSerial(serial),timeManager(t),secretManager(e), tankFlowData(tf) ,panchoConfigData(p)  {}
 
+
+bool WifiManager::getStationMode( )
+{
+    return stationmode;
+}
 
 String WifiManager::getMacAddress( )
 {
@@ -45,14 +55,11 @@ void WifiManager::setSensorString(String s)
 
 String WifiManager::getApAddress()
 {
+    apAddress = WiFi.softAPIP().toString();
+
     return apAddress;
 }
-void WifiManager::setCurrentStatusData(RTCInfoRecord c,RTCInfoRecord l, bool o)
-{
-    currentTimerRecord = c;
-    lastReceptionRTCInfoRecord=l;
-    opmode=o;
-}
+
 
 double WifiManager::getRSSI()
 {
@@ -105,61 +112,207 @@ void  WifiManager::setSSID(String c)
      ssid=c;
 }
 
+String WifiManager::getTeleonomeData(String url, bool debug){
+    
+    
+    int endPos = url.indexOf(".local");
+    if(endPos>0){
+        // http://Sento.local
+        // http://Ra.local
+        int startPos = 7;
+        String hostname = url.substring(startPos, endPos);// + ".local";
+         if(debug){
+            Serial.print("hostname: ");
+            Serial.print(hostname);
+        }
+        IPAddress ipAddress;
+            
+        int err = WiFi.hostByName(hostname.c_str(), ipAddress) ;
+        String ipA = String(ipAddress[0]) + String(".") + String(ipAddress[1]) + String(".") + String(ipAddress[2]) + String(".") + String(ipAddress[3])  ; 
+        if(debug){
+            Serial.print(" Ip address: ");
+            Serial.print(ipA);
+            Serial.print(" err: ");
+            Serial.print(err);
+        }
+        if(err == 1){
+            String h = (String)hostname;
+            h.concat(".local");
+                url.replace(h,ipA);
+                if(debug){
+                    Serial.print(" new url: ");
+                    Serial.println(url);
+                }
+                
+        } 
+    }
+    
+    String toReturn="Error";
+   
+   // _HardSerial.println(WiFi.localIP());
+
+ // _HardSerial.print("Fetching " + url );
+
+   // if(WiFi.status()== WL_CONNECTED){
+        http.begin(url);    
+        int httpCode = http.GET();
+        if (httpCode == 200) { //Check for the returning code
+            toReturn = http.getString();
+        }else{
+           toReturn="Error:" + httpCode; 
+        }
+        http.end();
+   // }
+
+
+    if(debug){
+        _HardSerial.print("teleonome data httpCode: ");
+        _HardSerial.println(httpCode);
+    }
+ 
+    return toReturn;
+}
+
+void WifiManager::scanNetworks() {
+  _HardSerial.println("scan start");
+
+  // WiFi.scanNetworks will return the number of networks found
+  int n = WiFi.scanNetworks();
+  _HardSerial.println("scan done");
+  if (n == 0) {
+      _HardSerial.println("no networks found");
+  } else {
+    _HardSerial.print(n);
+    Serial.println(" networks found");
+    for (int i = 0; i < n; ++i) {
+      // Print SSID and RSSI for each network found
+      _HardSerial.print(i + 1);
+      _HardSerial.print(": ");
+      _HardSerial.print(WiFi.SSID(i));
+      _HardSerial.print(" (");
+      _HardSerial.print(WiFi.RSSI(i));
+      _HardSerial.print(")");
+      _HardSerial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
+      delay(10);
+    }
+  }
+  Serial.println("");
+
+  // Wait a bit before scanning again
+  delay(5000);
+}
+
 uint8_t WifiManager::getWifiStatus(){
     return WiFi.status();
 }
+
+bool WifiManager::getAPStatus(){
+    return apConnected;
+}
+/*
 void WifiManager::configWifi(String s, String p, String sas, String sap, String h ){
     ssid = s;
     password = p;
     soft_ap_ssid = sas;
     soft_ap_password = sap;
     hostname=h;
-    
     secretManager.saveWifiParameters( ssid,  password, soft_ap_ssid, soft_ap_password,hostname);
    // secretManager.saveConfigData(float fieldId, stationName );
     WiFi.disconnect();
     connect();
 }
+*/
+bool WifiManager::configWifiAP( String sas, String sap, String h ){
+    ssid = secretManager.getSSID();
+    password = secretManager.getWifiPassword();;
+    soft_ap_ssid = sas;
+    soft_ap_password = sap;
+    hostname=h;
+    stationmode=false;
+    secretManager.saveWifiParameters( ssid,  password, soft_ap_ssid, soft_ap_password,hostname, stationmode);
+   // secretManager.saveConfigData(float fieldId, stationName );
+    WiFi.disconnect();
+    return connectAP();
+}
+
+bool WifiManager::configWifiSTA(String s, String p ){
+    ssid = s;
+    password = p;
+    
+    soft_ap_ssid = secretManager.getSoftAPSSID();
+    if(soft_ap_ssid=="")soft_ap_ssid="192.168.4.1";
+    soft_ap_password = secretManager.getSoftAPPASS();
+    hostname=secretManager.getHostName();
+    stationmode=true;
+    secretManager.saveWifiParameters( ssid,  password, soft_ap_ssid, soft_ap_password,hostname, stationmode);
+    WiFi.disconnect();
+    return connectSTA();
+}
 
 void WifiManager::restartWifi(){
     WiFi.disconnect();
-    connect();
+     if(stationmode){
+       connectSTA();
+    }else{
+         connectAP();
+    }
 }
 
-void  OnWiFiEvent(WiFiEvent_t event)
-{
-  switch (event) {
- 
-    case SYSTEM_EVENT_STA_CONNECTED:
-      _HardSerial.println("ESP32 Connected to WiFi Network");
-      break;
-    case SYSTEM_EVENT_AP_START:
-      _HardSerial.println("ESP32 soft AP started");
-      break;
-    case SYSTEM_EVENT_AP_STACONNECTED:
-      _HardSerial.println("Station connected to ESP32 soft AP");
-      break;
-    case SYSTEM_EVENT_AP_STADISCONNECTED:
-      _HardSerial.println("Station disconnected from ESP32 soft AP");
-      break;
-    default: break;
-  }
+
+bool WifiManager::connectSTA(){
+    WiFi.mode(WIFI_STA);
+   WiFi.begin(const_cast<char*>(ssid.c_str()), const_cast<char*>(password.c_str()));
+    bool gotConnection=true;
+    uint8_t counter=0;
+    bool keepGoing=true;
+    while (keepGoing){
+        keepGoing=WiFi.status() != WL_CONNECTED;
+        delay(1000);
+        _HardSerial.print(".");
+        counter++;
+        if(counter>30){
+            keepGoing=false;
+            gotConnection=false;
+        }
+    }
+
+_HardSerial.print("in connectSTA after settmg wifi, ip=");
+  _HardSerial.println(WiFi.localIP());
+
+    if(gotConnection){
+       
+        ipAddress = WiFi.localIP().toString();
+        _HardSerial.print(" Connected with ip=");
+        _HardSerial.println(ipAddress); 
+    }else{
+        _HardSerial.print("Error connecting to wifi router ssid=");
+         _HardSerial.println(ssid);
+    }
+    
+    return gotConnection;
+
+    
+    
 }
 
-void WifiManager::connect(){
-    WiFi.mode(WIFI_MODE_APSTA);
+bool WifiManager::connectAP(){
+    WiFi.mode(WIFI_MODE_AP);
+    
     //  WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
-    WiFi.onEvent(OnWiFiEvent);
+ //   WiFi.onEvent(OnWiFiEvent);
+    apConnected=false;
     WiFi.setHostname(hostname.c_str());
     WiFi.softAP(soft_ap_ssid.c_str(), soft_ap_password.c_str());
-    WiFi.begin(const_cast<char*>(ssid.c_str()), const_cast<char*>(password.c_str()));
+    apAddress = WiFi.softAPIP().toString();
+    if(apAddress=="192.168.4.1")apConnected=true;
+    /*
     bool gotConnection=true;
     uint8_t counter=0;
     bool keepGoing=true;
     while (keepGoing){
         keepGoing=WiFi.status() != WL_CONNECTED;
         delay(500);
-       // _HardSerial.print(".");
+        _HardSerial.print(".");
         counter++;
         if(counter>10){
             keepGoing=false;
@@ -167,15 +320,13 @@ void WifiManager::connect(){
         }
     }
 
-    if(gotConnection){
-        _HardSerial.println("");
-        ipAddress = WiFi.localIP().toString();
-        _HardSerial.println("WiFi connected.");
-        _HardSerial.println("IP address: ");
-        _HardSerial.println(ipAddress);
 
-        delay(2000);
+    if(gotConnection){
+       
         apAddress = WiFi.softAPIP().toString();
+        _HardSerial.print(" after got connectin apConnected=");
+        _HardSerial.println(this->apConnected);
+        if(apAddress=="192.168.4.1")apConnected=true;
         _HardSerial.println("Access Point Enabled connected.");
         _HardSerial.println("Access Point IP address: ");
         _HardSerial.println(apAddress); 
@@ -183,8 +334,11 @@ void WifiManager::connect(){
         _HardSerial.print("Error connecting to wifi router ssid=");
          _HardSerial.println(ssid);
     }
-    
+    */
+    return apConnected;
 }
+
+
 
 void WifiManager::start(){
    //
@@ -195,7 +349,17 @@ void WifiManager::start(){
     soft_ap_ssid = secretManager.getSoftAPSSID();
     soft_ap_password = secretManager.getSoftAPPASS();
     hostname=secretManager.getHostName();
-    connect();
+    stationmode = secretManager.getStationMode();
+    _HardSerial.println("ssid=");
+    _HardSerial.println(ssid);
+    _HardSerial.println("stationmode=");
+    _HardSerial.println(stationmode);
+    
+    if(stationmode){
+       connectSTA();
+    }else{
+         connectAP();
+    }
     asyncWebServer.begin();
     asyncWebServer.on("/GetSensorData", HTTP_GET, [this](AsyncWebServerRequest *request){
        this->_HardSerial.println("curl request returning");
@@ -445,7 +609,7 @@ void WifiManager::start(){
 						p = request->getParam(3);
 						password = p->value();
 						//secretManager.saveWifiParameters(ssid, password);
-                         secretManager.saveWifiParameters( ssid,  password, soft_ap_ssid, soft_ap_password,hostname);
+                         secretManager.saveWifiParameters( ssid,  password, soft_ap_ssid, soft_ap_password,hostname, stationmode);
 						ipAddress = WiFi.localIP().toString();
 						WiFi.disconnect();
 						WiFi.begin(const_cast<char*>(ssid.c_str()), const_cast<char*>(password.c_str()));

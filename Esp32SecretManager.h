@@ -26,12 +26,13 @@ public:
     String getStationName();  
 	void saveSleepPingMinutes(float pingMinutes );
 	float getSleepPingMinutes();
-	void saveWifiParameters(String ssid, String password, String softAPSSID, String softAPPASS,  String hostName);
+	void saveWifiParameters(String ssid, String password, String softAPSSID, String softAPPASS,  String hostName, bool stationmode);
 	String getSSID();
 	String getWifiPassword();
 	String getSoftAPSSID();
 	String getSoftAPPASS();
 	String getHostName();
+	bool getStationMode();
 	virtual ~Esp32SecretManager();
 };
 
