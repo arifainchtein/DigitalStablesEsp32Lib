@@ -49,9 +49,9 @@ public:
     String getSSID();
     void setSSID(String s);
     bool getStationMode( );
-
+    void setCurrentTimerRecord(RTCInfoRecord currentTimerRecord);
     bool configWifiAP(String sas, String sap, String h);
-    bool configWifiSTA(String s, String p);
+    bool configWifiSTA(String s, String p, String h);
    // void configWifi(String s, String p, String sas, String sap, String h);
     bool getAPStatus();
 

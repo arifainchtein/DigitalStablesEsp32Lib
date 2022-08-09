@@ -33,6 +33,10 @@ WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32Sec
  _HardSerial(serial),timeManager(t),secretManager(e), tankFlowData(tf) ,panchoConfigData(p)  {}
 
 
+void WifiManager::setCurrentTimerRecord(const RTCInfoRecord c){
+    currentTimerRecord=c;   
+}
+    
 bool WifiManager::getStationMode( )
 {
     return stationmode;
@@ -235,14 +239,14 @@ bool WifiManager::configWifiAP( String sas, String sap, String h ){
     return connectAP();
 }
 
-bool WifiManager::configWifiSTA(String s, String p ){
+bool WifiManager::configWifiSTA(String s, String p, String h ){
     ssid = s;
     password = p;
-    
+    hostname=h;
     soft_ap_ssid = secretManager.getSoftAPSSID();
     if(soft_ap_ssid=="")soft_ap_ssid="192.168.4.1";
     soft_ap_password = secretManager.getSoftAPPASS();
-    hostname=secretManager.getHostName();
+    //hostname=secretManager.getHostName();
     stationmode=true;
     secretManager.saveWifiParameters( ssid,  password, soft_ap_ssid, soft_ap_password,hostname, stationmode);
     WiFi.disconnect();
@@ -261,6 +265,9 @@ void WifiManager::restartWifi(){
 
 bool WifiManager::connectSTA(){
     WiFi.mode(WIFI_STA);
+    WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
+     WiFi.setHostname(hostname.c_str()); //define hostname
+  
    WiFi.begin(const_cast<char*>(ssid.c_str()), const_cast<char*>(password.c_str()));
     bool gotConnection=true;
     uint8_t counter=0;
