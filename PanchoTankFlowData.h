@@ -25,6 +25,7 @@ struct PanchoTankFlowData{
 	
 	long secondsTime=0L;
 	uint8_t dataSamplingSec=10;
+	uint8_t currentFunctionValue=0;
 	float temperature=0.0;
 	float reg33Voltage=0.0;
 	float rtcBatVolt=0.0;
@@ -33,7 +34,7 @@ struct PanchoTankFlowData{
 	float snr=0;
 	float flowRate=0.0;
 	float totalMilliLitres=0.0;
-	
+
 	float flowRate2=0.0;
 	float totalMilliLitres2=0.0;
 
