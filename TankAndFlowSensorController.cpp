@@ -42,11 +42,11 @@ TankAndFlowSensorController::TankAndFlowSensorController(HardwareSerial &serial,
  _HardSerial(serial), panchoTankFlowData(tf) , display1(d1), display2(d2)  {}
 
 
- void  IRAM_ATTR TankAndFlowSensorController::pulseCounter()
+ void   TankAndFlowSensorController::pulseCounter()
 {
 	flowMeterPulseCount++;
 }
- void  IRAM_ATTR TankAndFlowSensorController::pulseCounter2()
+ void   TankAndFlowSensorController::pulseCounter2()
 {
 	flowMeterPulseCount2++;
 }
@@ -233,7 +233,9 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		long lo = millis() - flowMeterPreviousMillis;
 		flowRate = (1000.0 / lo) * pulse1Sec / panchoTankFlowData.qfactor;
 		flowMeterPreviousMillis = millis();
-		
+		_HardSerial.print(" lo=");
+		  _HardSerial.print(lo);
+
 		  _HardSerial.print(" flow=");
 		  _HardSerial.println(flowRate);
 		// Divide the flow rate in litres/minute by 60 to determine how many litres have
