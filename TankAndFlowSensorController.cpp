@@ -1,7 +1,7 @@
 #include <TankAndFlowSensorController.h>
 
-#define SENSOR_INPUT_11 50
-#define SENSOR_INPUT_12  40
+#define SENSOR_INPUT_1 5
+#define SENSOR_INPUT_2  4
 
 // #define SENSOR_INPUT_1 5
 // #define SENSOR_INPUT_2 4
@@ -64,8 +64,8 @@ static void IRAM_ATTR TankAndFlowSensorController::pulseCounter2()
 
 void TankAndFlowSensorController::begin(uint8_t m){
     mode=m;
-    pinMode(SENSOR_INPUT_11, INPUT);
-    pinMode(SENSOR_INPUT_12, INPUT_PULLUP);
+    pinMode(SENSOR_INPUT_1, INPUT_PULLUP);
+    pinMode(SENSOR_INPUT_2, INPUT_PULLUP);
 
     //
 	// flowMeter variables init
