@@ -40,11 +40,11 @@ TankAndFlowSensorController::TankAndFlowSensorController(HardwareSerial &serial,
  _HardSerial(serial), panchoTankFlowData(tf) , display1(d1), display2(d2)  {}
 
 
- void  TankAndFlowSensorController::pulseCounter()
+ void  IRAM_ATTR TankAndFlowSensorController::pulseCounter()
 {
 	flowMeterPulseCount++;
 }
- void  TankAndFlowSensorController::pulseCounter2()
+ void  IRAM_ATTR TankAndFlowSensorController::pulseCounter2()
 {
 	flowMeterPulseCount2++;
 }
