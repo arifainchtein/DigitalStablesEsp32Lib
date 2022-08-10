@@ -122,7 +122,7 @@ void TankAndFlowSensorController::refreshDisplays(){
 	_HardSerial.println( panchoTankFlowData.flowRate2);
 	
     switch(mode){
-        case 0:
+        case 1:
             
 			if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
     			display1.showNumberDec(panchoTankFlowData.flowRate, false);
@@ -131,7 +131,7 @@ void TankAndFlowSensorController::refreshDisplays(){
 			}
 			display2.showNumberDec(panchoTankFlowData.totalMilliLitres, false);
             break;
-        case 1:
+        case 2:
             if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
     			display1.showNumberDec(panchoTankFlowData.flowRate, false);
   			}else{
@@ -146,7 +146,7 @@ void TankAndFlowSensorController::refreshDisplays(){
 			}
 			
             break;
-        case 2:
+        case 3:
             if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
     			display1.showNumberDec(panchoTankFlowData.flowRate, false);
   			}else{
@@ -159,14 +159,14 @@ void TankAndFlowSensorController::refreshDisplays(){
 				display2.showNumberDecEx(panchoTankFlowData.tankWaterLevel, (0x80 >> 1), false);
 			}
             break;
-        case 3:
+        case 4:
             if(panchoTankFlowData.tankWaterLevel==(int)panchoTankFlowData.tankWaterLevel){
     			display1.showNumberDec(panchoTankFlowData.tankWaterLevel, false);
   			}else{
 				display1.showNumberDecEx(panchoTankFlowData.tankWaterLevel, (0x80 >> 1), false);
 			}
             break;
-        case 4:
+        case 5:
             if(panchoTankFlowData.tankWaterLevel==(int)panchoTankFlowData.tankWaterLevel){
     			display1.showNumberDec(panchoTankFlowData.tankWaterLevel, false);
   			}else{

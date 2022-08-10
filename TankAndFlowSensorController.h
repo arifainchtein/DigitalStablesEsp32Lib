@@ -17,8 +17,8 @@ class TankAndFlowSensorController{
 protected:
 	HardwareSerial& _HardSerial;
     PanchoTankFlowData& panchoTankFlowData;
-    TM1637Display display1;
-TM1637Display display2;
+    TM1637Display& display1;
+    TM1637Display& display2;
     uint8_t mode;
  
 public:
