@@ -127,7 +127,7 @@ void TankAndFlowSensorController::refreshDisplays(){
 			if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
     			display1.showNumberDec(panchoTankFlowData.flowRate, false);
   			}else{
-				display1.showNumberDecEx(panchoTankFlowData.flowRate, (0x80 >> 0), false);
+				display1.showNumberDecEx(panchoTankFlowData.flowRate*100, (0x80 >> 0), false);
 			}
 			display2.showNumberDec(panchoTankFlowData.totalMilliLitres, false);
             break;
@@ -135,14 +135,14 @@ void TankAndFlowSensorController::refreshDisplays(){
             if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
     			display1.showNumberDec(panchoTankFlowData.flowRate, false);
   			}else{
-				display1.showNumberDecEx(panchoTankFlowData.flowRate, (0x80 >> 1), false);
+				display1.showNumberDecEx(panchoTankFlowData.flowRate*100), (0x80 >> 0), false);
 			}
 			
 
 			if(panchoTankFlowData.flowRate2==(int)panchoTankFlowData.flowRate2){
     			display2.showNumberDec(panchoTankFlowData.flowRate2, false);
   			}else{
-				display2.showNumberDecEx(panchoTankFlowData.flowRate2, (0x80 >> 1), false);
+				display2.showNumberDecEx(panchoTankFlowData.flowRate2*100, (0x80 >> 0), false);
 			}
 			
             break;
@@ -150,7 +150,7 @@ void TankAndFlowSensorController::refreshDisplays(){
             if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
     			display1.showNumberDec(panchoTankFlowData.flowRate, false);
   			}else{
-				display1.showNumberDecEx(panchoTankFlowData.flowRate, (0x80 >> 1), false);
+				display1.showNumberDecEx(panchoTankFlowData.flowRate*100, (0x80 >> 0), false);
 			}
 
 			if(panchoTankFlowData.tankWaterLevel==(int)panchoTankFlowData.tankWaterLevel){
@@ -255,7 +255,7 @@ void TankAndFlowSensorController::readFlowMeter1(){
 			// Add the millilitres passed in this second to the cumulative total
 				totalMilliLitres += flowMilliLitres;
 		}else{
-			totalMilliLitres=0
+			totalMilliLitres=0;
 		}
 		
 		//
@@ -293,7 +293,7 @@ void TankAndFlowSensorController::readFlowMeter1(){
 			// Add the millilitres passed in this second to the cumulative total
 				totalMilliLitres2 += flowMilliLitres2;
 		}else{
-			totalMilliLitres2=0
+			totalMilliLitres2=0;
 		}
 		//
 		// end of checking flow meter
