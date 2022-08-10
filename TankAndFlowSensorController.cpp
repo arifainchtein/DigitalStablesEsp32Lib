@@ -128,16 +128,23 @@ void TankAndFlowSensorController::refreshDisplays(){
     			display1.showNumberDec(panchoTankFlowData.flowRate, false);
   			}else{
 				scaledFlow=panchoTankFlowData.flowRate*100;
-				display1.showNumberDecEx(scaledFlow, (0x80 >> 0), false);
+				display1.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
 			}
-			display2.showNumberDec(panchoTankFlowData.totalMilliLitres, false);
+
+			if(panchoTankFlowData.totalMilliLitres>1000){
+				int liters = totalMilliLitres/1000;
+				display2.showNumberDec(liters, false);
+			}else{
+				display2.showNumberDec(panchoTankFlowData.totalMilliLitres, false);
+			}
+			
             break;
         case 2:
             if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
     			display1.showNumberDec(panchoTankFlowData.flowRate, false);
   			}else{
 				scaledFlow=panchoTankFlowData.flowRate*100;
-				display1.showNumberDecEx(scaledFlow, (0x80 >> 0), false);
+				display1.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
 			}
 			
 
@@ -145,7 +152,7 @@ void TankAndFlowSensorController::refreshDisplays(){
     			display2.showNumberDec(panchoTankFlowData.flowRate2, false);
   			}else{
 				scaledFlow=panchoTankFlowData.flowRate2*100;
-				display2.showNumberDecEx(scaledFlow, (0x80 >> 0), false);
+				display2.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
 			}
 			
             break;
@@ -154,7 +161,7 @@ void TankAndFlowSensorController::refreshDisplays(){
     			display1.showNumberDec(panchoTankFlowData.flowRate, false);
   			}else{
 				scaledFlow=panchoTankFlowData.flowRate*100;
-				display1.showNumberDecEx(scaledFlow, (0x80 >> 0), false);
+				display1.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
 			}
 
 			if(panchoTankFlowData.tankWaterLevel==(int)panchoTankFlowData.tankWaterLevel){
