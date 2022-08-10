@@ -120,14 +120,15 @@ void TankAndFlowSensorController::refreshDisplays(){
 	_HardSerial.print( panchoTankFlowData.flowRate);
 	_HardSerial.print( " anchoTankFlowData.flowRate2=");
 	_HardSerial.println( panchoTankFlowData.flowRate2);
-	
+	int scaledFlow;
     switch(mode){
         case 1:
             
 			if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
     			display1.showNumberDec(panchoTankFlowData.flowRate, false);
   			}else{
-				display1.showNumberDecEx(panchoTankFlowData.flowRate*100, (0x80 >> 0), false);
+				scaledFlow=panchoTankFlowData.flowRate*100;
+				display1.showNumberDecEx(scaledFlow, (0x80 >> 0), false);
 			}
 			display2.showNumberDec(panchoTankFlowData.totalMilliLitres, false);
             break;
@@ -135,14 +136,16 @@ void TankAndFlowSensorController::refreshDisplays(){
             if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
     			display1.showNumberDec(panchoTankFlowData.flowRate, false);
   			}else{
-				display1.showNumberDecEx(panchoTankFlowData.flowRate*100), (0x80 >> 0), false);
+				scaledFlow=panchoTankFlowData.flowRate*100;
+				display1.showNumberDecEx(scaledFlow, (0x80 >> 0), false);
 			}
 			
 
 			if(panchoTankFlowData.flowRate2==(int)panchoTankFlowData.flowRate2){
     			display2.showNumberDec(panchoTankFlowData.flowRate2, false);
   			}else{
-				display2.showNumberDecEx(panchoTankFlowData.flowRate2*100, (0x80 >> 0), false);
+				scaledFlow=panchoTankFlowData.flowRate2*100;
+				display2.showNumberDecEx(scaledFlow, (0x80 >> 0), false);
 			}
 			
             break;
@@ -150,12 +153,14 @@ void TankAndFlowSensorController::refreshDisplays(){
             if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
     			display1.showNumberDec(panchoTankFlowData.flowRate, false);
   			}else{
-				display1.showNumberDecEx(panchoTankFlowData.flowRate*100, (0x80 >> 0), false);
+				scaledFlow=panchoTankFlowData.flowRate*100;
+				display1.showNumberDecEx(scaledFlow, (0x80 >> 0), false);
 			}
 
 			if(panchoTankFlowData.tankWaterLevel==(int)panchoTankFlowData.tankWaterLevel){
     			display2.showNumberDec(panchoTankFlowData.tankWaterLevel, false);
   			}else{
+				scaledFlow=panchoTankFlowData.flowRate2*100;
 				display2.showNumberDecEx(panchoTankFlowData.tankWaterLevel, (0x80 >> 1), false);
 			}
             break;
