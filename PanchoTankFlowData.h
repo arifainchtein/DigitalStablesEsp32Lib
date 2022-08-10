@@ -24,7 +24,7 @@ struct PanchoWifiData{
 struct PanchoTankFlowData{
 	
 	long secondsTime=0L;
-	uint8_t dataSamplingSec=10;
+	uint8_t dataSamplingSec=3;
 	uint8_t currentFunctionValue=0;
 	float temperature=0.0;
 	float reg33Voltage=0.0;

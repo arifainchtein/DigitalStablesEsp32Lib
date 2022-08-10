@@ -127,7 +127,7 @@ void TankAndFlowSensorController::refreshDisplays(){
 			if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
     			display1.showNumberDec(panchoTankFlowData.flowRate, false);
   			}else{
-				display1.showNumberDecEx(panchoTankFlowData.flowRate, (0x80 >> 1), false);
+				display1.showNumberDecEx(panchoTankFlowData.flowRate, (0x80 >> 0), false);
 			}
 			display2.showNumberDec(panchoTankFlowData.totalMilliLitres, false);
             break;
@@ -239,6 +239,8 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		// this case) coming from the sensor.
 		long lo = millis() - flowMeterPreviousMillis;
 		flowRate = (1000.0 / lo) * pulse1Sec / panchoTankFlowData.qfactor;
+		//flowRate = ((1000.0 / (millis() - previousMillis)) * pulse1Sec) / calibrationFactor;
+    
 		flowMeterPreviousMillis = millis();
 		_HardSerial.print(" lo=");
 		  _HardSerial.print(lo);
@@ -248,9 +250,14 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		// Divide the flow rate in litres/minute by 60 to determine how many litres have
 		// passed through the sensor in this 1 second interval, then multiply by 1000 to
 		// convert to millilitres.
-		flowMilliLitres = (flowRate / 60) * 1000;
-		// Add the millilitres passed in this second to the cumulative total
-		totalMilliLitres += flowMilliLitres;
+		if(flowRate>0){
+			flowMilliLitres = panchoTankFlowData.dataSamplingSec*(flowRate / 60) * 1000;
+			// Add the millilitres passed in this second to the cumulative total
+				totalMilliLitres += flowMilliLitres;
+		}else{
+			totalMilliLitres=0
+		}
+		
 		//
 		// end of checking flow meter
 		//
@@ -271,7 +278,7 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		// based on the number of pulses per second per units of measure (litres/minute in
 		// this case) coming from the sensor.
 		long lo = millis() - flowMeterPreviousMillis2;
-		flowRate = (1000.0 / lo) * pulse2Sec / panchoTankFlowData.qfactor;
+		flowRate2 = (1000.0 / lo) * pulse2Sec / panchoTankFlowData.qfactor;
 		flowMeterPreviousMillis2 = millis();
 		//Serial.print("pulse1Sec=");
 		//  Serial.print(pulse1Sec);
@@ -281,9 +288,13 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		// Divide the flow rate in litres/minute by 60 to determine how many litres have
 		// passed through the sensor in this 1 second interval, then multiply by 1000 to
 		// convert to millilitres.
-		flowMilliLitres2 = (flowRate2 / 60) * 1000;
-		// Add the millilitres passed in this second to the cumulative total
-		totalMilliLitres2 += flowMilliLitres2;
+		if(flowRate2>0){
+			flowMilliLitres2 = panchoTankFlowData.dataSamplingSec*(flowRate2 / 60) * 1000;
+			// Add the millilitres passed in this second to the cumulative total
+				totalMilliLitres2 += flowMilliLitres2;
+		}else{
+			totalMilliLitres2=0
+		}
 		//
 		// end of checking flow meter
 		//
