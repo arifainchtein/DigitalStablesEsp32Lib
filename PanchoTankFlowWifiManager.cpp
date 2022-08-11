@@ -1,4 +1,5 @@
 #include <PanchoTankFlowWifiManager.h>
+#include <ArduinoJson.h>
 
 PanchoTankFlowWifiManager::PanchoTankFlowWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
 WifiManager(serial ,  t, e,  tf,  p) {}
@@ -304,35 +305,11 @@ asyncWebServer.on("/GetWebData", HTTP_GET, [](AsyncWebServerRequest *request) {
 				request->send_P(200, "text/plain", toReturn.c_str());
 	} });
 
-    asyncWebServer.on("/index.html", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-        String indexPage = getIndexPage();
+    asyncWebServer.on("/index.html", HTTP_GET, [this](AsyncWebServerRequest *request){
 
-        request->send_P(200, "text/html", indexPage.c_str());
+         });
 
-        if (ON_STA_FILTER(request))
-        {
-            this->_HardSerial.println("asking for index.html from station");
-            request->send(200, "text/html", indexPage.c_str());
-            return;
-        }
-        else if (ON_AP_FILTER(request))
-        {
-            this->_HardSerial.println("asking for index.html from access point");
-            request->send(200, "text/html", indexPage.c_str());
-            return;
-        } });
 
-    asyncWebServer.on("/", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-        String indexPage = getIndexPage();
-        if (ON_STA_FILTER(request)){
-            request->send(200, "text/html", indexPage.c_str());
-            return;
-        }else if (ON_AP_FILTER(request)){
-            request->send(200, "text/html", indexPage.c_str());
-            return;
-        } });
 
   //  server.begin();
 

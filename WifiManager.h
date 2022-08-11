@@ -30,7 +30,7 @@ protected:
     String password = "";
     String soft_ap_ssid = "PanchoVisualizer_AP";
     String soft_ap_password = "";
-    AsyncWebServer asyncWebServer(80);
+    AsyncWebServer asyncWebServer;
     HTTPClient http;
     String apAddress;
     String ipAddress;
@@ -38,7 +38,7 @@ protected:
     uint8_t delayT=10;
     float fieldId;
     String hostname = "PanchoTankFlow";
-
+    bool stationmode=false;
     void connect();
     bool connectAP();
     bool connectSTA();

@@ -8,14 +8,6 @@
 #include <WifiManager.h>
 
 
-
-
-//
-// stationmode:
-// 0 - AP and STA
-// 1 Serial.print()
-bool stationmode=false;
-
 WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
  _HardSerial(serial),timeManager(t),secretManager(e), tankFlowData(tf) ,panchoConfigData(p)  {}
 
