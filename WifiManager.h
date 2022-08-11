@@ -24,11 +24,14 @@ protected:
     Esp32SecretManager& secretManager;
     PanchoTankFlowData& tankFlowData;
     PanchoConfigData& panchoConfigData;
-
+    void connect();
+    bool connectAP();
+    bool connectSTA();
+    bool apConnected;
 
 public:
 	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, PanchoTankFlowData& tf, PanchoConfigData& p) ;
-	void start( );
+	virtual void start( )=0;
     void setCurrentSSID(String s);
     void setSensorString(String s);
     String getApAddress();
@@ -57,13 +60,7 @@ public:
 
     virtual ~WifiManager();
     
-private:
-
-    String getIndexPage();
-    void connect();
-    bool connectAP();
-    bool connectSTA();
-    bool apConnected;
+   
     
 };
 
