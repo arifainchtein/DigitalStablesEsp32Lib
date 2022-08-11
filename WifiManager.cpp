@@ -7,21 +7,8 @@
 
 #include <WifiManager.h>
 
-#include <ESPAsyncWebServer.h>
-#include <HTTPClient.h>
-protected String ssid = "MainRouter24";
-protected String password = "";
-protected String soft_ap_ssid = "PanchoVisualizer_AP";
-protected String soft_ap_password = "";
-protected AsyncWebServer asyncWebServer(80);
-//WiFiServer server(8080);
-protected  HTTPClient http;
-protected  String apAddress;
-protected  String ipAddress;
-protected  String sensorString;
-protected  uint8_t delayT=10;
-protected  float fieldId;
-protected  String hostname = "PanchoTankFlow";
+
+
 
 //
 // stationmode:

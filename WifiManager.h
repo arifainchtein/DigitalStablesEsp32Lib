@@ -13,6 +13,8 @@
 #include <Esp32SecretManager.h>
 #include <PanchoTankFlowData.h>
 #include <WiFi.h>
+#include <ESPAsyncWebServer.h>
+#include <HTTPClient.h>
 
 class WifiManager{
 
@@ -24,6 +26,19 @@ protected:
     Esp32SecretManager& secretManager;
     PanchoTankFlowData& tankFlowData;
     PanchoConfigData& panchoConfigData;
+    String ssid = "MainRouter24";
+    String password = "";
+    String soft_ap_ssid = "PanchoVisualizer_AP";
+    String soft_ap_password = "";
+    AsyncWebServer asyncWebServer(80);
+    HTTPClient http;
+    String apAddress;
+    String ipAddress;
+    String sensorString;
+    uint8_t delayT=10;
+    float fieldId;
+    String hostname = "PanchoTankFlow";
+
     void connect();
     bool connectAP();
     bool connectSTA();

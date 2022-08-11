@@ -1,8 +1,9 @@
 #include <PanchoTankFlowWifiManager.h>
 
 PanchoTankFlowWifiManager::PanchoTankFlowWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
- _HardSerial(serial),timeManager(t),secretManager(e), tankFlowData(tf) ,panchoConfigData(p)  {}
+WifiManager(serial ,  t, e,  tf,  p) {}
 
+ 
 
 void PanchoTankFlowWifiManager::start(){
    //
