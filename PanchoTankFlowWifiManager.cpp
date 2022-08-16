@@ -1,6 +1,8 @@
 #include <PanchoTankFlowWifiManager.h>
 #include <ArduinoJson.h>
 
+ String okString="Ok";
+
 PanchoTankFlowWifiManager::PanchoTankFlowWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
 WifiManager(serial ,  t, e,  tf,  p) {}
 
@@ -28,25 +30,65 @@ void PanchoTankFlowWifiManager::start(){
     }
     asyncWebServer.begin();
 
-asyncWebServer.on("/GetWebData", HTTP_GET, [](AsyncWebServerRequest *request) {
-      AsyncResponseStream *response = request->beginResponseStream("application/json");
-      DynamicJsonDocument json(1024);
-      json["status"] = "ok";
-      json["ssid"] = WiFi.SSID();
-      json["ip"] = WiFi.localIP().toString();
-      serializeJson(json, *response);
-      request->send(response);
+asyncWebServer.on("/GetWebData", HTTP_GET, [this](AsyncWebServerRequest *request) {
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    DynamicJsonDocument json(1024);
+	json["flow1name"] = this->panchoTankFlowData.flow1name;
+	json["flow2name"] = this->panchoTankFlowData.flow2name;
+	json["tank1name"] = this->panchoTankFlowData.tank1name;
+	json["tank2name"] = this->panchoTankFlowData.tank2name;
+    json["secondsTime"] = this->panchoTankFlowData.secondsTime;
+    json["dataSamplingSec"] = this->panchoTankFlowData.dataSamplingSec;
+    json["currentFunctionValue"] = this->panchoTankFlowData.currentFunctionValue;
+    json["temperature"] = this->panchoTankFlowData.temperature;
+    json["reg33Voltage"] = this->panchoTankFlowData.reg33Voltage;
+    json["rtcBatVolt"] = this->panchoTankFlowData.rtcBatVolt;
+    json["opMode"] = this->panchoTankFlowData.opMode;
+    json["rssi"] = this->panchoTankFlowData.rssi;
+    json["snr"] = this->panchoTankFlowData.snr;
+    json["flowRate"] = this->panchoTankFlowData.flowRate;
+    json["totalMilliLitres"] = this->panchoTankFlowData.totalMilliLitres;
+    json["flowRate2"] = this->panchoTankFlowData.flowRate2;
+    json["totalMilliLitres2"] = this->panchoTankFlowData.totalMilliLitres2;
+    json["tankPressurePsi"] = this->panchoTankFlowData.tankPressurePsi;
+    json["tankPressureVolts"] = this->panchoTankFlowData.tankPressureVolts;
+    json["tankWaterLevel"] = this->panchoTankFlowData.tankWaterLevel;
+    json["tankHeightMeters"] = this->panchoTankFlowData.tankHeightMeters;
+    json["tank2PressurePsi"] = this->panchoTankFlowData.tank2PressurePsi;
+    json["tank2PressureVolts"] = this->panchoTankFlowData.tank2PressureVolts;
+    json["tank2WaterLevel"] = this->panchoTankFlowData.tank2WaterLevel;
+    json["tank2HeightMeters"] = this->panchoTankFlowData.tank2HeightMeters;
+    json["qfactor1"] = this->panchoTankFlowData.qfactor1;
+    json["qfactor2"] = this->panchoTankFlowData.qfactor2;
+    json["operatingStatus"] = this->panchoTankFlowData.operatingStatus;
+    json["sleepPingMinutes"] = this->panchoTankFlowData.sleepPingMinutes;
+    json["secondsSinceLastPulse"] = this->panchoTankFlowData.secondsSinceLastPulse;
+    json["soft_ap_ssid"] = this->soft_ap_ssid;
+    json["serialNumber"] = this->serialNumber;
+    json["apAddress"] = this->apAddress;
+    json["hostname"] = this->hostname;
+    json["stationmode"] = this->stationmode;
+    json["ssid"] =this-> ssid;
+    json["ipAddress"] = this->ipAddress;
+    serializeJson(json, *response);
+    request->send(response);
   });
 
- 
-
-
-    asyncWebServer.on("/GetSensorData", HTTP_GET, [this](AsyncWebServerRequest *request){
+ asyncWebServer.on("/GetSensorData", HTTP_GET, [this](AsyncWebServerRequest *request){
        this->_HardSerial.println("curl request returning");
         this->_HardSerial.println(sensorString);
         request->send_P(200, "text/plain", sensorString.c_str()); 
     });
 
+
+    asyncWebServer.on("/SetQFactor1", HTTP_GET, [this](AsyncWebServerRequest *request){
+        int numberOfParameters = request->params();
+        AsyncWebParameter* p = request->getParam(0);
+        panchoTankFlowData.qfactor1 = p->value().toFloat();
+       
+        request->send_P(200, "text/plain", okString.c_str()); 
+    });
+/*
     asyncWebServer.on("/Command", HTTP_GET, [this](AsyncWebServerRequest *request){
 			int numberOfParameters = request->params();
 
@@ -58,8 +100,8 @@ asyncWebServer.on("/GetWebData", HTTP_GET, [](AsyncWebServerRequest *request) {
 			int switchState=0;
 			AsyncWebParameter* p = request->getParam(0);
 			String command = p->value();
-			this->_HardSerial.print("command:");
-			this->_HardSerial.println(command);
+			this->HardSerial.print("command:");
+			this->HardSerial.println(command);
 			RTCInfoRecord newTime;
 			if(command=="GetTime"){
 
@@ -83,8 +125,8 @@ asyncWebServer.on("/GetWebData", HTTP_GET, [](AsyncWebServerRequest *request) {
 				toReturn+=this->currentTimerRecord.second;
 				toReturn+="\r\nOk-GetTime";
 
-				this->_HardSerial.println("curl request GetTime returning");
-				this->_HardSerial.println(toReturn);
+				this->HardSerial.println("curl request GetTime returning");
+				this->HardSerial.println(toReturn);
 				request->send_P(200, "text/plain", toReturn.c_str());
 			}else if(command=="SetTime"){
 				//switchState = digitalRead( OP_MODE );
@@ -141,8 +183,8 @@ asyncWebServer.on("/GetWebData", HTTP_GET, [](AsyncWebServerRequest *request) {
 						toReturn+=r.second;
 						toReturn+="\r\nOk-SetTime";
 
-						this->_HardSerial.println("curl request SetTime returning");
-						this->_HardSerial.println(toReturn);
+						this->HardSerial.println("curl request SetTime returning");
+						this->HardSerial.println(toReturn);
 						request->send_P(200, "text/plain", toReturn.c_str());
 					}
 					//  }else{
@@ -156,8 +198,8 @@ asyncWebServer.on("/GetWebData", HTTP_GET, [](AsyncWebServerRequest *request) {
 				}
 			}else if(command.startsWith("GetCommandCode")){
 				long code =secretManager.generateCode();
-				this->_HardSerial.print("GetCommandCode produces:");
-				this->_HardSerial.println(code);
+				this->HardSerial.print("GetCommandCode produces:");
+				this->HardSerial.println(code);
 				//
 				// patch a bug in the totp library
 				// if the first digit is a zero, it
@@ -226,8 +268,8 @@ asyncWebServer.on("/GetWebData", HTTP_GET, [](AsyncWebServerRequest *request) {
 					// char secretCode[SHARED_SECRET_LENGTH];
 					String secret = secretManager.readSecret();
 
-					this->_HardSerial.println(secret);
-					this->_HardSerial.println("Ok-GetSecret");
+					this->HardSerial.println(secret);
+					this->HardSerial.println("Ok-GetSecret");
 					Serial.flush();
 					delay(delayT);
 					String toReturn=secret;
@@ -240,8 +282,8 @@ asyncWebServer.on("/GetWebData", HTTP_GET, [](AsyncWebServerRequest *request) {
 
 			} else if(command.startsWith("SetSecret")){
 			//	switchState = digitalRead(OP_MODE);
-				this->_HardSerial.print("switchState=");
-				this->_HardSerial.println(switchState);
+				this->HardSerial.print("switchState=");
+				this->HardSerial.println(switchState);
 				if (tankFlowData.opMode == LOW ){
 					//   //
 					//   // the switch is in the PGM position so return the secret
@@ -253,19 +295,19 @@ asyncWebServer.on("/GetWebData", HTTP_GET, [](AsyncWebServerRequest *request) {
 					}else{
 						AsyncWebParameter* p = request->getParam(1);
 						String secret = p->value();
-						this->_HardSerial.println(secret);
+						this->HardSerial.println(secret);
 						p = request->getParam(2);
 						int numberDigits = p->value().toInt();
 						p = request->getParam(3);
 						int periodSeconds= p->value().toInt();
 
 
-						this->_HardSerial.print("receive savesecret");
-						this->_HardSerial.println(secret);
+						this->HardSerial.print("receive savesecret");
+						this->HardSerial.println(secret);
 						secretManager.saveSecret(secret, numberDigits, periodSeconds);
-						this->_HardSerial.println("stored secret, reading secret");
+						this->HardSerial.println("stored secret, reading secret");
 						String secretRead = secretManager.readSecret();
-						this->_HardSerial.println(secretRead);
+						this->HardSerial.println(secretRead);
 						String toReturn="Ok-SetSecret";
 						request->send_P(200, "text/plain", toReturn.c_str());
 					}
@@ -304,13 +346,11 @@ asyncWebServer.on("/GetWebData", HTTP_GET, [](AsyncWebServerRequest *request) {
 				String toReturn="Failure-Invalid Command:" + command;
 				request->send_P(200, "text/plain", toReturn.c_str());
 	} });
-
+*/
     asyncWebServer.on("/index.html", HTTP_GET, [this](AsyncWebServerRequest *request){
 
          });
 
-
-
-  //  server.begin();
-
 }
+
+PanchoTankFlowWifiManager::~PanchoTankFlowWifiManager() {}

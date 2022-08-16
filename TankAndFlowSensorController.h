@@ -30,6 +30,7 @@ public:
     void readFlowMeter1();
     void readFlowMeter2();
     void refreshDisplays();
+    void setQFactor1(float q1);
     virtual ~TankAndFlowSensorController();
     
 private:

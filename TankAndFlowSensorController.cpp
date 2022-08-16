@@ -131,7 +131,10 @@ void TankAndFlowSensorController::refreshDisplays(){
 				display1.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
 			}
 
-			if(panchoTankFlowData.totalMilliLitres>1000){
+			if(panchoTankFlowData.totalMilliLitres>10000){
+				int liters = totalMilliLitres/10000;
+				display2.showNumberDec(liters, false);
+			}else if(panchoTankFlowData.totalMilliLitres>1000){
 				int liters = totalMilliLitres/1000;
 				display2.showNumberDec(liters, false);
 			}else{
@@ -207,10 +210,19 @@ void TankAndFlowSensorController::readTank1(){
       total = total + analogRead(SENSOR_INPUT_1);  // add each value to a total
      }
     average = total / samples;
+	//
+	// average wil return a value where 3.3 represents 4095
+	// so get the voltage
 
+	float vol33 = 3.3*average/4095;
+	float vol45 = 4.5*vol33/3.3;
+	//
+	// since the psi is 5 for 4.5 then
+	float psi = vol45*5/4.5;
+	
     panchoTankFlowData.tankPressureVolts=average;
-    panchoTankFlowData.tankPressurePsi=panchoTankFlowData.qfactor*average/4095;
-    panchoTankFlowData.tankWaterLevel=average*.7;
+    panchoTankFlowData.tankPressurePsi=psi;
+    panchoTankFlowData.tankWaterLevel=psi*.7;
 }
 
 float tank2PressurePsi=0.0;
@@ -220,7 +232,7 @@ float tank2PressurePsi=0.0;
 
 
 void TankAndFlowSensorController::readTank2(){
-    //
+     //
     // tank level
     //
     // Output: 0.5-4.5V linear voltage output. 0 psi outputs 0.5V, 2.5 psi outputs 2.5V, 5 psi outputs 4.5V.
@@ -229,12 +241,22 @@ void TankAndFlowSensorController::readTank2(){
     float average=0.0;
     const float  OffSet = 0.483 ;
     for (int x = 0; x < samples; x++) {           // multiple analogue readings for averaging
-      total = total + analogRead(SENSOR_INPUT_2);  // add each value to a total
+      total = total + analogRead(SENSOR_INPUT_1);  // add each value to a total
      }
     average = total / samples;
+	//
+	// average wil return a value where 3.3 represents 4095
+	// so get the voltage
+
+	float vol33 = 3.3*average/4095;
+	float vol45 = 4.5*vol33/3.3;
+	//
+	// since the psi is 5 for 4.5 then
+	float psi = vol45*5/4.5;
+	
     panchoTankFlowData.tank2PressureVolts=average;
-    panchoTankFlowData.tank2PressurePsi=panchoTankFlowData.qfactor*average/4095;
-    panchoTankFlowData.tank2WaterLevel=average*.7;
+    panchoTankFlowData.tank2PressurePsi=psi;
+    panchoTankFlowData.tank2WaterLevel=psi*.7;
 }
 
 void TankAndFlowSensorController::readFlowMeter1(){
@@ -250,7 +272,7 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		// based on the number of pulses per second per units of measure (litres/minute in
 		// this case) coming from the sensor.
 		long lo = millis() - flowMeterPreviousMillis;
-		flowRate = (1000.0 / lo) * pulse1Sec / panchoTankFlowData.qfactor;
+		flowRate = (1000.0 / lo) * pulse1Sec / panchoTankFlowData.qfactor1;
 		//flowRate = ((1000.0 / (millis() - previousMillis)) * pulse1Sec) / calibrationFactor;
     
 		flowMeterPreviousMillis = millis();
@@ -290,7 +312,7 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		// based on the number of pulses per second per units of measure (litres/minute in
 		// this case) coming from the sensor.
 		long lo = millis() - flowMeterPreviousMillis2;
-		flowRate2 = (1000.0 / lo) * pulse2Sec / panchoTankFlowData.qfactor;
+		flowRate2 = (1000.0 / lo) * pulse2Sec / panchoTankFlowData.qfactor2;
 		flowMeterPreviousMillis2 = millis();
 		//Serial.print("pulse1Sec=");
 		//  Serial.print(pulse1Sec);

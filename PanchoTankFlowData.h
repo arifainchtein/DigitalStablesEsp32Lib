@@ -22,6 +22,10 @@ struct PanchoWifiData{
 #ifndef PANCHOTANKFLOWDATA_H
 #define PANCHOTANKFLOWDATA_H
 struct PanchoTankFlowData{
+	char flow1name[16];
+	char flow2name[16];
+	char tank1name[16];
+	char tank2name[16];
 	
 	long secondsTime=0L;
 	uint8_t dataSamplingSec=3;
@@ -48,7 +52,8 @@ struct PanchoTankFlowData{
 	float tank2WaterLevel=0.0;
 	float tank2HeightMeters=.3;
 	
-	float qfactor=.82;
+	float qfactor1=.82;
+	float qfactor2=.82;
 	// the status values are:
 	// 0 - Comma
 	// 1 - WPS normal

@@ -9,9 +9,11 @@
 
 
 WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
- _HardSerial(serial),timeManager(t),secretManager(e), tankFlowData(tf) ,panchoConfigData(p)  {}
+ _HardSerial(serial),timeManager(t),secretManager(e), panchoTankFlowData(tf) ,panchoConfigData(p),asyncWebServer(80)  {}
 
-
+void WifiManager::setSerialNumber(String s){
+    serialNumber=s;
+}
 void WifiManager::setCurrentTimerRecord(const RTCInfoRecord c){
     currentTimerRecord=c;   
 }
