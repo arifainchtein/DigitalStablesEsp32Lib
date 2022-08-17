@@ -120,10 +120,10 @@ void TankAndFlowSensorController::refreshDisplays(){
 	_HardSerial.print( panchoTankFlowData.flowRate);
 	_HardSerial.print( " anchoTankFlowData.flowRate2=");
 	_HardSerial.println( panchoTankFlowData.flowRate2);
-	int scaledFlow;
+	int scaledFlow, displayD;
+	float liters;
     switch(mode){
         case 1:
-            
 			if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
     			display1.showNumberDec(panchoTankFlowData.flowRate, false);
   			}else{
@@ -131,29 +131,25 @@ void TankAndFlowSensorController::refreshDisplays(){
 				display1.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
 			}
 
-			float liters = totalMilliLitres/1000.0;
-			int displayD;
+			liters = panchoTankFlowData.totalMilliLitres/1000.0;
 			if(totalMilliLitres<1000){
 				display2.showNumberDec(panchoTankFlowData.totalMilliLitres, false);
 			}else{
 				if(liters>1000000){
-					int liters = totalMilliLitres/1000000;
+					displayD = 100*totalMilliLitres/1000000;
 					display2.showNumberDecEx(displayD, (0x80 >> 1), false);
 				}else if(liters>100000){
-					int liters = totalMilliLitres/100000;
+					displayD = 100*totalMilliLitres/100000;
 					display2.showNumberDecEx(displayD, (0x80 >> 1), false);
 				}else if(liters>10000){
 					displayD = 100*liters/10000;
 					display2.showNumberDec(displayD, false);
 					display2.showNumberDecEx(displayD, (0x80 >> 1), false);
 				}else if(liters<10000){
-					displayD = liters/10000;
-					display2.showNumberDec(liters, false);
+					displayD = (int)liters;
+					display2.showNumberDec(displayD, false);
 				}
 			}
-
-			
-			
             break;
         case 2:
             if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
