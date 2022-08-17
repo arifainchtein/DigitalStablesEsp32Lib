@@ -130,18 +130,29 @@ void TankAndFlowSensorController::refreshDisplays(){
 				scaledFlow=panchoTankFlowData.flowRate*100;
 				display1.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
 			}
-			if(panchoTankFlowData.totalMilliLitres>100000){
-				int liters = totalMilliLitres/100000;
-				display2.showNumberDecEx(liters, (0x80 >> 2), false);
-			}else if(panchoTankFlowData.totalMilliLitres>10000){
-				int liters = totalMilliLitres/10000;
-				display2.showNumberDecEx(liters, (0x80 >> 1), false);
-			}else if(panchoTankFlowData.totalMilliLitres>1000){
-				int liters = totalMilliLitres/1000;
-				display2.showNumberDec(liters, false);
-			}else{
+
+			float liters = totalMilliLitres/1000.0;
+			int displayD;
+			if(totalMilliLitres<1000){
 				display2.showNumberDec(panchoTankFlowData.totalMilliLitres, false);
+			}else{
+				if(liters>1000000){
+					int liters = totalMilliLitres/1000000;
+					display2.showNumberDecEx(displayD, (0x80 >> 1), false);
+				}else if(liters>100000){
+					int liters = totalMilliLitres/100000;
+					display2.showNumberDecEx(displayD, (0x80 >> 1), false);
+				}else if(liters>10000){
+					displayD = 100*liters/10000;
+					display2.showNumberDec(displayD, false);
+					display2.showNumberDecEx(displayD, (0x80 >> 1), false);
+				}else if(liters<10000){
+					displayD = liters/10000;
+					display2.showNumberDec(liters, false);
+				}
 			}
+
+			
 			
             break;
         case 2:
