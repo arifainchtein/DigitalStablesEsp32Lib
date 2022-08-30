@@ -97,6 +97,31 @@ void  WifiManager::setSSID(String c)
      ssid=c;
 }
 
+void WifiManager::createDeneWord(JsonObject& deneWord, String name, String value, String valueType){
+    deneWord["Name"] = name;
+	deneWord["Value"] =value;
+	deneWord["Dene Type"] = valueType;
+}
+
+void WifiManager::createDeneWord(JsonObject& deneWord, String name, float value, String valueType){
+    deneWord["Name"] = name;
+	deneWord["Value"] =value;
+	deneWord["Value Type"] = valueType;
+}
+
+void WifiManager::createDeneWord(JsonObject& deneWord, String name, int value, String valueType){
+    deneWord["Name"] = name;
+	deneWord["Value"] =value;
+	deneWord["Value Type"] = valueType;
+}
+
+void WifiManager::createDeneWord(JsonObject& deneWord, String name, long value, String valueType){
+    deneWord["Name"] = name;
+	deneWord["Value"] =value;
+	deneWord["Value Type"] = valueType;
+}
+
+
 String WifiManager::getTeleonomeData(String url, bool debug){
     
     

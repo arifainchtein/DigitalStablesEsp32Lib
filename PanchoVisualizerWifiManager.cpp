@@ -1,14 +1,13 @@
-#include <PanchoTankFlowWifiManager.h>
+#include <PanchoVisualizerWifiManager.h>
+#include <ArduinoJson.h>
 
-
- String okString="Ok";
-
-PanchoTankFlowWifiManager::PanchoTankFlowWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
+ 
+PanchoVisualizerWifiManager::PanchoVisualizerWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
 WifiManager(serial ,  t, e,  tf,  p) {}
 
  
 
-void PanchoTankFlowWifiManager::start(){
+void PanchoVisualizerWifiManager::start(){
    //
    // get the parameters
    //
@@ -25,145 +24,15 @@ void PanchoTankFlowWifiManager::start(){
     
     if(stationmode){
        connectSTA();
+       asyncWebServer.begin();
     }else{
-         connectAP();
+         //  mark as not connected
     }
-    asyncWebServer.begin();
-/*
-	"Value": "Soon",
-	"Name": "Page Title",
-	"Value Type": "String"
-}
-*/
-
-asyncWebServer.on("/GetDene", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    AsyncResponseStream *response = request->beginResponseStream("application/json");
-
-
-	const size_t capacity = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(1) + 20;
-    DynamicJsonDocument doc(8192);//capacity);
-    JsonObject dene = doc.to<JsonObject>();
-    JsonArray denewords = dene.createNestedArray("DeneWords");
-
- 	dene["Name"] = this->hostname;
-	dene["Dene Type"] = "PanchoTankFlow";
-
-	JsonObject deneWordFlow1Name = denewords.createNestedObject();
-	createDeneWord(deneWordFlow1Name,"Flow1Name", this->panchoTankFlowData.flow1name,  "String");
-	
-	
-	JsonObject deneWordFlow2Name = denewords.createNestedObject();
-	createDeneWord(deneWordFlow2Name,"Flow2Name", this->panchoTankFlowData.flow2name,  "String");
-	
-	JsonObject deneWordTank1Name = denewords.createNestedObject();
-	createDeneWord(deneWordTank1Name,"Tank1Name", this->panchoTankFlowData.tank1name,  "String");
-	
-	JsonObject deneWordTank2Name = denewords.createNestedObject();
-	createDeneWord(deneWordTank2Name,"Tank2Name", this->panchoTankFlowData.tank2name,  "String");
-	
-	JsonObject deneWordSecondsTime = denewords.createNestedObject();
-	createDeneWord(deneWordSecondsTime,"secondsTime", this->panchoTankFlowData.secondsTime,  "long");
-	
-	JsonObject deneWordDataSamplingSec = denewords.createNestedObject();
-	createDeneWord(deneWordDataSamplingSec,"dataSamplingSec", this->panchoTankFlowData.dataSamplingSec,  "int");
-
-	JsonObject deneWordCurrentFunctionValue = denewords.createNestedObject();
-	createDeneWord(deneWordCurrentFunctionValue,"currentFunctionValue", this->panchoTankFlowData.currentFunctionValue,  "String");
-	
-	JsonObject deneWordTemperature = denewords.createNestedObject();
-	createDeneWord(deneWordTemperature,"temperature", this->panchoTankFlowData.temperature,  "String");
-	
-	JsonObject deneWordReg33Voltage = denewords.createNestedObject();
-	createDeneWord(deneWordReg33Voltage,"reg33Voltage", this->panchoTankFlowData.reg33Voltage,  "double");
-	
-	JsonObject deneWordRtcBatVolt = denewords.createNestedObject();
-	createDeneWord(deneWordRtcBatVolt,"rtcBatVolt", this->panchoTankFlowData.rtcBatVolt,  "double");
-
-	JsonObject deneWordOpMode = denewords.createNestedObject();
-	createDeneWord(deneWordOpMode,"opMode", this->panchoTankFlowData.opMode,  "int");
-
-	JsonObject deneWordRSSI = denewords.createNestedObject();
-	createDeneWord(deneWordRSSI,"rssi", this->panchoTankFlowData.rssi,  "double");   
-   
-   	JsonObject deneWordsnr = denewords.createNestedObject();
-	createDeneWord(deneWordsnr,"snr", this->panchoTankFlowData.snr,  "double");   
-   
-   JsonObject deneWordflowrate = denewords.createNestedObject();
-	createDeneWord(deneWordflowrate,"flowRate", this->panchoTankFlowData.flowRate,  "double"); 
-
-	JsonObject deneWordtotalMilliLitres = denewords.createNestedObject();
-	createDeneWord(deneWordtotalMilliLitres,"totalMilliLitres", this->panchoTankFlowData.totalMilliLitres,  "double"); 
-
-	JsonObject deneWordflowrate2 = denewords.createNestedObject();
-	createDeneWord(deneWordflowrate2,"flowRate2", this->panchoTankFlowData.flowRate2,  "double"); 
-
-	JsonObject deneWordtotalMilliLitres2 = denewords.createNestedObject();
-	createDeneWord(deneWordtotalMilliLitres2,"totalMilliLitres2", this->panchoTankFlowData.totalMilliLitres2,  "double"); 
-
-	JsonObject deneWordtankPressurePsi = denewords.createNestedObject();
-	createDeneWord(deneWordtankPressurePsi,"tankPressurePsi", this->panchoTankFlowData.tankPressurePsi,  "double"); 
-
-	JsonObject deneWordtankPressureVolts = denewords.createNestedObject();
-	createDeneWord(deneWordtankPressureVolts,"tankPressureVolts", this->panchoTankFlowData.tankPressureVolts,  "double"); 
-
-	JsonObject deneWordtankWaterLevel = denewords.createNestedObject();
-	createDeneWord(deneWordtankWaterLevel,"tankWaterLevel", this->panchoTankFlowData.tankWaterLevel,  "double"); 
-
-	JsonObject deneWordtankHeightMeters = denewords.createNestedObject();
-	createDeneWord(deneWordtankHeightMeters,"tankHeightMeters", this->panchoTankFlowData.tankHeightMeters,  "double"); 
-
-	JsonObject deneWordtank2PressurePsi = denewords.createNestedObject();
-	createDeneWord(deneWordtank2PressurePsi,"tank2PressurePsi", this->panchoTankFlowData.tank2PressurePsi,  "double"); 
-
-	JsonObject deneWordtank2PressureVolts = denewords.createNestedObject();
-	createDeneWord(deneWordtank2PressureVolts,"tank2PressureVolts", this->panchoTankFlowData.tank2PressureVolts,  "double"); 
-
-	JsonObject deneWordtank2WaterLevel = denewords.createNestedObject();
-	createDeneWord(deneWordtank2WaterLevel,"tank2WaterLevel", this->panchoTankFlowData.tank2WaterLevel,  "double"); 
-
-	JsonObject deneWordtank2HeightMeters = denewords.createNestedObject();
-	createDeneWord(deneWordtank2HeightMeters,"tank2HeightMeters", this->panchoTankFlowData.tank2HeightMeters,  "double"); 
-
-	JsonObject deneWordqfactor1 = denewords.createNestedObject();
-	createDeneWord(deneWordqfactor1,"qfactor1", this->panchoTankFlowData.qfactor1,  "double"); 
-
-	JsonObject deneWordqfactor2 = denewords.createNestedObject();
-	createDeneWord(deneWordqfactor2,"qfactor2", this->panchoTankFlowData.qfactor2,  "double"); 
-	
-	JsonObject deneWordoperatingStatus = denewords.createNestedObject();
-	createDeneWord(deneWordoperatingStatus,"operatingStatus", this->panchoTankFlowData.operatingStatus,  "double"); 
-
-	JsonObject deneWordsecondsSinceLastPulse = denewords.createNestedObject();
-	createDeneWord(deneWordsecondsSinceLastPulse,"secondsSinceLastPulse", this->panchoTankFlowData.secondsSinceLastPulse,  "long"); 
-
-	JsonObject deneWordsoft_ap_ssid = denewords.createNestedObject();
-	createDeneWord(deneWordsoft_ap_ssid,"soft_ap_ssid", this-> soft_ap_ssid,  "String");
-
-	JsonObject deneWordserialNumber = denewords.createNestedObject();
-	createDeneWord(deneWordserialNumber,"serialNumber", this->serialNumber,  "String"); 
-
-	JsonObject deneWordapAddress = denewords.createNestedObject();
-	createDeneWord(deneWordapAddress,"apAddress", this->apAddress,  "String"); 
-	
-	JsonObject deneWordstationmode = denewords.createNestedObject();
-	createDeneWord(deneWordstationmode,"stationmode", this->stationmode,  "String"); 
-
-	JsonObject deneWordssid = denewords.createNestedObject();
-	createDeneWord(deneWordssid,"ssid", this->ssid,  "String"); 
-
-	JsonObject deneWordipAddress = denewords.createNestedObject();
-	createDeneWord(deneWordipAddress,"ipAddress", this->ipAddress,  "String"); 
-
-    serializeJson(dene, *response);
-    request->send(response);
-  });
-
+    
 
 asyncWebServer.on("/GetWebData", HTTP_GET, [this](AsyncWebServerRequest *request) {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
-    DynamicJsonDocument json(2056);
-
-
+    DynamicJsonDocument json(1024);
 	json["flow1name"] = this->panchoTankFlowData.flow1name;
 	json["flow2name"] = this->panchoTankFlowData.flow2name;
 	json["tank1name"] = this->panchoTankFlowData.tank1name;
@@ -212,13 +81,7 @@ asyncWebServer.on("/GetWebData", HTTP_GET, [this](AsyncWebServerRequest *request
     });
 
 
-    asyncWebServer.on("/SetQFactor1", HTTP_GET, [this](AsyncWebServerRequest *request){
-        int numberOfParameters = request->params();
-        AsyncWebParameter* p = request->getParam(0);
-        panchoTankFlowData.qfactor1 = p->value().toFloat();
-       
-        request->send_P(200, "text/plain", okString.c_str()); 
-    });
+    
 /*
     asyncWebServer.on("/Command", HTTP_GET, [this](AsyncWebServerRequest *request){
 			int numberOfParameters = request->params();
@@ -484,4 +347,4 @@ asyncWebServer.on("/GetWebData", HTTP_GET, [this](AsyncWebServerRequest *request
 
 }
 
-PanchoTankFlowWifiManager::~PanchoTankFlowWifiManager() {}
+PanchoVisualizerWifiManager::~PanchoVisualizerWifiManager() {}

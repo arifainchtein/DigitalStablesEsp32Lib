@@ -15,6 +15,7 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <HTTPClient.h>
+#include <ArduinoJson.h>
 
 class WifiManager{
 
@@ -44,6 +45,11 @@ protected:
     bool connectAP();
     bool connectSTA();
     bool apConnected;
+    void createDeneWord(JsonObject& deneWord, String name, String value, String valueType);
+    void createDeneWord(JsonObject& deneWord, String name, float value, String valueType);
+    void createDeneWord(JsonObject& deneWord, String name, int value, String valueType);
+    void createDeneWord(JsonObject& deneWord, String name, long value, String valueType);
+
 
 public:
 	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, PanchoTankFlowData& tf, PanchoConfigData& p) ;

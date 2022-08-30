@@ -22,6 +22,7 @@ struct PanchoWifiData{
 #ifndef PANCHOTANKFLOWDATA_H
 #define PANCHOTANKFLOWDATA_H
 struct PanchoTankFlowData{
+	char devicename[16];
 	char flow1name[16];
 	char flow2name[16];
 	char tank1name[16];
