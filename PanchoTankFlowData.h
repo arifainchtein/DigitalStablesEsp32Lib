@@ -9,6 +9,16 @@ struct PanchoConfigData{
 };
 #endif
 
+
+#ifndef PANCHOCOMMANDDATA_H
+#define PANCHOCOMMANDDATA_H
+struct PanchoCommandData{
+	float fieldId=0;
+	long commandcode=0;
+	char command[64];
+};
+#endif
+
 #ifndef PANCHOWIFIDATA_H
 #define PANCHOWIFIDATA_H
 struct PanchoWifiData{
@@ -52,8 +62,14 @@ struct PanchoTankFlowData{
 	float tank2PressureVolts=0.0;
 	float tank2WaterLevel=0.0;
 	float tank2HeightMeters=.3;
-	
-	float qfactor1=.82;
+	//
+	// from aliexpress
+	//  25mm flow meter qfactor =1.08   https://www.aliexpress.com/item/32792886446.html
+	//  32mm flow meter qfactor = .45   https://www.aliexpress.com/item/4000795880974.html
+	//  40mm flow meter qfactor = .45   https://www.aliexpress.com/item/32795067364.html
+	//  50mm flow meter qfactor = .2   https://www.alibaba.com/product-detail/YF-DN50-hall-sensor-small-inductive_1600196933068.html
+
+ 	float qfactor1=.82;
 	float qfactor2=.82;
 	// the status values are:
 	// 0 - Comma
