@@ -61,7 +61,7 @@ public:
     String getSoft_ap_ssid();
     void setSoft_ap_ssid(String s);
     void restartWifi();
-    void scanNetworks();
+    void scanNetworks(JsonArray& ssids);
     String getSoft_ap_password();
     void setSoft_ap_password(String s);
     uint8_t getWifiStatus();

@@ -183,7 +183,7 @@ String WifiManager::getTeleonomeData(String url, bool debug){
     return toReturn;
 }
 
-void WifiManager::scanNetworks() {
+void WifiManager::scanNetworks(JsonArray& ssids) {
   _HardSerial.println("scan start");
 
   // WiFi.scanNetworks will return the number of networks found
@@ -193,17 +193,22 @@ void WifiManager::scanNetworks() {
       _HardSerial.println("no networks found");
   } else {
     _HardSerial.print(n);
-    Serial.println(" networks found");
+    _HardSerial.println(" networks found");
     for (int i = 0; i < n; ++i) {
-      // Print SSID and RSSI for each network found
-      _HardSerial.print(i + 1);
-      _HardSerial.print(": ");
-      _HardSerial.print(WiFi.SSID(i));
-      _HardSerial.print(" (");
-      _HardSerial.print(WiFi.RSSI(i));
-      _HardSerial.print(")");
-      _HardSerial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
-      delay(10);
+        delay(10);
+        JsonObject object = ssids.createNestedObject();
+        object["ssid"] = WiFi.SSID(i);
+        object["rssi"] = WiFi.RSSI(i);
+        object["enc"] = WiFi.encryptionType(i);
+
+        // Print SSID and RSSI for each network found
+          _HardSerial.print(i + 1);
+          _HardSerial.print(": ");
+          _HardSerial.print(WiFi.SSID(i));
+          _HardSerial.print(" (");
+          _HardSerial.print(WiFi.RSSI(i));
+          _HardSerial.print(")");
+          _HardSerial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
     }
   }
   Serial.println("");
@@ -219,19 +224,7 @@ uint8_t WifiManager::getWifiStatus(){
 bool WifiManager::getAPStatus(){
     return apConnected;
 }
-/*
-void WifiManager::configWifi(String s, String p, String sas, String sap, String h ){
-    ssid = s;
-    password = p;
-    soft_ap_ssid = sas;
-    soft_ap_password = sap;
-    hostname=h;
-    secretManager.saveWifiParameters( ssid,  password, soft_ap_ssid, soft_ap_password,hostname);
-   // secretManager.saveConfigData(float fieldId, stationName );
-    WiFi.disconnect();
-    connect();
-}
-*/
+
 bool WifiManager::configWifiAP( String sas, String sap, String h ){
     ssid = secretManager.getSSID();
     password = secretManager.getWifiPassword();;
@@ -250,7 +243,7 @@ bool WifiManager::configWifiSTA(String s, String p, String h ){
     password = p;
     hostname=h;
     soft_ap_ssid = secretManager.getSoftAPSSID();
-    if(soft_ap_ssid=="")soft_ap_ssid="192.168.4.1";
+    if(soft_ap_ssid=="")soft_ap_ssid="192.168.5.1";
     soft_ap_password = secretManager.getSoftAPPASS();
     //hostname=secretManager.getHostName();
     stationmode=true;
@@ -310,44 +303,20 @@ _HardSerial.print("in connectSTA after settmg wifi, ip=");
 
 bool WifiManager::connectAP(){
     WiFi.mode(WIFI_MODE_AP);
-    
+    _HardSerial.println("Starting connectAP");
     //  WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
  //   WiFi.onEvent(OnWiFiEvent);
     apConnected=false;
     WiFi.setHostname(hostname.c_str());
+    soft_ap_ssid="PanchoPool";
     WiFi.softAP(soft_ap_ssid.c_str(), soft_ap_password.c_str());
     apAddress = WiFi.softAPIP().toString();
+    _HardSerial.print("Ap Mode using Ip Address of ");
+    
+    _HardSerial.println(apAddress);
     if(apAddress=="192.168.4.1")apConnected=true;
-    /*
-    bool gotConnection=true;
-    uint8_t counter=0;
-    bool keepGoing=true;
-    while (keepGoing){
-        keepGoing=WiFi.status() != WL_CONNECTED;
-        delay(500);
-        _HardSerial.print(".");
-        counter++;
-        if(counter>10){
-            keepGoing=false;
-            gotConnection=false;
-        }
-    }
-
-
-    if(gotConnection){
-       
-        apAddress = WiFi.softAPIP().toString();
-        _HardSerial.print(" after got connectin apConnected=");
-        _HardSerial.println(this->apConnected);
-        if(apAddress=="192.168.4.1")apConnected=true;
-        _HardSerial.println("Access Point Enabled connected.");
-        _HardSerial.println("Access Point IP address: ");
-        _HardSerial.println(apAddress); 
-    }else{
-        _HardSerial.print("Error connecting to wifi router ssid=");
-         _HardSerial.println(ssid);
-    }
-    */
+   
+   
     return apConnected;
 }
 
