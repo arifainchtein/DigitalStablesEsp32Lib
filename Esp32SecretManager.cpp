@@ -103,7 +103,7 @@ void Esp32SecretManager::saveWifiParameters(String ssid, String password, String
 bool Esp32SecretManager::getStationMode(){
 	preferences.begin("WIFIData",false);
 	bool stationmode = false;
-	if(preferences.isKey("stationmode"))stationmode=preferences.getBool("stationmode");
+	if(preferences.isKey("stationmode"))stationmode=preferences.getBool("stationmode","");
 	preferences.end();
 	return stationmode;
 }
@@ -111,7 +111,7 @@ bool Esp32SecretManager::getStationMode(){
 String Esp32SecretManager::getSSID(){
 	preferences.begin("WIFIData",false);
 	String ssid = "";
-	if(preferences.isKey("ssid"))ssid=preferences.getString("ssid");
+	if(preferences.isKey("ssid"))ssid=preferences.getString("ssid","");
 	preferences.end();
 	return ssid;
 }
@@ -119,7 +119,7 @@ String Esp32SecretManager::getSSID(){
 String Esp32SecretManager::getWifiPassword(){
 	preferences.begin("WIFIData",false);
 	String password = "";
-	if(preferences.isKey("password"))password=preferences.getString("password");
+	if(preferences.isKey("password"))password=preferences.getString("password","");
 	preferences.end();
 	return password;
 }
@@ -127,7 +127,7 @@ String Esp32SecretManager::getWifiPassword(){
 String Esp32SecretManager::getSoftAPSSID(){
 	preferences.begin("WIFIData",false);
 	String softAPSSID = "";
-	if(preferences.isKey("softAPSSID"))softAPSSID=preferences.getString("softAPSSID");
+	if(preferences.isKey("softAPSSID"))softAPSSID=preferences.getString("softAPSSID","");
 	preferences.end();
 	return softAPSSID;
 }
@@ -135,7 +135,7 @@ String Esp32SecretManager::getSoftAPSSID(){
 String Esp32SecretManager::getSoftAPPASS(){
 	preferences.begin("WIFIData",false);
 	String softAPPASS = "";
-	if(preferences.isKey("softAPPASS"))softAPPASS=preferences.getString("softAPPASS");
+	if(preferences.isKey("softAPPASS"))softAPPASS=preferences.getString("softAPPASS","");
 	preferences.end();
 	return softAPPASS;
 }
@@ -143,7 +143,7 @@ String Esp32SecretManager::getSoftAPPASS(){
 String Esp32SecretManager::getHostName(){
 	preferences.begin("WIFIData",false);
 	String hostName = "";
-	if(preferences.isKey("hostName"))hostName=preferences.getString("hostName");
+	if(preferences.isKey("hostName"))hostName=preferences.getString("hostName","");
 	preferences.end();
 	return hostName;
 }

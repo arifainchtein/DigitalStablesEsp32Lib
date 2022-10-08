@@ -13,6 +13,7 @@
 #include <Esp32SecretManager.h>
 #include <PanchoTankFlowData.h>
 #include <WiFi.h>
+#include <ESPmDNS.h>
 #include <ESPAsyncWebServer.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
@@ -27,7 +28,10 @@ protected:
     Esp32SecretManager& secretManager;
     PanchoTankFlowData& panchoTankFlowData;
     PanchoConfigData& panchoConfigData;
+    JsonArray availablessids;
     String ssid;
+    String ssids;
+        
     String password;
     String soft_ap_ssid ;
     String soft_ap_password;
@@ -41,6 +45,7 @@ protected:
     float fieldId;
     String hostname;
     bool stationmode;
+    bool lora;
     void connect();
     bool connectAP();
     bool connectSTA();
@@ -61,7 +66,7 @@ public:
     String getSoft_ap_ssid();
     void setSoft_ap_ssid(String s);
     void restartWifi();
-    void scanNetworks(JsonArray& ssids);
+    String scanNetworks();
     String getSoft_ap_password();
     void setSoft_ap_password(String s);
     uint8_t getWifiStatus();
@@ -74,6 +79,7 @@ public:
     String getSSID();
     void setSSID(String s);
     void setSerialNumber(String s);
+     void setLora(bool b);
     bool getStationMode( );
     void setCurrentTimerRecord(RTCInfoRecord currentTimerRecord);
     bool configWifiAP(String sas, String sap, String h);

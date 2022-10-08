@@ -11,6 +11,13 @@
 WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
  _HardSerial(serial),timeManager(t),secretManager(e), panchoTankFlowData(tf) ,panchoConfigData(p),asyncWebServer(80)  {}
 
+void WifiManager::setLora(boolean b){
+    lora=b;
+    _HardSerial.print("setting lora to ");
+    _HardSerial.println(lora);
+    
+}
+
 void WifiManager::setSerialNumber(String s){
     serialNumber=s;
 }
@@ -183,38 +190,34 @@ String WifiManager::getTeleonomeData(String url, bool debug){
     return toReturn;
 }
 
-void WifiManager::scanNetworks(JsonArray& ssids) {
-  _HardSerial.println("scan start");
-
-  // WiFi.scanNetworks will return the number of networks found
-  int n = WiFi.scanNetworks();
-  _HardSerial.println("scan done");
-  if (n == 0) {
-      _HardSerial.println("no networks found");
-  } else {
-    _HardSerial.print(n);
-    _HardSerial.println(" networks found");
-    for (int i = 0; i < n; ++i) {
-        delay(10);
-        JsonObject object = ssids.createNestedObject();
-        object["ssid"] = WiFi.SSID(i);
-        object["rssi"] = WiFi.RSSI(i);
-        object["enc"] = WiFi.encryptionType(i);
-
-        // Print SSID and RSSI for each network found
-          _HardSerial.print(i + 1);
-          _HardSerial.print(": ");
-          _HardSerial.print(WiFi.SSID(i));
-          _HardSerial.print(" (");
-          _HardSerial.print(WiFi.RSSI(i));
-          _HardSerial.print(")");
-          _HardSerial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
+String WifiManager::scanNetworks() {
+    delay(5);
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    delay(5);
+    int n= WiFi.scanNetworks();
+    delay(5);
+     String json = "[";
+     n = WiFi.scanComplete();
+      this->_HardSerial.println("scan 2 complete");
+    if(n){
+      for (int i = 0; i < n; ++i){
+        if(i) json += ",";
+        json += "{";
+        json += "\"rssi\":"+String(WiFi.RSSI(i));
+        json += ",\"ssid\":\""+WiFi.SSID(i)+"\"";
+        json += ",\"bssid\":\""+WiFi.BSSIDstr(i)+"\"";
+        json += ",\"channel\":"+String(WiFi.channel(i));
+        json += ",\"secure\":"+String(WiFi.encryptionType(i));
+        //json += ",\"hidden\":"+String(WiFi.isHidden(i)?"true":"false");
+        this->_HardSerial.print(",");
+        this->_HardSerial.print(WiFi.SSID(i));
+        json += "}";
+      }
     }
-  }
-  Serial.println("");
-
-  // Wait a bit before scanning again
-  delay(5000);
+    json += "]";
+      WiFi.scanDelete();
+      return json;
 }
 
 uint8_t WifiManager::getWifiStatus(){
@@ -243,7 +246,11 @@ bool WifiManager::configWifiSTA(String s, String p, String h ){
     password = p;
     hostname=h;
     soft_ap_ssid = secretManager.getSoftAPSSID();
-    if(soft_ap_ssid=="")soft_ap_ssid="192.168.5.1";
+    if(soft_ap_ssid==""){
+        soft_ap_ssid="192.168.4.1";
+    }else{
+        
+    }
     soft_ap_password = secretManager.getSoftAPPASS();
     //hostname=secretManager.getHostName();
     stationmode=true;
@@ -255,7 +262,12 @@ bool WifiManager::configWifiSTA(String s, String p, String h ){
 void WifiManager::restartWifi(){
     WiFi.disconnect();
      if(stationmode){
-       connectSTA();
+       bool gotConnection = connectSTA();
+       if(!gotConnection){
+          _HardSerial.print("restartwifi could not connect ");
+          
+		      connectAP();
+       }
     }else{
          connectAP();
     }
@@ -263,10 +275,33 @@ void WifiManager::restartWifi(){
 
 
 bool WifiManager::connectSTA(){
+    ssid = secretManager.getSSID();
+    password = secretManager.getWifiPassword();;
+    ssid = secretManager.getSSID();
+    hostname = secretManager.getHostName();
+    _HardSerial.print("Setting hostname=");
+    _HardSerial.println(hostname); 
+    //
+    // the host name needs to be set before setting 
+    // the mode
+    //
+    const char* hnchar = hostname.c_str();
+     int hnl = hostname.length();
+     int hnlt = hnl+1;
+     char hname[hnlt];
+    // hname[hnlt] = '\0';
+
+    snprintf(hname, hnlt, hnchar, 32);
+    WiFi.disconnect();
     WiFi.mode(WIFI_STA);
+    WiFi.setHostname(hname);
+
+    
+  //  WiFi.setHostname(hostname.c_str()); //define hostname
+
+//    WiFi.mode(WIFI_STA);
     WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
-     WiFi.setHostname(hostname.c_str()); //define hostname
-  
+     
    WiFi.begin(const_cast<char*>(ssid.c_str()), const_cast<char*>(password.c_str()));
     bool gotConnection=true;
     uint8_t counter=0;
@@ -294,7 +329,12 @@ _HardSerial.print("in connectSTA after settmg wifi, ip=");
         _HardSerial.print("Error connecting to wifi router ssid=");
          _HardSerial.println(ssid);
     }
-    
+    if (!MDNS.begin(hostname.c_str())) {
+      _HardSerial.println("Error setting up MDNS responder!");
+    }else{
+        _HardSerial.println("MDNS setup ok");
+    }
+
     return gotConnection;
 
     
@@ -302,14 +342,27 @@ _HardSerial.print("in connectSTA after settmg wifi, ip=");
 }
 
 bool WifiManager::connectAP(){
+    //WiFi.mode(WIFI_MODE_AP);
     WiFi.mode(WIFI_MODE_AP);
-    _HardSerial.println("Starting connectAP");
+
+     soft_ap_ssid = secretManager.getSoftAPSSID();
+    if(soft_ap_ssid=="" || soft_ap_ssid=="192.168.4.1"){
+        soft_ap_ssid="Pancho";
+    }
+    soft_ap_password = secretManager.getSoftAPPASS();
+    hostname = secretManager.getHostName();;
+
+
+    _HardSerial.print("Starting connectAP 2 soft_ap_ssid=");
+    _HardSerial.println(soft_ap_ssid);
+    
     //  WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
  //   WiFi.onEvent(OnWiFiEvent);
     apConnected=false;
-    WiFi.setHostname(hostname.c_str());
-    soft_ap_ssid="PanchoPool";
+   // WiFi.setHostname(hostname.c_str());
+    //soft_ap_ssid="PanchoPool";
     WiFi.softAP(soft_ap_ssid.c_str(), soft_ap_password.c_str());
+    delay(500);
     apAddress = WiFi.softAPIP().toString();
     _HardSerial.print("Ap Mode using Ip Address of ");
     
