@@ -57,7 +57,7 @@ protected:
 
 
 public:
-	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, PanchoTankFlowData& tf, PanchoConfigData& p) ;
+	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e) ;
 	virtual void start( )=0;
     void setCurrentSSID(String s);
     void setSensorString(String s);

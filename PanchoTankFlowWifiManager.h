@@ -11,6 +11,9 @@ class PanchoTankFlowWifiManager : public WifiManager{
 
 
 public:
+	PanchoTankFlowData& panchoTankFlowData;
+    PanchoConfigData& panchoConfigData;
+	
 	PanchoTankFlowWifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, PanchoTankFlowData& tf, PanchoConfigData& p) ;
 	void start( );
     virtual ~PanchoTankFlowWifiManager();

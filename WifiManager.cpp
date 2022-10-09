@@ -8,8 +8,8 @@
 #include <WifiManager.h>
 
 
-WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
- _HardSerial(serial),timeManager(t),secretManager(e), panchoTankFlowData(tf) ,panchoConfigData(p),asyncWebServer(80)  {}
+WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e) :
+ _HardSerial(serial),timeManager(t),secretManager(e),asyncWebServer(80)  {}
 
 void WifiManager::setLora(boolean b){
     lora=b;

@@ -9,7 +9,10 @@
 
 
 PanchoVisualizerWifiManager::PanchoVisualizerWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
-WifiManager(serial ,  t, e,  tf,  p) {}
+WifiManager(serial ,  t, e,  tf,  p) {
+   panchoTankFlowData(tf);
+    panchoConfigData(p);
+}
 
  
 
@@ -80,9 +83,11 @@ asyncWebServer.on("/assets/js/jquery.min.js", HTTP_GET, [this](AsyncWebServerReq
   });
 
 asyncWebServer.on("/assets/css/slideswitch.css", HTTP_GET, [this](AsyncWebServerRequest *request){
- // this->_HardSerial.println("request  /=");
-    request->send(SPIFFS, "/fontawesome-all.min.css", String(), false);
+  this->_HardSerial.println("request  slideswitch/=");
+    request->send(SPIFFS, "/slideswitch.css", String(), false);
+    delay(5);
   });
+
 
 
 asyncWebServer.on("/assets/css/styles.css", HTTP_GET, [this](AsyncWebServerRequest *request){

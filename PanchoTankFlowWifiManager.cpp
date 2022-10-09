@@ -10,7 +10,11 @@
  String okString="Ok";
 
 PanchoTankFlowWifiManager::PanchoTankFlowWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
-WifiManager(serial ,  t, e,  tf,  p) {}
+WifiManager(serial ,  t, e) {
+     panchoTankFlowData(tf);
+    panchoConfigData(p);
+
+}
 
  
 
@@ -48,8 +52,7 @@ void PanchoTankFlowWifiManager::start(){
     _HardSerial.print(" stationmode=");
     _HardSerial.println(stationmode);
     _HardSerial.println("about to do start scan");
-     
-      ssids = scanNetworks();
+    ssids = scanNetworks();
       //
       //set the mode to null so that 
       // the hostname is applied
