@@ -26,8 +26,7 @@ protected:
     RTCInfoRecord currentTimerRecord, lastReceptionRTCInfoRecord;
     PCF8563TimeManager& timeManager;
     Esp32SecretManager& secretManager;
-    PanchoTankFlowData& panchoTankFlowData;
-    PanchoConfigData& panchoConfigData;
+
     JsonArray availablessids;
     String ssid;
     String ssids;

@@ -3,7 +3,7 @@
 
  
 SeedlingMonitoringWifiManager::SeedlingMonitoringWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
-WifiManager(serial ,  t, e,  tf,  p) {}
+WifiManager(serial ,  t, e) {}
 
  
 void SeedlingMonitoringWifiManager::prepareData(DynamicJsonDocument& json){
@@ -18,6 +18,7 @@ void SeedlingMonitoringWifiManager::prepareData(DynamicJsonDocument& json){
         json["stationmode"] = stationmode;
         json["ssid"] = ssid;
         json["ipAddress"] = ipAddress;
+        seedlingMonitorData
 }
 
 void SeedlingMonitoringWifiManager::start(){
