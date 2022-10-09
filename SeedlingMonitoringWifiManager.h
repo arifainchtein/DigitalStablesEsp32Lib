@@ -5,6 +5,7 @@
 #define LIBRARIES_DIGITALSTABLES_SEEDLINGMONITORINGWIFIMANAGER_H_
 #include "Arduino.h"
 #include <WifiManager.h>
+#include <SeedlingMonitoringData.h>
 #include <ArduinoJson.h>
 
 class SeedlingMonitoringWifiManager : public WifiManager{
@@ -13,7 +14,9 @@ private:
 void prepareData(DynamicJsonDocument& json);
 
 public:
-	SeedlingMonitoringWifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, PanchoTankFlowData& tf, PanchoConfigData& p) ;
+	SeedlingMonitorData& seedlingMonitorData;
+  	
+	SeedlingMonitoringWifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, SeedlingMonitorData& s) ;
 	void start( );
     virtual ~SeedlingMonitoringWifiManager();
 };

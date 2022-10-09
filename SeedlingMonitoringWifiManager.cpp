@@ -2,23 +2,32 @@
 
 
  
-SeedlingMonitoringWifiManager::SeedlingMonitoringWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
-WifiManager(serial ,  t, e) {}
+SeedlingMonitoringWifiManager::SeedlingMonitoringWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e, SeedlingMonitorData &s) :
+WifiManager(serial ,  t, e), seedlingMonitorData(s){}
 
- 
 void SeedlingMonitoringWifiManager::prepareData(DynamicJsonDocument& json){
-    json["seedlingtemp"] = panchoTankFlowData.flowRate;
-        json["roomtemp"] = panchoTankFlowData.flowRate2;
+    json["soilTemperature"] = seedlingMonitorData.soilTemperature;
+    json["greenhouseTemp"] = seedlingMonitorData.greenhouseTemp;
+    json["greenhouseHum"] = seedlingMonitorData.greenhouseHum;
+    json["dewPoint"] = seedlingMonitorData.dewPoint;
+    json["heatIndex"] = seedlingMonitorData.heatIndex;
+    json["dataSamplingSec"] = seedlingMonitorData.dataSamplingSec;
+    json["soilMoisture"] = seedlingMonitorData.soilMoisture;
+    json["temperature"] = seedlingMonitorData.temperature;
+    json["rtcBatVolt"] = seedlingMonitorData.rtcBatVolt;
+    json["rssi"] = seedlingMonitorData.rssi;
+    json["snr"] = seedlingMonitorData.snr;
+    json["secondsSinceLastPulse"] = seedlingMonitorData.secondsSinceLastPulse;
+    json["soft_ap_ssid"] = soft_ap_ssid;
+    json["serialNumber"] = serialNumber;
+    json["secondsTime"] = seedlingMonitorData.secondsTime;
+    json["roomTemperature"] = seedlingMonitorData.roomTemperature;
+    json["apAddress"] =apAddress;
+    json["hostname"] = hostname;
+    json["stationmode"] = stationmode;
+    json["ssid"] = ssid;
+    json["ipAddress"] = ipAddress;
         
-        json["secondsSinceLastPulse"] = panchoTankFlowData.secondsSinceLastPulse;
-        json["soft_ap_ssid"] = soft_ap_ssid;
-        json["serialNumber"] = serialNumber;
-        json["apAddress"] =apAddress;
-        json["hostname"] = hostname;
-        json["stationmode"] = stationmode;
-        json["ssid"] = ssid;
-        json["ipAddress"] = ipAddress;
-        seedlingMonitorData
 }
 
 void SeedlingMonitoringWifiManager::start(){

@@ -11,8 +11,12 @@ class PanchoVisualizerWifiManager : public WifiManager{
 
 
 public:
+	PanchoTankFlowData& panchoTankFlowData;
+    PanchoConfigData& panchoConfigData;
+	
 	PanchoVisualizerWifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, PanchoTankFlowData& tf, PanchoConfigData& p) ;
 	void start( );
     virtual ~PanchoVisualizerWifiManager();
+	
 };
 #endif /* LIBRARIES_DIGITALSTABLES_PANCHOVISUALIZEROWWIFIMANAGER */

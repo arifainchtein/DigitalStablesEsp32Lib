@@ -9,9 +9,7 @@
 
 
 PanchoVisualizerWifiManager::PanchoVisualizerWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
-WifiManager(serial ,  t, e,  tf,  p) {
-   panchoTankFlowData(tf);
-    panchoConfigData(p);
+WifiManager(serial ,  t, e) , panchoTankFlowData(tf),panchoConfigData(p){
 }
 
  
