@@ -1,7 +1,18 @@
 #include <TankAndFlowSensorController.h>
 
 #define SENSOR_INPUT_1 5
-#define SENSOR_INPUT_2  4
+//
+// for build 8 and below 
+//
+//#define SENSOR_INPUT_2  4
+
+
+//
+// for build 9 and below 
+//
+#define SENSOR_INPUT_2  18
+
+
 
 // #define SENSOR_INPUT_1 5
 // #define SENSOR_INPUT_2 4
