@@ -1,3 +1,4 @@
+
 /*
  * WifiManager.cpp
  *
@@ -11,11 +12,18 @@
 WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e) :
  _HardSerial(serial),timeManager(t),secretManager(e),asyncWebServer(80)  {}
 
+bool WifiManager::getInternetAvailable(){
+    return internetAvailable;
+}
 void WifiManager::setLora(boolean b){
     lora=b;
     _HardSerial.print("setting lora to ");
     _HardSerial.println(lora);
     
+}
+
+void WifiManager::setCurrentToTpCode(long c){
+    totpcode=c;
 }
 
 void WifiManager::setSerialNumber(String s){
@@ -325,6 +333,14 @@ _HardSerial.print("in connectSTA after settmg wifi, ip=");
         ipAddress = WiFi.localIP().toString();
         _HardSerial.print(" Connected with ip=");
         _HardSerial.println(ipAddress); 
+
+        const char* ntpServer = "oceania.pool.ntp.org";
+        const long  gmtOffset_sec = 10*3600;
+        const int   daylightOffset_sec = 3600;
+        configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+        internetConnectionAvailable();
+
+       
     }else{
         _HardSerial.print("Error connecting to wifi router ssid=");
          _HardSerial.println(ssid);
@@ -374,5 +390,51 @@ bool WifiManager::connectAP(){
 }
 
 
+void WifiManager::internetConnectionAvailable(){
+    internetAvailable =  Ping.ping("www.google.com");
+    internetPingTime=0;
+    if(internetAvailable){
+        internetPingTime = Ping.averageTime();
+    }
+    _HardSerial.print("called ping, speed=");
+    _HardSerial.println(internetPingTime);
+    
+}
+
+bool WifiManager::setTimeFromInternet(){
+    bool toReturn=false;
+    
+    struct tm timeinfo;
+    if(getLocalTime(&timeinfo)){
+       uint8_t date = timeinfo.tm_mday;
+        uint8_t month = timeinfo.tm_mon +1;
+        uint8_t year = timeinfo.tm_year-100;
+        uint8_t hour = timeinfo.tm_hour;
+        uint8_t minute = timeinfo.tm_min;
+        uint8_t second = timeinfo.tm_sec;
+        uint8_t dw = timeinfo.tm_wday;
+        String commandTime = "SetTime#";
+        commandTime.concat(date);
+        commandTime.concat("#");
+        commandTime.concat(month);
+        commandTime.concat("#");
+        commandTime.concat(year);
+        commandTime.concat("#");
+        commandTime.concat(dw);
+        commandTime.concat("#");
+        commandTime.concat(hour);
+        commandTime.concat("#");
+        commandTime.concat(minute);
+        commandTime.concat("#");
+        commandTime.concat(second);
+        commandTime.concat("#");
+        _HardSerial.print("Setting internetTime:");
+        _HardSerial.println(commandTime);
+        
+        toReturn = timeManager.setTime(commandTime);
+      
+    }
+    return toReturn;
+}
 
 WifiManager::~WifiManager() {}

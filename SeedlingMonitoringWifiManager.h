@@ -10,14 +10,13 @@
 
 class SeedlingMonitoringWifiManager : public WifiManager{
 
-private:
-void prepareData(DynamicJsonDocument& json);
-
 public:
 	SeedlingMonitorData& seedlingMonitorData;
   	
 	SeedlingMonitoringWifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, SeedlingMonitorData& s) ;
 	void start( );
+	bool uploadDataToDigitalStables();
+	void generateWebData(DynamicJsonDocument& json);
     virtual ~SeedlingMonitoringWifiManager();
 };
 #endif /* LIBRARIES_DIGITALSTABLES_SEEDLINGMONITORINGgOWWIFIMANAGER */

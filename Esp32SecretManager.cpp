@@ -40,10 +40,22 @@ void Esp32SecretManager::saveConfigData(float fieldId, String stationName ){
 
 	preferences.begin("ConfigData", false);
 	preferences.putString("stationName", stationName);
-	preferences.putFloat("fieldId", fieldId);
+	preferences.putFloat("fieldId", fieldId);	
 	preferences.end();
 }
 
+void Esp32SecretManager::setGroupIdentifier( String groupIdentifier ){
+	preferences.begin("ConfigData", false);
+	preferences.putString("groupIdentifier", groupIdentifier);
+	preferences.end();
+}
+
+String Esp32SecretManager::getGroupIdentifier(){
+	preferences.begin("ConfigData",false);
+	String groupIdentifier = preferences.getString("groupIdentifier");
+	preferences.end();
+	return groupIdentifier;
+}
 
 String Esp32SecretManager::getStationName(){
 	preferences.begin("ConfigData",false);

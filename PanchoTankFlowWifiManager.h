@@ -16,6 +16,8 @@ public:
 	
 	PanchoTankFlowWifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, PanchoTankFlowData& tf, PanchoConfigData& p) ;
 	void start( );
+	void generateWebData(DynamicJsonDocument& json, String s);
+	bool uploadDataToDigitalStables();
     virtual ~PanchoTankFlowWifiManager();
 };
 #endif /* LIBRARIES_DIGITALSTABLES_PANCHOTANKANDFLOWWIFIMANAGER_H_ */

@@ -37,7 +37,8 @@ struct PanchoTankFlowData{
 	char flow2name[16];
 	char tank1name[16];
 	char tank2name[16];
-	
+	char groupidentifier[16];
+	char deviceTypeId[30];
 	long secondsTime=0L;
 	uint8_t dataSamplingSec=3;
 	uint8_t currentFunctionValue=0;
@@ -53,15 +54,19 @@ struct PanchoTankFlowData{
 	float flowRate2=0.0;
 	float totalMilliLitres2=0.0;
 
-	float tankPressurePsi=0.0;
-	float tankPressureVolts=0.0;
-	float tankWaterLevel=0.0;
-	float tankHeightMeters=.3;
-	
+	float tank1PressurePsi=0.0;
+	float tank1PressureVolts=0.0;
+	float tank1WaterLevel=0.0;
+	float tank1HeightMeters=.3;
+	float tank1maxvollit;
+	float tank1heightmeters;
+
 	float tank2PressurePsi=0.0;
 	float tank2PressureVolts=0.0;
 	float tank2WaterLevel=0.0;
 	float tank2HeightMeters=.3;
+	float tank2maxvollit;
+	float tank2heightmeters;
 	//
 	// from aliexpress
 	//  25mm flow meter qfactor =1.08   https://www.aliexpress.com/item/32792886446.html
@@ -78,5 +83,9 @@ struct PanchoTankFlowData{
 	float operatingStatus=0;
 	float sleepPingMinutes=30;
 	long secondsSinceLastPulse;
+	bool digitalStablesUpload;
+	long dsLastUpload;
+	float latitude;
+	float longitude;
 };
 #endif

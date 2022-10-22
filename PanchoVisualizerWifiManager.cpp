@@ -35,7 +35,6 @@ void PanchoVisualizerWifiManager::start(){
     _HardSerial.print(ssid);
     _HardSerial.print(" stationmode=");
     _HardSerial.println(stationmode);
-    
     _HardSerial.println("about to do start scan");
     ssids = scanNetworks();
       //
@@ -58,6 +57,7 @@ void PanchoVisualizerWifiManager::start(){
 		  _HardSerial.println("about to do connectAP");
         bool apModeActive = connectAP();
     }
+    
     
 
 asyncWebServer.on("/assets/bootstrap/css/bootstrap.min.css", HTTP_GET, [this](AsyncWebServerRequest *request){
@@ -223,86 +223,93 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
       p = request->getParam(2);
       String qfactor1 =p->value();  
 
+    }else  if(formName=="SetTime"){
+      p = request->getParam(1);
+      String time =p->value();    
+      bool r = timeManager.setTime(time);
+      if(r){
+        String ok = "Ok";
+         request->send_P(200, "text/plain", ok.c_str()); 
+      }else{
+        String fail="Fail";
+        request->send_P(200, "text/plain", fail.c_str()); 
+      }
+
     }
 });
 
 asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_GET, [this](AsyncWebServerRequest *request) {
  int paramsNr = request->params();
     this->_HardSerial.println(paramsNr);
-   
     AsyncWebParameter* p = request->getParam(0);
     //String formName =p->name;
     String formName =p->value();    
-  this->_HardSerial.print("in servet, formName=");
-  this->_HardSerial.println(formName);
-  
+    this->_HardSerial.print("in servet, formName=");
+    this->_HardSerial.println(formName);
+    AsyncResponseStream *response = request->beginResponseStream("text/plain");
     if(formName=="GetWebData"){
-		//AsyncResponseStream *response = request->beginResponseStream("application/json");
-		AsyncResponseStream *response = request->beginResponseStream("text/plain");
-		int paramsNr = request->params();
-		this->_HardSerial.println(paramsNr);
-	
-		AsyncWebParameter* p = request->getParam(0);
-	    //String formName =p->name;
-    	String formName =p->value();    
-		this->_HardSerial.print("in servet, formName=");
-		this->_HardSerial.println(formName);
-			
-		DynamicJsonDocument json(1024);
-		// json["currentFunctionValue"]= FUN_1_FLOW_1_TANK;
-		// json["flow1name"] = this->panchoTankFlowData.flow1name;
-		// json["flow2name"] = this->panchoTankFlowData.flow2name;
-		// json["tank1name"] = this->panchoTankFlowData.tank1name;
-		// json["tank2name"] = this->panchoTankFlowData.tank2name;
-		// json["secondsTime"] = this->panchoTankFlowData.secondsTime;
-		// json["dataSamplingSec"] = this->panchoTankFlowData.dataSamplingSec;
-		// json["currentFunctionValue"] = this->panchoTankFlowData.currentFunctionValue;
-		// json["temperature"] = this->panchoTankFlowData.temperature;
-		// json["reg33Voltage"] = this->panchoTankFlowData.reg33Voltage;
-		// json["rtcBatVolt"] = this->panchoTankFlowData.rtcBatVolt;
-		// json["opMode"] = this->panchoTankFlowData.opMode;
-		// json["rssi"] = this->panchoTankFlowData.rssi;
-		// json["snr"] = this->panchoTankFlowData.snr;
-		// json["flowRate"] = this->panchoTankFlowData.flowRate;
-		// json["totalMilliLitres"] = this->panchoTankFlowData.totalMilliLitres;
-		// json["flowRate2"] = this->panchoTankFlowData.flowRate2;
-		// json["totalMilliLitres2"] = this->panchoTankFlowData.totalMilliLitres2;
-		// json["tankPressurePsi"] = this->panchoTankFlowData.tankPressurePsi;
-		// json["tankPressureVolts"] = this->panchoTankFlowData.tankPressureVolts;
-		// json["tankWaterLevel"] = this->panchoTankFlowData.tankWaterLevel;
-		// json["tankHeightMeters"] = this->panchoTankFlowData.tankHeightMeters;
-		// json["tank2PressurePsi"] = this->panchoTankFlowData.tank2PressurePsi;
-		// json["tank2PressureVolts"] = this->panchoTankFlowData.tank2PressureVolts;
-		// json["tank2WaterLevel"] = this->panchoTankFlowData.tank2WaterLevel;
-		// json["tank2HeightMeters"] = this->panchoTankFlowData.tank2HeightMeters;
-		// json["qfactor1"] = this->panchoTankFlowData.qfactor1;
-		// json["qfactor2"] = this->panchoTankFlowData.qfactor2;
-		// json["operatingStatus"] = this->panchoTankFlowData.operatingStatus;
-		// json["sleepPingMinutes"] = this->panchoTankFlowData.sleepPingMinutes;
-		// json["secondsSinceLastPulse"] = this->panchoTankFlowData.secondsSinceLastPulse;
-		json["soft_ap_ssid"] = this->soft_ap_ssid;
-		json["serialNumber"] = this->serialNumber;
-		json["apAddress"] = this->apAddress;
-		json["hostname"] = this->hostname;
-		json["stationmode"] = this->stationmode;
-		json["ssid"] =this-> ssid;
-    json["ssids"] =this-> ssids;
-		json["ipAddress"] = this->ipAddress;
-		serializeJson(json, *response);
-		request->send(response);
+		  DynamicJsonDocument json(1800);
+      this->generateWebData(json, serialNumber);
+      serializeJson(json, *response);
+      request->send(response);
 	}
   });
 
- asyncWebServer.on("/GetSensorData", HTTP_GET, [this](AsyncWebServerRequest *request){
+   asyncWebServer.on("/GetSensorData", HTTP_GET, [this](AsyncWebServerRequest *request){
        this->_HardSerial.println("curl request returning");
         this->_HardSerial.println(sensorString);
         request->send_P(200, "text/plain", sensorString.c_str()); 
     });
 
-asyncWebServer.begin();
+  asyncWebServer.begin();
     
-    
+}  
+ 
+void PanchoVisualizerWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
 
+		json["soft_ap_ssid"] = this->soft_ap_ssid;
+		json["serialNumber"] = this->serialNumber;
+    json["apAddress"] = apAddress;
+    json["hostname"] = hostname;
+    json["stationmode"] = stationmode;
+    json["ssid"] = ssid;
+    json["ssids"] = ssids;
+    json["lora"] = lora;
+    json["internetAvailable"] = internetAvailable;
+    json["internetPingTime"] = internetPingTime;
+    json["ipAddress"] = ipAddress;
+    json["totp"] = totpcode;
+    json["deviceTypeId"]=panchoTankFlowData.deviceTypeId;
+    json["dsLastUpload"]=panchoTankFlowData.dsLastUpload;
+    json["latitude"]=panchoTankFlowData.latitude;
+     json["longitude"]=panchoTankFlowData.longitude;
+}   
+
+bool PanchoVisualizerWifiManager::uploadDataToDigitalStables(){
+
+  DynamicJsonDocument json(1800);
+  generateWebData(json, serialNumber);
+  
+  String output;
+  serializeJson(json, output);
+  const char* serverName = "http://www.digitalstables.com/DeviceUploadServlet";
+  http.begin(serverName);    
+  http.addHeader("Content-Type", "application/json");
+  boolean toReturn=false;
+  int httpResponseCode = http.POST(output);
+  _HardSerial.print("upload digitalstables return ");
+  _HardSerial.println(httpResponseCode);
+   panchoTankFlowData.digitalStablesUpload=false;
+  if (httpResponseCode == 200) { //Check for the returning code
+      String response = http.getString();  //Get the response to the request
+      if(response=="Ok"){
+        toReturn =true;
+         panchoTankFlowData.digitalStablesUpload=true;
+      }
+  }
+  http.end();
+  return toReturn;
 }
+
 
 PanchoVisualizerWifiManager::~PanchoVisualizerWifiManager() {}

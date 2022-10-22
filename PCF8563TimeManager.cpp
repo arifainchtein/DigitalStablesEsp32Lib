@@ -43,6 +43,7 @@ bool PCF8563TimeManager::setTime(RTCInfoRecord e){
 	  Wire.write(decToBcd(e.year));
 	  Wire.endTransmission();
 }
+
 bool PCF8563TimeManager::setTime(String command){
 	//SetTime#24#10#19#4#17#32#00
 	int date = GeneralFunctions::getValue(command, '#', 1).toInt();
@@ -53,17 +54,17 @@ bool PCF8563TimeManager::setTime(String command){
 	int minute = GeneralFunctions::getValue(command, '#', 6).toInt();
 	int second = GeneralFunctions::getValue(command, '#', 7).toInt();
 
-	// _HardSerial.print(date);
-	// _HardSerial.print("/");
-	// 	_HardSerial.print(month);
-	// 	_HardSerial.print("/");
-	// 	_HardSerial.print(year);
-	// 	_HardSerial.print(" ");
-	// 	_HardSerial.print(hour);
-	// 	_HardSerial.print(":");
-	// 	_HardSerial.print(minute);
-	// 	_HardSerial.print(":");
-	// 	_HardSerial.print(second);
+	_HardSerial.print(date);
+	_HardSerial.print("/");
+		_HardSerial.print(month);
+		_HardSerial.print("/");
+		_HardSerial.print(year);
+		_HardSerial.print(" ");
+		_HardSerial.print(hour);
+		_HardSerial.print(":");
+		_HardSerial.print(minute);
+		_HardSerial.print(":");
+		_HardSerial.print(second);
 
 
 		Wire.beginTransmission(PCF8563address);

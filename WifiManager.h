@@ -13,12 +13,15 @@
 #include <Esp32SecretManager.h>
 #include <PanchoTankFlowData.h>
 #include <WiFi.h>
+#include <time.h>
+
 #include <ESPmDNS.h>
 #include <ESPAsyncWebServer.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
-
+#include <ESP32Ping.h>
 class WifiManager{
+
 
 
 protected:
@@ -30,7 +33,7 @@ protected:
     JsonArray availablessids;
     String ssid;
     String ssids;
-        
+    long  totpcode;    
     String password;
     String soft_ap_ssid ;
     String soft_ap_password;
@@ -45,6 +48,9 @@ protected:
     String hostname;
     bool stationmode;
     bool lora;
+    bool internetAvailable;
+    int internetPingTime;
+    
     void connect();
     bool connectAP();
     bool connectSTA();
@@ -53,11 +59,17 @@ protected:
     void createDeneWord(JsonObject& deneWord, String name, float value, String valueType);
     void createDeneWord(JsonObject& deneWord, String name, int value, String valueType);
     void createDeneWord(JsonObject& deneWord, String name, long value, String valueType);
-
+    void internetConnectionAvailable();
+    bool setTimeFromInternet();
+    
+    virtual void generateWebData(DynamicJsonDocument& json, String s)=0;
+   
 
 public:
 	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e) ;
 	virtual void start( )=0;
+    virtual bool uploadDataToDigitalStables()=0;
+    void setCurrentToTpCode(long t);
     void setCurrentSSID(String s);
     void setSensorString(String s);
     String getApAddress();
@@ -75,6 +87,7 @@ public:
     //void checkClient();
 	String getHostName();
     void setHostName(String s);
+    bool getInternetAvailable();
     String getSSID();
     void setSSID(String s);
     void setSerialNumber(String s);
@@ -85,6 +98,8 @@ public:
     bool configWifiSTA(String s, String p, String h);
    // void configWifi(String s, String p, String sas, String sap, String h);
     bool getAPStatus();
+    
+
 
     virtual ~WifiManager();
     

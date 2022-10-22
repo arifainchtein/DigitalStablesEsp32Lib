@@ -176,25 +176,25 @@ void TankAndFlowSensorController::refreshDisplays(){
 				display1.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
 			}
 
-			if(panchoTankFlowData.tankWaterLevel==(int)panchoTankFlowData.tankWaterLevel){
-    			display2.showNumberDec(panchoTankFlowData.tankWaterLevel, false);
+			if(panchoTankFlowData.tank1WaterLevel==(int)panchoTankFlowData.tank1WaterLevel){
+    			display2.showNumberDec(panchoTankFlowData.tank1WaterLevel, false);
   			}else{
 				scaledFlow=panchoTankFlowData.flowRate2*100;
-				display2.showNumberDecEx(panchoTankFlowData.tankWaterLevel, (0x80 >> 1), false);
+				display2.showNumberDecEx(panchoTankFlowData.tank1WaterLevel, (0x80 >> 1), false);
 			}
             break;
         case 4:
-            if(panchoTankFlowData.tankWaterLevel==(int)panchoTankFlowData.tankWaterLevel){
-    			display1.showNumberDec(panchoTankFlowData.tankWaterLevel, false);
+            if(panchoTankFlowData.tank1WaterLevel==(int)panchoTankFlowData.tank1WaterLevel){
+    			display1.showNumberDec(panchoTankFlowData.tank1WaterLevel, false);
   			}else{
-				display1.showNumberDecEx(panchoTankFlowData.tankWaterLevel, (0x80 >> 1), false);
+				display1.showNumberDecEx(panchoTankFlowData.tank1WaterLevel, (0x80 >> 1), false);
 			}
             break;
         case 5:
-            if(panchoTankFlowData.tankWaterLevel==(int)panchoTankFlowData.tankWaterLevel){
-    			display1.showNumberDec(panchoTankFlowData.tankWaterLevel, false);
+            if(panchoTankFlowData.tank1WaterLevel==(int)panchoTankFlowData.tank1WaterLevel){
+    			display1.showNumberDec(panchoTankFlowData.tank1WaterLevel, false);
   			}else{
-				display1.showNumberDecEx(panchoTankFlowData.tankWaterLevel, (0x80 >> 1), false);
+				display1.showNumberDecEx(panchoTankFlowData.tank1WaterLevel, (0x80 >> 1), false);
 			}
             
 			if(panchoTankFlowData.tank2WaterLevel==(int)panchoTankFlowData.tank2WaterLevel){
@@ -229,9 +229,9 @@ void TankAndFlowSensorController::readTank1(){
 	// since the psi is 5 for 4.5 then
 	float psi = vol45*5/4.5;
 	
-    panchoTankFlowData.tankPressureVolts=average;
-    panchoTankFlowData.tankPressurePsi=psi;
-    panchoTankFlowData.tankWaterLevel=psi*.7;
+    panchoTankFlowData.tank1PressureVolts=average;
+    panchoTankFlowData.tank1PressurePsi=psi;
+    panchoTankFlowData.tank1WaterLevel=psi*.7;
 }
 
 float tank2PressurePsi=0.0;

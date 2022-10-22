@@ -32,6 +32,8 @@ public:
 	String getSoftAPSSID();
 	String getSoftAPPASS();
 	String getHostName();
+	String getGroupIdentifier();
+	void setGroupIdentifier(String groupIdentifier);
 	bool getStationMode();
 	virtual ~Esp32SecretManager();
 };
