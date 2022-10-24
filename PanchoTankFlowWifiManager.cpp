@@ -355,15 +355,15 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
 
 
 asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_GET, [this](AsyncWebServerRequest *request) {
- int paramsNr = request->params();
+    int paramsNr = request->params();
     this->_HardSerial.println(paramsNr);
    
     AsyncWebParameter* p = request->getParam(0);
     //String formName =p->name;
     String formName =p->value();    
-  this->_HardSerial.print("in servet2, formName=");
-  this->_HardSerial.println(formName);
-   AsyncResponseStream *response = request->beginResponseStream("text/plain");
+    this->_HardSerial.print("in servet2, formName=");
+    this->_HardSerial.println(formName);
+    AsyncResponseStream *response = request->beginResponseStream("text/plain");
     if(formName=="GetWebData"){
        DynamicJsonDocument json(1800);
       this->generateWebData(json, serialNumber);
@@ -447,7 +447,7 @@ bool PanchoTankFlowWifiManager::uploadDataToDigitalStables(){
   
   String output;
   serializeJson(json, output);
-  const char* serverName = "http://www.digitalstables.com/DeviceUploadServlet";
+  const char* serverName = "http://devices.digitalstables.com/DeviceUploadServlet";
   http.begin(serverName);    
   http.addHeader("Content-Type", "application/json");
   boolean toReturn=false;
