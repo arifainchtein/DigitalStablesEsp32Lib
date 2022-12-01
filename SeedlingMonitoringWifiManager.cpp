@@ -361,7 +361,7 @@ asyncWebServer.on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
 }
 
 
-bool SeedlingMonitoringWifiManager::uploadDataToDigitalStables(){
+int SeedlingMonitoringWifiManager::uploadDataToDigitalStables(){
 
   DynamicJsonDocument json(1800);
   generateWebData(json);
@@ -381,10 +381,13 @@ bool SeedlingMonitoringWifiManager::uploadDataToDigitalStables(){
       if(response=="Ok"){
         toReturn =true;
          seedlingMonitorData.digitalStablesUpload=true;
+      }else{
+        httpResponseCode=500;
       }
   }
   http.end();
-  return toReturn;
+  return  httpResponseCode; //Check for the returning code
+;
 }
 
 SeedlingMonitoringWifiManager::~SeedlingMonitoringWifiManager() {}

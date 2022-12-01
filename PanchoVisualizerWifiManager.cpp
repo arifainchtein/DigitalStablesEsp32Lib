@@ -285,7 +285,7 @@ void PanchoVisualizerWifiManager::generateWebData(DynamicJsonDocument& json, Str
      json["longitude"]=panchoTankFlowData.longitude;
 }   
 
-bool PanchoVisualizerWifiManager::uploadDataToDigitalStables(){
+int PanchoVisualizerWifiManager::uploadDataToDigitalStables(){
 
   DynamicJsonDocument json(1800);
   generateWebData(json, serialNumber);
@@ -305,10 +305,12 @@ bool PanchoVisualizerWifiManager::uploadDataToDigitalStables(){
       if(response=="Ok"){
         toReturn =true;
          panchoTankFlowData.digitalStablesUpload=true;
+      }else{
+        httpResponseCode=500;
       }
   }
   http.end();
-  return toReturn;
+  return httpResponseCode;//toReturn;
 }
 
 

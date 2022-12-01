@@ -68,7 +68,7 @@ protected:
 public:
 	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e) ;
 	virtual void start( )=0;
-    virtual bool uploadDataToDigitalStables()=0;
+    virtual int uploadDataToDigitalStables()=0;
     void setCurrentToTpCode(long t);
     void setCurrentSSID(String s);
     void setSensorString(String s);

@@ -1,4 +1,4 @@
-#include <PanchoTankFlowWifiManager.h>
+#include <GloriaTankFlowPumpWifiManager.h>
 #include <ArduinoJson.h>
 #include "SPIFFS.h"
  #define FUN_1_FLOW 1
@@ -9,12 +9,12 @@
 
  String okString="Ok";
 
-PanchoTankFlowWifiManager::PanchoTankFlowWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
-WifiManager(serial ,  t, e) , panchoTankFlowData(tf),panchoConfigData(p){}
+GloriaTankFlowPumpWifiManager::GloriaTankFlowPumpWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  GloriaTankFlowPumpData& tf,GloriaConfigData& p) :
+WifiManager(serial ,  t, e) , gloriaTankFlowPumpData(tf),gloriaConfigData(p){}
 
  
 
-void PanchoTankFlowWifiManager::start(){
+void GloriaTankFlowPumpWifiManager::start(){
 
 	if (!SPIFFS.begin(true)) {
 		// SPIFFS will be configured on reboot
@@ -70,7 +70,7 @@ void PanchoTankFlowWifiManager::start(){
     asyncWebServer.on("/SetQFactor1", HTTP_GET, [this](AsyncWebServerRequest *request){
         int numberOfParameters = request->params();
         AsyncWebParameter* p = request->getParam(0);
-        panchoTankFlowData.qfactor1 = p->value().toFloat();
+        gloriaTankFlowPumpData.qfactor1 = p->value().toFloat();
        
         request->send_P(200, "text/plain", okString.c_str()); 
     });
@@ -279,8 +279,8 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
 
       p = request->getParam(2);
       float log =p->value().toFloat();  
-      panchoTankFlowData.latitude=lat;
-      panchoTankFlowData.longitude=log;
+      gloriaTankFlowPumpData.latitude=lat;
+      gloriaTankFlowPumpData.longitude=log;
     
         DynamicJsonDocument json(1800);
        this->generateWebData(json,serialNumber);
@@ -291,10 +291,10 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
       p = request->getParam(1);
       String fn2 =p->value();  
      
-      fn2.toCharArray(panchoTankFlowData.flow2name,16);
+      fn2.toCharArray(gloriaTankFlowPumpData.flow2name,16);
 
       p = request->getParam(2);
-      panchoTankFlowData.qfactor2=p->value().toFloat();  
+      gloriaTankFlowPumpData.qfactor2=p->value().toFloat();  
 
       DynamicJsonDocument json(1800);
       this->generateWebData(json, serialNumber);
@@ -305,10 +305,10 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
       p = request->getParam(1);
       String fn1=p->value();  
      
-      fn1.toCharArray(panchoTankFlowData.flow1name,16);
+      fn1.toCharArray(gloriaTankFlowPumpData.flow1name,16);
 
       p = request->getParam(2);
-      panchoTankFlowData.qfactor1=p->value().toFloat();  
+      gloriaTankFlowPumpData.qfactor1=p->value().toFloat();  
 
       DynamicJsonDocument json(1800);
       this->generateWebData(json, serialNumber);
@@ -319,13 +319,13 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
       p = request->getParam(1);
       String t1n =p->value();  
      
-      t1n.toCharArray(panchoTankFlowData.tank1name,16);
+      t1n.toCharArray(gloriaTankFlowPumpData.tank1name,16);
 
       p = request->getParam(2);
-      panchoTankFlowData.tank1heightmeters=p->value().toFloat();  
+      gloriaTankFlowPumpData.tank1heightmeters=p->value().toFloat();  
 
       p = request->getParam(2);
-      panchoTankFlowData.tank1maxvollit=p->value().toFloat();  
+      gloriaTankFlowPumpData.tank1maxvollit=p->value().toFloat();  
 
         DynamicJsonDocument json(1800);
        this->generateWebData(json, serialNumber);
@@ -335,13 +335,13 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
     }else if(formName=="SetTank2Param"){
       p = request->getParam(1);
       String t2n =p->value();  
-      t2n.toCharArray(panchoTankFlowData.tank2name,16);
+      t2n.toCharArray(gloriaTankFlowPumpData.tank2name,16);
 
        p = request->getParam(2);
-      panchoTankFlowData.tank2heightmeters=p->value().toFloat();  
+      gloriaTankFlowPumpData.tank2heightmeters=p->value().toFloat();  
 
       p = request->getParam(2);
-      panchoTankFlowData.tank2maxvollit=p->value().toFloat();  
+      gloriaTankFlowPumpData.tank2maxvollit=p->value().toFloat();  
 
         DynamicJsonDocument json(1800);
        this->generateWebData(json, serialNumber);
@@ -385,41 +385,41 @@ asyncWebServer.begin();
 
 }
 
-void PanchoTankFlowWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
-    json["currentFunctionValue"]= panchoTankFlowData.currentFunctionValue;
-    json["flow1name"] = panchoTankFlowData.flow1name;
-    json["flow2name"] = panchoTankFlowData.flow2name;
-    json["tank1name"] = panchoTankFlowData.tank1name;
-    json["tank2name"] = panchoTankFlowData.tank2name;
-    json["groupidentifier"]=panchoTankFlowData.groupidentifier;
-    json["secondsTime"] = panchoTankFlowData.secondsTime;
-    json["dataSamplingSec"] = panchoTankFlowData.dataSamplingSec;
-    json["currentFunctionValue"] = panchoTankFlowData.currentFunctionValue;
-    json["temperature"] = panchoTankFlowData.temperature;
-    json["reg33Voltage"] = panchoTankFlowData.reg33Voltage;
-    json["rtcBatVolt"] = panchoTankFlowData.rtcBatVolt;
-    json["opMode"] = panchoTankFlowData.opMode;
-    json["rssi"] = panchoTankFlowData.rssi;
-    json["snr"] = panchoTankFlowData.snr;
-    json["flowrate"] = panchoTankFlowData.flowRate;
-    json["totalmilliLitres"] = panchoTankFlowData.totalMilliLitres;
-    json["flowrate2"] = panchoTankFlowData.flowRate2;
-    json["totalmilliLitres2"] = panchoTankFlowData.totalMilliLitres2;
-    json["tank1pressurePsi"] = panchoTankFlowData.tank1PressurePsi;
-    json["tank1pressureVolts"] = panchoTankFlowData.tank1PressureVolts;
-    json["tank1waterLevel"] = panchoTankFlowData.tank1WaterLevel;
-    json["tank1heightMeters"] = panchoTankFlowData.tank1HeightMeters;
-    json["tank2pressurePsi"] = panchoTankFlowData.tank2PressurePsi;
-    json["tank2pressureVolts"] = panchoTankFlowData.tank2PressureVolts;
-    json["tank2waterLevel"] = panchoTankFlowData.tank2WaterLevel;
-    json["tank2heightMeters"] = panchoTankFlowData.tank2HeightMeters;
-    json["qfactor1"] = panchoTankFlowData.qfactor1;
-    json["qfactor2"] = panchoTankFlowData.qfactor2;
-    json["rtcBatVolt"] = panchoTankFlowData.rtcBatVolt;        
-    json["operatingStatus"] = panchoTankFlowData.operatingStatus;
-    json["sleepPingMinutes"] = panchoTankFlowData.sleepPingMinutes;
-    json["digitalStablesUpload"] = panchoTankFlowData.digitalStablesUpload;
-    json["secondsSinceLastPulse"] = panchoTankFlowData.secondsSinceLastPulse;
+void GloriaTankFlowPumpWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
+    json["currentFunctionValue"]= gloriaTankFlowPumpData.currentFunctionValue;
+    json["flow1name"] = gloriaTankFlowPumpData.flow1name;
+    json["flow2name"] = gloriaTankFlowPumpData.flow2name;
+    json["tank1name"] = gloriaTankFlowPumpData.tank1name;
+    json["tank2name"] = gloriaTankFlowPumpData.tank2name;
+    json["groupidentifier"]=gloriaTankFlowPumpData.groupidentifier;
+    json["secondsTime"] = gloriaTankFlowPumpData.secondsTime;
+    json["dataSamplingSec"] = gloriaTankFlowPumpData.dataSamplingSec;
+    json["currentFunctionValue"] = gloriaTankFlowPumpData.currentFunctionValue;
+    json["temperature"] = gloriaTankFlowPumpData.temperature;
+    json["reg33Voltage"] = gloriaTankFlowPumpData.reg33Voltage;
+    json["rtcBatVolt"] = gloriaTankFlowPumpData.rtcBatVolt;
+    json["opMode"] = gloriaTankFlowPumpData.opMode;
+    json["rssi"] = gloriaTankFlowPumpData.rssi;
+    json["snr"] = gloriaTankFlowPumpData.snr;
+    json["flowrate"] = gloriaTankFlowPumpData.flowRate;
+    json["totalmilliLitres"] = gloriaTankFlowPumpData.totalMilliLitres;
+    json["flowrate2"] = gloriaTankFlowPumpData.flowRate2;
+    json["totalmilliLitres2"] = gloriaTankFlowPumpData.totalMilliLitres2;
+    json["tank1pressurePsi"] = gloriaTankFlowPumpData.tank1PressurePsi;
+    json["tank1pressureVolts"] = gloriaTankFlowPumpData.tank1PressureVolts;
+    json["tank1waterLevel"] = gloriaTankFlowPumpData.tank1WaterLevel;
+    json["tank1heightMeters"] = gloriaTankFlowPumpData.tank1HeightMeters;
+    json["tank2pressurePsi"] = gloriaTankFlowPumpData.tank2PressurePsi;
+    json["tank2pressureVolts"] = gloriaTankFlowPumpData.tank2PressureVolts;
+    json["tank2waterLevel"] = gloriaTankFlowPumpData.tank2WaterLevel;
+    json["tank2heightMeters"] = gloriaTankFlowPumpData.tank2HeightMeters;
+    json["qfactor1"] = gloriaTankFlowPumpData.qfactor1;
+    json["qfactor2"] = gloriaTankFlowPumpData.qfactor2;
+    json["rtcBatVolt"] = gloriaTankFlowPumpData.rtcBatVolt;        
+    json["operatingStatus"] = gloriaTankFlowPumpData.operatingStatus;
+    json["sleepPingMinutes"] = gloriaTankFlowPumpData.sleepPingMinutes;
+    json["digitalStablesUpload"] = gloriaTankFlowPumpData.digitalStablesUpload;
+    json["secondsSinceLastPulse"] = gloriaTankFlowPumpData.secondsSinceLastPulse;
     json["soft_ap_ssid"] = soft_ap_ssid;
     json["serialnumber"] = serialNumber;
     json["sentBy"] = sentBy;
@@ -434,13 +434,13 @@ void PanchoTankFlowWifiManager::generateWebData(DynamicJsonDocument& json, Strin
     json["internetPingTime"] = internetPingTime;
     json["ipAddress"] = ipAddress;
     json["totp"] = totpcode;
-    json["deviceTypeId"]=panchoTankFlowData.deviceTypeId;
-    json["dsLastUpload"]=panchoTankFlowData.dsLastUpload;
-    json["latitude"]=panchoTankFlowData.latitude;
-     json["longitude"]=panchoTankFlowData.longitude;
+    json["deviceTypeId"]=gloriaTankFlowPumpData.deviceTypeId;
+    json["dsLastUpload"]=gloriaTankFlowPumpData.dsLastUpload;
+    json["latitude"]=gloriaTankFlowPumpData.latitude;
+     json["longitude"]=gloriaTankFlowPumpData.longitude;
   }
 
-int PanchoTankFlowWifiManager::uploadDataToDigitalStables(){
+int GloriaTankFlowPumpWifiManager::uploadDataToDigitalStables(){
 
   DynamicJsonDocument json(1800);
   generateWebData(json, serialNumber);
@@ -454,14 +454,14 @@ int PanchoTankFlowWifiManager::uploadDataToDigitalStables(){
   int httpResponseCode = http.POST(output);
   _HardSerial.print("upload digitalstables return ");
   _HardSerial.println(httpResponseCode);
-   panchoTankFlowData.digitalStablesUpload=false;
+   gloriaTankFlowPumpData.digitalStablesUpload=false;
   if (httpResponseCode == 200) { //Check for the returning code
       String response = http.getString();  //Get the response to the request
        _HardSerial.print("reponse= ");
       _HardSerial.println(response);
       if(response=="Ok"){
         toReturn =true;
-         panchoTankFlowData.digitalStablesUpload=true;
+         gloriaTankFlowPumpData.digitalStablesUpload=true;
       }else{
         httpResponseCode =500;
       }
@@ -474,4 +474,4 @@ int PanchoTankFlowWifiManager::uploadDataToDigitalStables(){
 }
 
 
-PanchoTankFlowWifiManager::~PanchoTankFlowWifiManager() {}
+GloriaTankFlowPumpWifiManager::~GloriaTankFlowPumpWifiManager() {}
