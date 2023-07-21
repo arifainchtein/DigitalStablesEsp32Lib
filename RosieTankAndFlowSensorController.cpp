@@ -1,4 +1,4 @@
-#include <TankAndFlowSensorController.h>
+#include <RosieTankAndFlowSensorController.h>
  #define SENSOR_INPUT_1 5
     //
     // for build 8 and below 
@@ -20,15 +20,15 @@ static volatile int flowMeterPulseCount;
 static volatile int flowMeterPulseCount2;
 
 
-TankAndFlowSensorController::TankAndFlowSensorController(HardwareSerial &serial,  PanchoTankFlowData& tf, TM1637Display& d1,TM1637Display& d2) :
- _HardSerial(serial), panchoTankFlowData(tf) , display1(d1), display2(d2)  {}
+RosieTankAndFlowSensorController::RosieTankAndFlowSensorController(HardwareSerial &serial,  RosieData& tf) :
+ _HardSerial(serial), rosieData(tf)   {}
 
 
- void   TankAndFlowSensorController::pulseCounter()
+ void   RosieTankAndFlowSensorController::pulseCounter()
 {
 	flowMeterPulseCount++;
 }
- void   TankAndFlowSensorController::pulseCounter2()
+ void   RosieTankAndFlowSensorController::pulseCounter2()
 {
 	flowMeterPulseCount2++;
 }
@@ -44,7 +44,7 @@ static void IRAM_ATTR TankAndFlowSensorController::pulseCounter2()
 }
 */
 
-void TankAndFlowSensorController::begin(uint8_t m){
+void RosieTankAndFlowSensorController::begin(uint8_t m){
     mode=m;
     pinMode(SENSOR_INPUT_1, INPUT_PULLUP);
     pinMode(SENSOR_INPUT_2, INPUT_PULLUP);
@@ -57,8 +57,8 @@ void TankAndFlowSensorController::begin(uint8_t m){
 	flowMilliLitres = 0;
 	totalMilliLitres = 0;
 	flowMeterPreviousMillis = 0;
-	if(mode<3)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_1), TankAndFlowSensorController::pulseCounter, FALLING);
-	if(mode==2)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_2), TankAndFlowSensorController::pulseCounter2, FALLING);
+	if(mode<3)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_1), RosieTankAndFlowSensorController::pulseCounter, FALLING);
+	if(mode==2)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_2), RosieTankAndFlowSensorController::pulseCounter2, FALLING);
 }
 
 
@@ -69,7 +69,7 @@ void TankAndFlowSensorController::begin(uint8_t m){
  * Mode 4  1 Tank
  * Mode 5  2 Tanks
 */
-void TankAndFlowSensorController::process(){
+void RosieTankAndFlowSensorController::process(){
 	//_HardSerial.print("processing, mode=");
 	//_HardSerial.println(mode);
 	
@@ -95,100 +95,100 @@ void TankAndFlowSensorController::process(){
     }
 }
 
-void TankAndFlowSensorController::refreshDisplays(){
-	// _HardSerial.print( " refresh display, mode=");
+void RosieTankAndFlowSensorController::refreshDisplays(){
+	// _HardSerial.print( " refresh //display2, mode=");
 	// _HardSerial.print( mode);
 	// _HardSerial.print( " anchoTankFlowData.flowRate=");
-	// _HardSerial.print( panchoTankFlowData.flowRate);
+	// _HardSerial.print( rosieData.flowRate);
 	// _HardSerial.print( " anchoTankFlowData.flowRate2=");
-	// _HardSerial.println( panchoTankFlowData.flowRate2);
-	int scaledFlow, displayD;
+	// _HardSerial.println( rosieData.flowRate2);
+	int scaledFlow, display2D;
 	float liters;
     switch(mode){
         case 1:
-			if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
-    			display1.showNumberDec(panchoTankFlowData.flowRate, false);
+			if(rosieData.flowRate==(int)rosieData.flowRate){
+    		///	////display21.showNumberDec(rosieData.flowRate, false);
   			}else{
-				scaledFlow=panchoTankFlowData.flowRate*100;
-				display1.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
+				scaledFlow=rosieData.flowRate*100;
+				//////display21.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
 			}
 
-			liters = panchoTankFlowData.totalMilliLitres/1000.0;
+			liters = rosieData.totalMilliLitres/1000.0;
 			if(totalMilliLitres<1000){
-				display2.showNumberDec(panchoTankFlowData.totalMilliLitres, false);
+				//display22.showNumberDec(rosieData.totalMilliLitres, false);
 			}else{
 				if(liters>1000000){
-					displayD = 100*totalMilliLitres/1000000;
-					display2.showNumberDecEx(displayD, (0x80 >> 1), false);
+					//display2D = 100*totalMilliLitres/1000000;
+					//display22.showNumberDecEx(//display2D, (0x80 >> 1), false);
 				}else if(liters>100000){
-					displayD = 100*totalMilliLitres/100000;
-					display2.showNumberDecEx(displayD, (0x80 >> 1), false);
+					//display2D = 100*totalMilliLitres/100000;
+					//display22.showNumberDecEx(//display2D, (0x80 >> 1), false);
 				}else if(liters>10000){
-					displayD = 100*liters/10000;
-					display2.showNumberDec(displayD, false);
-					display2.showNumberDecEx(displayD, (0x80 >> 1), false);
+					//display2D = 100*liters/10000;
+					//display22.showNumberDec(//display2D, false);
+					//display22.showNumberDecEx(//display2D, (0x80 >> 1), false);
 				}else if(liters<10000){
-					displayD = (int)liters;
-					display2.showNumberDec(displayD, false);
+					//display2D = (int)liters;
+					//display22.showNumberDec(//display2D, false);
 				}
 			}
             break;
         case 2:
-            if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
-    			display1.showNumberDec(panchoTankFlowData.flowRate, false);
+            if(rosieData.flowRate==(int)rosieData.flowRate){
+    			////display21.showNumberDec(rosieData.flowRate, false);
   			}else{
-				scaledFlow=panchoTankFlowData.flowRate*100;
-				display1.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
+				scaledFlow=rosieData.flowRate*100;
+				////display21.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
 			}
 			
 
-			if(panchoTankFlowData.flowRate2==(int)panchoTankFlowData.flowRate2){
-    			display2.showNumberDec(panchoTankFlowData.flowRate2, false);
+			if(rosieData.flowRate2==(int)rosieData.flowRate2){
+    			//display22.showNumberDec(rosieData.flowRate2, false);
   			}else{
-				scaledFlow=panchoTankFlowData.flowRate2*100;
-				display2.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
+				scaledFlow=rosieData.flowRate2*100;
+				//display22.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
 			}
 			
             break;
         case 3:
-            if(panchoTankFlowData.flowRate==(int)panchoTankFlowData.flowRate){
-    			display1.showNumberDec(panchoTankFlowData.flowRate, false);
+            if(rosieData.flowRate==(int)rosieData.flowRate){
+    			////display21.showNumberDec(rosieData.flowRate, false);
   			}else{
-				scaledFlow=panchoTankFlowData.flowRate*100;
-				display1.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
+				scaledFlow=rosieData.flowRate*100;
+				////display21.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
 			}
 
-			if(panchoTankFlowData.tank1WaterLevel==(int)panchoTankFlowData.tank1WaterLevel){
-    			display2.showNumberDec(panchoTankFlowData.tank1WaterLevel, false);
+			if(rosieData.tank1WaterLevel==(int)rosieData.tank1WaterLevel){
+    			//display22.showNumberDec(rosieData.tank1WaterLevel, false);
   			}else{
-				scaledFlow=panchoTankFlowData.flowRate2*100;
-				display2.showNumberDecEx(panchoTankFlowData.tank1WaterLevel, (0x80 >> 1), false);
+				scaledFlow=rosieData.flowRate2*100;
+				//display22.showNumberDecEx(rosieData.tank1WaterLevel, (0x80 >> 1), false);
 			}
             break;
         case 4:
-            if(panchoTankFlowData.tank1WaterLevel==(int)panchoTankFlowData.tank1WaterLevel){
-    			display1.showNumberDec(panchoTankFlowData.tank1WaterLevel, false);
+            if(rosieData.tank1WaterLevel==(int)rosieData.tank1WaterLevel){
+    			////display21.showNumberDec(rosieData.tank1WaterLevel, false);
   			}else{
-				display1.showNumberDecEx(panchoTankFlowData.tank1WaterLevel, (0x80 >> 1), false);
+				////display21.showNumberDecEx(rosieData.tank1WaterLevel, (0x80 >> 1), false);
 			}
             break;
         case 5:
-            if(panchoTankFlowData.tank1WaterLevel==(int)panchoTankFlowData.tank1WaterLevel){
-    			display1.showNumberDec(panchoTankFlowData.tank1WaterLevel, false);
+            if(rosieData.tank1WaterLevel==(int)rosieData.tank1WaterLevel){
+    			////display21.showNumberDec(rosieData.tank1WaterLevel, false);
   			}else{
-				display1.showNumberDecEx(panchoTankFlowData.tank1WaterLevel, (0x80 >> 1), false);
+				////display21.showNumberDecEx(rosieData.tank1WaterLevel, (0x80 >> 1), false);
 			}
             
-			if(panchoTankFlowData.tank2WaterLevel==(int)panchoTankFlowData.tank2WaterLevel){
-    			display2.showNumberDec(panchoTankFlowData.tank2WaterLevel, false);
+			if(rosieData.tank2WaterLevel==(int)rosieData.tank2WaterLevel){
+    			//display22.showNumberDec(rosieData.tank2WaterLevel, false);
   			}else{
-				display2.showNumberDecEx(panchoTankFlowData.tank2WaterLevel, (0x80 >> 1), false);
+				//display22.showNumberDecEx(rosieData.tank2WaterLevel, (0x80 >> 1), false);
 			}
 
             break;
     }
 }
-void TankAndFlowSensorController::readTank1(){
+void RosieTankAndFlowSensorController::readTank1(){
     //
     // tank level
     //
@@ -211,15 +211,15 @@ void TankAndFlowSensorController::readTank1(){
 	// since the psi is 5 for 4.5 then
 	float psi = vol45*5/4.5;
 	
-    panchoTankFlowData.tank1PressureVolts=average;
-    panchoTankFlowData.tank1PressurePsi=psi;
-    panchoTankFlowData.tank1WaterLevel=psi*.7;
+    rosieData.tank1PressureVolts=average;
+    rosieData.tank1PressurePsi=psi;
+    rosieData.tank1WaterLevel=psi*.7;
 }
 
 
 
 
-void TankAndFlowSensorController::readTank2(){
+void RosieTankAndFlowSensorController::readTank2(){
      //
     // tank level
     //
@@ -242,12 +242,12 @@ void TankAndFlowSensorController::readTank2(){
 	// since the psi is 5 for 4.5 then
 	float psi = vol45*5/4.5;
 	
-    panchoTankFlowData.tank2PressureVolts=average;
-    panchoTankFlowData.tank2PressurePsi=psi;
-    panchoTankFlowData.tank2WaterLevel=psi*.7;
+    rosieData.tank2PressureVolts=average;
+    rosieData.tank2PressurePsi=psi;
+    rosieData.tank2WaterLevel=psi*.7;
 }
 
-void TankAndFlowSensorController::readFlowMeter1(){
+void RosieTankAndFlowSensorController::readFlowMeter1(){
 		pulse1Sec = flowMeterPulseCount;
 
 		flowMeterPulseCount = 0;
@@ -260,7 +260,7 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		// based on the number of pulses per second per units of measure (litres/minute in
 		// this case) coming from the sensor.
 		long lo = millis() - flowMeterPreviousMillis;
-		flowRate = (1000.0 / lo) * pulse1Sec / panchoTankFlowData.qfactor1;
+		flowRate = (1000.0 / lo) * pulse1Sec / rosieData.qfactor1;
 		//flowRate = ((1000.0 / (millis() - previousMillis)) * pulse1Sec) / calibrationFactor;
     
 		flowMeterPreviousMillis = millis();
@@ -273,7 +273,7 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		// passed through the sensor in this 1 second interval, then multiply by 1000 to
 		// convert to millilitres.
 		if(flowRate>0){
-			flowMilliLitres = panchoTankFlowData.dataSamplingSec*(flowRate / 60) * 1000;
+			flowMilliLitres = rosieData.dataSamplingSec*(flowRate / 60) * 1000;
 			// Add the millilitres passed in this second to the cumulative total
 				totalMilliLitres += flowMilliLitres;
 		}else{
@@ -283,11 +283,11 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		//
 		// end of checking flow meter
 		//
-		panchoTankFlowData.flowRate=flowRate;
-		panchoTankFlowData.totalMilliLitres=totalMilliLitres;
+		rosieData.flowRate=flowRate;
+		rosieData.totalMilliLitres=totalMilliLitres;
     }
 
-    void TankAndFlowSensorController::readFlowMeter2(){
+    void RosieTankAndFlowSensorController::readFlowMeter2(){
 		pulse2Sec = flowMeterPulseCount2;
 
 		flowMeterPulseCount2 = 0;
@@ -300,7 +300,7 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		// based on the number of pulses per second per units of measure (litres/minute in
 		// this case) coming from the sensor.
 		long lo = millis() - flowMeterPreviousMillis2;
-		flowRate2 = (1000.0 / lo) * pulse2Sec / panchoTankFlowData.qfactor2;
+		flowRate2 = (1000.0 / lo) * pulse2Sec / rosieData.qfactor2;
 		flowMeterPreviousMillis2 = millis();
 		//Serial.print("pulse1Sec=");
 		//  Serial.print(pulse1Sec);
@@ -311,7 +311,7 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		// passed through the sensor in this 1 second interval, then multiply by 1000 to
 		// convert to millilitres.
 		if(flowRate2>0){
-			flowMilliLitres2 = panchoTankFlowData.dataSamplingSec*(flowRate2 / 60) * 1000;
+			flowMilliLitres2 = rosieData.dataSamplingSec*(flowRate2 / 60) * 1000;
 			// Add the millilitres passed in this second to the cumulative total
 				totalMilliLitres2 += flowMilliLitres2;
 		}else{
@@ -320,9 +320,9 @@ void TankAndFlowSensorController::readFlowMeter1(){
 		//
 		// end of checking flow meter
 		//
-		panchoTankFlowData.flowRate2=flowRate2;
-		panchoTankFlowData.totalMilliLitres2=totalMilliLitres2;
+		rosieData.flowRate2=flowRate2;
+		rosieData.totalMilliLitres2=totalMilliLitres2;
     }
 
 
- TankAndFlowSensorController::~TankAndFlowSensorController() {}
+ RosieTankAndFlowSensorController::~RosieTankAndFlowSensorController() {}

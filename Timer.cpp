@@ -31,6 +31,8 @@ bool Timer::status(){
 	else return false;
 }
 
+
+
 Timer::~Timer() {
 	// TODO Auto-generated destructor stub
 }

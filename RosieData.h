@@ -1,37 +1,17 @@
-
-#ifndef GLORIACONFIGDATA_H
-#define GLORIACONFIGDATA_H
-struct GloriaConfigData{
+#ifndef ROSIECONFIGDATA_H
+#define ROSIECONFIGDATA_H
+struct RosieConfigData{
 	float fieldId=0;
 	long commandcode=0;
+	char stationName[20];
 	float operatingStatus=0;
 	float sleepPingMinutes=30;
 };
 #endif
 
-
-#ifndef GLORIACOMMANDDATA_H
-#define GLORIACOMMANDDATA_H
-struct GloriaCommandData{
-	float fieldId=0;
-	long commandcode=0;
-	char command[64];
-};
-#endif
-
-#ifndef GLORIAWIFIDATA_H
-#define GLORIAWIFIDATA_H
-struct GloriaWifiData{
-	float fieldId=0;
-	long commandcode=0;
-	float operatingStatus=0;
-	float sleepPingMinutes=30;
-};
-#endif
-
-#ifndef GLORIATANKFLOWPUMPDATA_H
-#define GLORIATANKFLOWPUMPDATA_H
-struct GloriaTankFlowPumpData{
+#ifndef ROSIEDATA_H
+#define ROSIEDATA_H
+struct RosieData{
 	char devicename[16];
 	char deviceshortname[4];
 	char flow1name[12];
@@ -44,6 +24,7 @@ struct GloriaTankFlowPumpData{
 	uint8_t dataSamplingSec=3;
 	uint8_t currentFunctionValue=0;
 	uint8_t temperature=0;
+	float reg33Voltage=0.0;
 	float rtcBatVolt=0.0;
 	uint8_t opMode=0;
 	float rssi=0;
@@ -87,5 +68,7 @@ struct GloriaTankFlowPumpData{
 	long dsLastUpload;
 	float latitude;
 	float longitude;
+	float solarVoltage=0.0;
+	float capacitorVoltage=0.0;
 };
 #endif

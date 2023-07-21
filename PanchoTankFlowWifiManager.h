@@ -19,5 +19,9 @@ public:
 	void generateWebData(DynamicJsonDocument& json, String s);
 	int uploadDataToDigitalStables();
     virtual ~PanchoTankFlowWifiManager();
+
+private:
+	String okString="Ok";
+
 };
 #endif /* LIBRARIES_DIGITALSTABLES_PANCHOTANKANDFLOWWIFIMANAGER_H_ */

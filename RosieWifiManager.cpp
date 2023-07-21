@@ -1,4 +1,4 @@
-#include <PanchoTankFlowWifiManager.h>
+#include <RosieWifiManager.h>
 #include <ArduinoJson.h>
 #include "SPIFFS.h"
  #define FUN_1_FLOW 1
@@ -8,12 +8,12 @@
 #define FUN_2_TANK 5
 
 
-PanchoTankFlowWifiManager::PanchoTankFlowWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
-WifiManager(serial ,  t, e) , panchoTankFlowData(tf),panchoConfigData(p){}
+RosieWifiManager::RosieWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  RosieData& tf,RosieConfigData& p) :
+WifiManager(serial ,  t,e) , rosieData(tf),rosieConfigData(p){}
 
  
 
-void PanchoTankFlowWifiManager::start(){
+void RosieWifiManager::start(){
 
 	if (!SPIFFS.begin(true)) {
 		// SPIFFS will be configured on reboot
@@ -42,7 +42,7 @@ void PanchoTankFlowWifiManager::start(){
     _HardSerial.println("stationmode=");
     _HardSerial.println(stationmode);
     
-    _HardSerial.print("in  PanchoVisualizerWifiManager ssid=");
+    _HardSerial.print("in  RosieWifiManager ssid=");
     _HardSerial.print(ssid);
     _HardSerial.print(" stationmode=");
     _HardSerial.println(stationmode);
@@ -69,7 +69,7 @@ void PanchoTankFlowWifiManager::start(){
     asyncWebServer.on("/SetQFactor1", HTTP_GET, [this](AsyncWebServerRequest *request){
         int numberOfParameters = request->params();
         AsyncWebParameter* p = request->getParam(0);
-        panchoTankFlowData.qfactor1 = p->value().toFloat();
+        rosieData.qfactor1 = p->value().toFloat();
        
         request->send_P(200, "text/plain", okString.c_str()); 
     });
@@ -82,9 +82,9 @@ asyncWebServer.on("/assets/bootstrap/css/bootstrap.min.css", HTTP_GET, [this](As
     delay(5);
   });
 
-asyncWebServer.on("/assets/img/Pancho.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
-  //this->_HardSerial.println("request  Pancho.svg");
-    request->send(SPIFFS, "/Pancho.svg", String(), false);
+asyncWebServer.on("/assets/img/Rosie.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
+  //this->_HardSerial.println("request  Rosie.svg");
+    request->send(SPIFFS, "/Rosie.svg", String(), false);
     delay(5);
   });
 
@@ -191,10 +191,8 @@ asyncWebServer.on("/assets/fonts/Roboto-Regular.woff", HTTP_GET, [this](AsyncWeb
   
   
 
-asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerRequest *request) {
+asyncWebServer.on("/RosieTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerRequest *request) {
     int paramsNr = request->params();
-     this->_HardSerial.print("servlet received, number f params=");
-     
     this->_HardSerial.println(paramsNr);
    
     AsyncWebParameter* p = request->getParam(0);
@@ -252,25 +250,10 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
       }
     }else  if(formName=="SetSensor1Param"){
       p = request->getParam(1);
-      // String flow1Name   
-      String flow1Name=p->value();
-       this->_HardSerial.print("received set sensor 1 name=");
-         this->_HardSerial.println(flow1Name);
-      int str_len = flow1Name.length() + 1; 
-      char flow1NameArray[16];
-      flow1Name.toCharArray(flow1NameArray, 16);
-      memcpy(panchoTankFlowData.flow1name, flow1NameArray, 16);
-    
+      String flow1Name =p->value();    
+  
       p = request->getParam(2);
-      float qf1=p->value().toFloat(); 
-      panchoTankFlowData.qfactor1=qf1; 
-      this->_HardSerial.print("received qf1=");
-         this->_HardSerial.println(qf1);
-
-        DynamicJsonDocument json(1800);
-       this->generateWebData(json,serialNumber);
-        serializeJson(json, *response);
-        request->send(response);
+      String qfactor1 =p->value();  
 
     }else if(formName=="SetTimeViaInternet"){
       bool r = setTimeFromInternet();
@@ -295,8 +278,8 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
 
       p = request->getParam(2);
       float log =p->value().toFloat();  
-      panchoTankFlowData.latitude=lat;
-      panchoTankFlowData.longitude=log;
+      rosieData.latitude=lat;
+      rosieData.longitude=log;
     
         DynamicJsonDocument json(1800);
        this->generateWebData(json,serialNumber);
@@ -307,10 +290,10 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
       p = request->getParam(1);
       String fn2 =p->value();  
      
-      fn2.toCharArray(panchoTankFlowData.flow2name,16);
+      fn2.toCharArray(rosieData.flow2name,16);
 
       p = request->getParam(2);
-      panchoTankFlowData.qfactor2=p->value().toFloat();  
+      rosieData.qfactor2=p->value().toFloat();  
 
       DynamicJsonDocument json(1800);
       this->generateWebData(json, serialNumber);
@@ -321,10 +304,10 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
       p = request->getParam(1);
       String fn1=p->value();  
      
-      fn1.toCharArray(panchoTankFlowData.flow1name,16);
+      fn1.toCharArray(rosieData.flow1name,16);
 
       p = request->getParam(2);
-      panchoTankFlowData.qfactor1=p->value().toFloat();  
+      rosieData.qfactor1=p->value().toFloat();  
 
       DynamicJsonDocument json(1800);
       this->generateWebData(json, serialNumber);
@@ -335,13 +318,13 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
       p = request->getParam(1);
       String t1n =p->value();  
      
-      t1n.toCharArray(panchoTankFlowData.tank1name,16);
+      t1n.toCharArray(rosieData.tank1name,16);
 
       p = request->getParam(2);
-      panchoTankFlowData.tank1heightmeters=p->value().toFloat();  
+      rosieData.tank1heightmeters=p->value().toFloat();  
 
       p = request->getParam(2);
-      panchoTankFlowData.tank1maxvollit=p->value().toFloat();  
+      rosieData.tank1maxvollit=p->value().toFloat();  
 
         DynamicJsonDocument json(1800);
        this->generateWebData(json, serialNumber);
@@ -351,13 +334,13 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
     }else if(formName=="SetTank2Param"){
       p = request->getParam(1);
       String t2n =p->value();  
-      t2n.toCharArray(panchoTankFlowData.tank2name,16);
+      t2n.toCharArray(rosieData.tank2name,16);
 
        p = request->getParam(2);
-      panchoTankFlowData.tank2heightmeters=p->value().toFloat();  
+      rosieData.tank2heightmeters=p->value().toFloat();  
 
       p = request->getParam(2);
-      panchoTankFlowData.tank2maxvollit=p->value().toFloat();  
+      rosieData.tank2maxvollit=p->value().toFloat();  
 
         DynamicJsonDocument json(1800);
        this->generateWebData(json, serialNumber);
@@ -370,7 +353,7 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
 });
 
 
-asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_GET, [this](AsyncWebServerRequest *request) {
+asyncWebServer.on("/RosieTankAndFlowServlet", HTTP_GET, [this](AsyncWebServerRequest *request) {
     int paramsNr = request->params();
     this->_HardSerial.println(paramsNr);
    
@@ -401,39 +384,41 @@ asyncWebServer.begin();
 
 }
 
-void PanchoTankFlowWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
-    json["currentFunctionValue"]= panchoTankFlowData.currentFunctionValue;
-    json["flow1name"] = panchoTankFlowData.flow1name;
-    json["flow2name"] = panchoTankFlowData.flow2name;
-    json["tank1name"] = panchoTankFlowData.tank1name;
-    json["tank2name"] = panchoTankFlowData.tank2name;
-    json["groupidentifier"]=panchoTankFlowData.groupidentifier;
-    json["secondsTime"] = panchoTankFlowData.secondsTime;
-    json["dataSamplingSec"] = panchoTankFlowData.dataSamplingSec;
-    json["currentFunctionValue"] = panchoTankFlowData.currentFunctionValue;
-    json["temperature"] = panchoTankFlowData.temperature;
-    json["rtcBatVolt"] = panchoTankFlowData.rtcBatVolt;
-    json["opMode"] = panchoTankFlowData.opMode;
-    json["rssi"] = panchoTankFlowData.rssi;
-    json["snr"] = panchoTankFlowData.snr;
-    json["flowrate"] = panchoTankFlowData.flowRate;
-    json["totalmilliLitres"] = panchoTankFlowData.totalMilliLitres;
-    json["flowrate2"] = panchoTankFlowData.flowRate2;
-    json["totalmilliLitres2"] = panchoTankFlowData.totalMilliLitres2;
-    json["tank1pressurePsi"] = panchoTankFlowData.tank1PressurePsi;
-    json["tank1pressureVolts"] = panchoTankFlowData.tank1PressureVolts;
-    json["tank1waterLevel"] = panchoTankFlowData.tank1WaterLevel;
-    json["tank1heightMeters"] = panchoTankFlowData.tank1HeightMeters;
-    json["tank2pressurePsi"] = panchoTankFlowData.tank2PressurePsi;
-    json["tank2pressureVolts"] = panchoTankFlowData.tank2PressureVolts;
-    json["tank2waterLevel"] = panchoTankFlowData.tank2WaterLevel;
-    json["tank2heightMeters"] = panchoTankFlowData.tank2HeightMeters;
-    json["qfactor1"] = panchoTankFlowData.qfactor1;
-    json["qfactor2"] = panchoTankFlowData.qfactor2;
-    json["rtcBatVolt"] = panchoTankFlowData.rtcBatVolt;        
-    json["operatingStatus"] = panchoTankFlowData.operatingStatus;
-    json["digitalStablesUpload"] = panchoTankFlowData.digitalStablesUpload;
-    json["secondsSinceLastPulse"] = panchoTankFlowData.secondsSinceLastPulse;
+void RosieWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
+    json["currentFunctionValue"]= rosieData.currentFunctionValue;
+    json["flow1name"] = rosieData.flow1name;
+    json["flow2name"] = rosieData.flow2name;
+    json["tank1name"] = rosieData.tank1name;
+    json["tank2name"] = rosieData.tank2name;
+    json["groupidentifier"]=rosieData.groupidentifier;
+    json["secondsTime"] = rosieData.secondsTime;
+    json["dataSamplingSec"] = rosieData.dataSamplingSec;
+    json["currentFunctionValue"] = rosieData.currentFunctionValue;
+    json["temperature"] = rosieData.temperature;
+    json["reg33Voltage"] = rosieData.reg33Voltage;
+    json["rtcBatVolt"] = rosieData.rtcBatVolt;
+    json["opMode"] = rosieData.opMode;
+    json["rssi"] = rosieData.rssi;
+    json["snr"] = rosieData.snr;
+    json["flowrate"] = rosieData.flowRate;
+    json["totalmilliLitres"] = rosieData.totalMilliLitres;
+    json["flowrate2"] = rosieData.flowRate2;
+    json["totalmilliLitres2"] = rosieData.totalMilliLitres2;
+    json["tank1pressurePsi"] = rosieData.tank1PressurePsi;
+    json["tank1pressureVolts"] = rosieData.tank1PressureVolts;
+    json["tank1waterLevel"] = rosieData.tank1WaterLevel;
+    json["tank1heightMeters"] = rosieData.tank1HeightMeters;
+    json["tank2pressurePsi"] = rosieData.tank2PressurePsi;
+    json["tank2pressureVolts"] = rosieData.tank2PressureVolts;
+    json["tank2waterLevel"] = rosieData.tank2WaterLevel;
+    json["tank2heightMeters"] = rosieData.tank2HeightMeters;
+    json["qfactor1"] = rosieData.qfactor1;
+    json["qfactor2"] = rosieData.qfactor2;
+    json["rtcBatVolt"] = rosieData.rtcBatVolt;        
+    json["operatingStatus"] = rosieData.operatingStatus;
+    json["sleepPingMinutes"] = rosieData.sleepPingMinutes;
+    json["digitalStablesUpload"] = rosieData.digitalStablesUpload;
+    json["secondsSinceLastPulse"] = rosieData.secondsSinceLastPulse;
     json["soft_ap_ssid"] = soft_ap_ssid;
     json["serialnumber"] = serialNumber;
     json["sentBy"] = sentBy;
@@ -448,13 +433,13 @@ void PanchoTankFlowWifiManager::generateWebData(DynamicJsonDocument& json, Strin
     json["internetPingTime"] = internetPingTime;
     json["ipAddress"] = ipAddress;
     json["totp"] = totpcode;
-    json["deviceTypeId"]=panchoTankFlowData.deviceTypeId;
-    json["dsLastUpload"]=panchoTankFlowData.dsLastUpload;
-    json["latitude"]=panchoTankFlowData.latitude;
-     json["longitude"]=panchoTankFlowData.longitude;
+    json["deviceTypeId"]=rosieData.deviceTypeId;
+    json["dsLastUpload"]=rosieData.dsLastUpload;
+    json["latitude"]=rosieData.latitude;
+     json["longitude"]=rosieData.longitude;
   }
 
-int PanchoTankFlowWifiManager::uploadDataToDigitalStables(){
+int RosieWifiManager::uploadDataToDigitalStables(){
 
   DynamicJsonDocument json(1800);
   generateWebData(json, serialNumber);
@@ -468,14 +453,14 @@ int PanchoTankFlowWifiManager::uploadDataToDigitalStables(){
   int httpResponseCode = http.POST(output);
   _HardSerial.print("upload digitalstables return ");
   _HardSerial.println(httpResponseCode);
-   panchoTankFlowData.digitalStablesUpload=false;
+   rosieData.digitalStablesUpload=false;
   if (httpResponseCode == 200) { //Check for the returning code
       String response = http.getString();  //Get the response to the request
        _HardSerial.print("reponse= ");
       _HardSerial.println(response);
       if(response=="Ok"){
         toReturn =true;
-         panchoTankFlowData.digitalStablesUpload=true;
+         rosieData.digitalStablesUpload=true;
       }else{
         httpResponseCode =500;
       }
@@ -488,4 +473,4 @@ int PanchoTankFlowWifiManager::uploadDataToDigitalStables(){
 }
 
 
-PanchoTankFlowWifiManager::~PanchoTankFlowWifiManager() {}
+RosieWifiManager::~RosieWifiManager() {}

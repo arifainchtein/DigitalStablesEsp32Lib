@@ -33,17 +33,17 @@ struct PanchoWifiData{
 #define PANCHOTANKFLOWDATA_H
 struct PanchoTankFlowData{
 	char devicename[16];
-	char flow1name[16];
-	char flow2name[16];
-	char tank1name[16];
-	char tank2name[16];
-	char groupidentifier[16];
-	char deviceTypeId[30];
+	char deviceshortname[4];
+	char flow1name[12];
+	char flow2name[12];
+	char tank1name[12];
+	char tank2name[12];
+	char groupidentifier[12];
+	char deviceTypeId[12];
 	long secondsTime=0L;
 	uint8_t dataSamplingSec=3;
 	uint8_t currentFunctionValue=0;
 	uint8_t temperature=0;
-	float reg33Voltage=0.0;
 	float rtcBatVolt=0.0;
 	uint8_t opMode=0;
 	float rssi=0;
@@ -81,7 +81,6 @@ struct PanchoTankFlowData{
 	// 1 - WPS normal
 	// 2 - Active Normal
 	float operatingStatus=0;
-	float sleepPingMinutes=30;
 	long secondsSinceLastPulse;
 	bool digitalStablesUpload;
 	long dsLastUpload;

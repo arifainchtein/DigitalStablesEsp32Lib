@@ -34,6 +34,42 @@ public:
     virtual ~TankAndFlowSensorController();
     
 private:
+
+   
+    //
+    // fowMeter1 variables
+    //
+    long flowMeterCurrentMillis = 0;
+    long flowMeterPreviousMillis = 0;
+    float calibrationFactor = 4.5;
+
+    int pulse1Sec = 0;
+    float flowRate;
+    unsigned int flowMilliLitres;
+    unsigned long totalMilliLitres;
+    uint8_t samples=10;
+    //
+    // end of flow meter1 variables
+    //
+
+    //
+    // fowMeter2 variables
+    //
+    long flowMeterCurrentMillis2 = 0;
+    long flowMeterPreviousMillis2 = 0;
+
+    int pulse2Sec = 0;
+    float flowRate2;
+    unsigned int flowMilliLitres2;
+    unsigned long totalMilliLitres2;
+    //
+    // end of flow meter1 variables
+    //
+    float tank2PressurePsi=0.0;
+	float tank2PressureVolts=0.0;
+	float tank2WaterLevel=0.0;
+	float tank2HeightMeters=.3;
+    
     void readFlowMeter();
     static void IRAM_ATTR pulseCounter();
     static void IRAM_ATTR pulseCounter2();

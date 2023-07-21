@@ -20,5 +20,9 @@ public:
 	void generateWebData(DynamicJsonDocument& json, String s);
 	int uploadDataToDigitalStables();
     virtual ~GloriaTankFlowPumpWifiManager();
+
+private:
+	String okString="Ok";
+
 };
 #endif /* LIBRARIES_DIGITALSTABLES_GLORIATANKFLOWPUMPWIFIMANAGER_H_ */

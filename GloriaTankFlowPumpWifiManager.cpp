@@ -7,8 +7,7 @@
 #define FUN_1_TANK 4
 #define FUN_2_TANK 5
 
- String okString="Ok";
-
+ 
 GloriaTankFlowPumpWifiManager::GloriaTankFlowPumpWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  GloriaTankFlowPumpData& tf,GloriaConfigData& p) :
 WifiManager(serial ,  t, e) , gloriaTankFlowPumpData(tf),gloriaConfigData(p){}
 
@@ -396,7 +395,6 @@ void GloriaTankFlowPumpWifiManager::generateWebData(DynamicJsonDocument& json, S
     json["dataSamplingSec"] = gloriaTankFlowPumpData.dataSamplingSec;
     json["currentFunctionValue"] = gloriaTankFlowPumpData.currentFunctionValue;
     json["temperature"] = gloriaTankFlowPumpData.temperature;
-    json["reg33Voltage"] = gloriaTankFlowPumpData.reg33Voltage;
     json["rtcBatVolt"] = gloriaTankFlowPumpData.rtcBatVolt;
     json["opMode"] = gloriaTankFlowPumpData.opMode;
     json["rssi"] = gloriaTankFlowPumpData.rssi;

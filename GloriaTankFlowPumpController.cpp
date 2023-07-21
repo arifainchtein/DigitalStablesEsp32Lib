@@ -2,41 +2,9 @@
 
 #define SENSOR_INPUT_1 32
 #define SENSOR_INPUT_2 33
+static volatile int flowMeterPulseCount;
+static volatile int flowMeterPulseCount2;
 
-
-
-// #define SENSOR_INPUT_1 5
-// #define SENSOR_INPUT_2 4
-//
-// fowMeter1 variables
-//
-long flowMeterCurrentMillis = 0;
-long flowMeterPreviousMillis = 0;
-float calibrationFactor = 4.5;
-volatile int flowMeterPulseCount;
-int pulse1Sec = 0;
-float flowRate;
-unsigned int flowMilliLitres;
-unsigned long totalMilliLitres;
-uint8_t samples=10;
-//
-// end of flow meter1 variables
-//
-
-//
-// fowMeter2 variables
-//
-long flowMeterCurrentMillis2 = 0;
-long flowMeterPreviousMillis2 = 0;
-
-volatile int flowMeterPulseCount2;
-int pulse2Sec = 0;
-float flowRate2;
-unsigned int flowMilliLitres2;
-unsigned long totalMilliLitres2;
-//
-// end of flow meter1 variables
-//
 
 
 
@@ -236,10 +204,7 @@ void GloriaTankAndFlowPumpController::readTank1(){
     gloriaTankFlowPumpData.tank1WaterLevel=psi*.7;
 }
 
-float tank2PressurePsi=0.0;
-	float tank2PressureVolts=0.0;
-	float tank2WaterLevel=0.0;
-	float tank2HeightMeters=.3;
+
 
 
 void GloriaTankAndFlowPumpController::readTank2(){
