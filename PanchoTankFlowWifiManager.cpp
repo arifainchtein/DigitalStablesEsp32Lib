@@ -466,13 +466,13 @@ int PanchoTankFlowWifiManager::uploadDataToDigitalStables(){
   http.addHeader("Content-Type", "application/json");
   boolean toReturn=false;
   int httpResponseCode = http.POST(output);
-  _HardSerial.print("upload digitalstables return ");
-  _HardSerial.println(httpResponseCode);
+  //_HardSerial.print("upload digitalstables return ");
+  //_HardSerial.println(httpResponseCode);
    panchoTankFlowData.digitalStablesUpload=false;
   if (httpResponseCode == 200) { //Check for the returning code
       String response = http.getString();  //Get the response to the request
-       _HardSerial.print("reponse= ");
-      _HardSerial.println(response);
+    //   _HardSerial.print("reponse= ");
+    //  _HardSerial.println(response);
       if(response=="Ok"){
         toReturn =true;
          panchoTankFlowData.digitalStablesUpload=true;
