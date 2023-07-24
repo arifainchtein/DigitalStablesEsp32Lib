@@ -21,7 +21,7 @@ class TimeManager{
 	
 		#define LEAP_YEAR(_year) ((_year%4)==0)
 
-		int timeZoneHours=11;
+		int timeZoneHours=10;
 		int SECONDOFFSET=10;
 
 		TimeManager( HardwareSerial& serial);
@@ -33,6 +33,7 @@ class TimeManager{
 		virtual void monthlyTasks(long time)=0;
 		virtual void yearlyTasks(long time)=0;
 		virtual long getCurrentTimeInSeconds()=0;
+		void setTimeZoneOffset(uint8_t h);
 		virtual RTCInfoRecord now()=0;
 		virtual long getTimeForCodeGeneration()=0;
 		//
