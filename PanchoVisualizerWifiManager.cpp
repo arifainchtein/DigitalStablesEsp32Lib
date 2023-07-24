@@ -268,11 +268,13 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_GET, [this](AsyncWebServerRe
 void PanchoVisualizerWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
 
 		json["soft_ap_ssid"] = this->soft_ap_ssid;
-		json["serialNumber"] = this->serialNumber;
+		json["serialnumber"] = this->serialNumber;
     json["apAddress"] = apAddress;
     json["hostname"] = hostname;
     json["stationmode"] = stationmode;
     json["ssid"] = ssid;
+    json["groupidentifier"]=panchoTankFlowData.groupidentifier;
+    json["secondsTime"] = panchoTankFlowData.secondsTime;
     json["ssids"] = ssids;
     json["lora"] = lora;
     json["internetAvailable"] = internetAvailable;
@@ -292,7 +294,7 @@ int PanchoVisualizerWifiManager::uploadDataToDigitalStables(){
   
   String output;
   serializeJson(json, output);
-  const char* serverName = "http://www.digitalstables.com/DeviceUploadServlet";
+  const char* serverName = "http://devices.digitalstables.com/DeviceUploadServlet";
   http.begin(serverName);    
   http.addHeader("Content-Type", "application/json");
   boolean toReturn=false;
