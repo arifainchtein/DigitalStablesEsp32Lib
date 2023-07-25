@@ -34,7 +34,7 @@ void GloriaTankFlowPumpSerializer::pushToSerial(HardwareSerial& serial , GloriaT
         if(gloriaTankFlowPumpData.groupidentifier[i]!=NULL)Serial.print(gloriaTankFlowPumpData.groupidentifier[i]);
     }
      serial.print(F("#"));
-      serial.print(gloriaTankFlowPumpData.deviceTypeId);
+  
       for(int i = 0; i < sizeof(gloriaTankFlowPumpData.deviceTypeId); i++){
         if(gloriaTankFlowPumpData.deviceTypeId[i]!=NULL)Serial.print(gloriaTankFlowPumpData.deviceTypeId[i]);
     }
