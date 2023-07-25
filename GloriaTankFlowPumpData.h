@@ -1,5 +1,6 @@
 
 #include "Arduino.h"
+
 #ifndef GLORIACONFIGDATA_H
 #define GLORIACONFIGDATA_H
 struct GloriaConfigData{

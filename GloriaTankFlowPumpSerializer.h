@@ -7,7 +7,7 @@
 class GloriaTankFlowPumpSerializer{
 
     public:
-        GloriaTankFlowPumpSerializer();
+       // GloriaTankFlowPumpSerializer();
         void pushToSerial(HardwareSerial& serial , GloriaTankFlowPumpData& g);
         virtual ~GloriaTankFlowPumpSerializer();
 };
