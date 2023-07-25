@@ -1,4 +1,5 @@
 
+#include "Arduino.h"
 #ifndef GLORIACONFIGDATA_H
 #define GLORIACONFIGDATA_H
 struct GloriaConfigData{
@@ -38,6 +39,7 @@ struct GloriaTankFlowPumpData{
 	char flow2name[12];
 	char tank1name[12];
 	char tank2name[12];
+	uint8_t serialnumberarray[8];
 	char groupidentifier[12];
 	char deviceTypeId[12];
 	long secondsTime=0L;
