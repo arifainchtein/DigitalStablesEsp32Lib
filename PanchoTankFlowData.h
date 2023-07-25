@@ -1,6 +1,9 @@
 
 #ifndef PANCHOCONFIGDATA_H
 #define PANCHOCONFIGDATA_H
+
+#include "Arduino.h"
+
 struct PanchoConfigData{
 	float fieldId=0;
 	long commandcode=0;

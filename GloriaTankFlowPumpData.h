@@ -62,14 +62,12 @@ struct GloriaTankFlowPumpData{
 	float tank1WaterLevel=0.0;
 	float tank1HeightMeters=.3;
 	float tank1maxvollit;
-	float tank1heightmeters;
 
 	float tank2PressurePsi=0.0;
 	float tank2PressureVolts=0.0;
 	float tank2WaterLevel=0.0;
 	float tank2HeightMeters=.3;
 	float tank2maxvollit;
-	float tank2heightmeters;
 	//
 	// from aliexpress
 	//  25mm flow meter qfactor =1.08   https://www.aliexpress.com/item/32792886446.html
@@ -90,5 +88,7 @@ struct GloriaTankFlowPumpData{
 	long dsLastUpload;
 	float latitude;
 	float longitude;
+	float solarvoltage;
+	float capacitorvoltage;
 };
 #endif

@@ -321,7 +321,7 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
       t1n.toCharArray(gloriaTankFlowPumpData.tank1name,16);
 
       p = request->getParam(2);
-      gloriaTankFlowPumpData.tank1heightmeters=p->value().toFloat();  
+      gloriaTankFlowPumpData.tank1HeightMeters=p->value().toFloat();  
 
       p = request->getParam(2);
       gloriaTankFlowPumpData.tank1maxvollit=p->value().toFloat();  
@@ -337,7 +337,7 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
       t2n.toCharArray(gloriaTankFlowPumpData.tank2name,16);
 
        p = request->getParam(2);
-      gloriaTankFlowPumpData.tank2heightmeters=p->value().toFloat();  
+      gloriaTankFlowPumpData.tank2HeightMeters=p->value().toFloat();  
 
       p = request->getParam(2);
       gloriaTankFlowPumpData.tank2maxvollit=p->value().toFloat();  
