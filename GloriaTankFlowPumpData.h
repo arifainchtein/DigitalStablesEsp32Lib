@@ -86,8 +86,8 @@ struct GloriaTankFlowPumpData{
 	long secondsSinceLastPulse;
 	bool digitalStablesUpload;
 	long dsLastUpload;
-	float latitude;
-	float longitude;
+	float latitude=-37.17139;
+	float longitude=144.48861;
 	float solarvoltage;
 	float capacitorvoltage;
 };
