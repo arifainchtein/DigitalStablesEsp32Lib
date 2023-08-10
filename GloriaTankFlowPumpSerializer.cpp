@@ -115,7 +115,8 @@ void GloriaTankFlowPumpSerializer::pushToSerial(HardwareSerial& serial , GloriaT
      serial.print(F("#"));
     serial.print(gloriaTankFlowPumpData.secondsSinceLastPulse);
      serial.print(F("#"));
-     serial.print(gloriaTankFlowPumpData.sleepPingMinutes);
+     //serial.print(gloriaTankFlowPumpData.sleepPingMinutes);
+     serial.print(66);
      serial.print(F("#"));
     serial.print(gloriaTankFlowPumpData.solarvoltage);
      serial.print(F("#"));
