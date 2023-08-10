@@ -82,8 +82,8 @@ struct GloriaTankFlowPumpData{
 	// 1 - WPS normal
 	// 2 - Active Normal
 	float operatingStatus=0;
-	float sleepPingMinutes=30;
-	long secondsSinceLastPulse;
+	int sleepPingMinutes=30;
+	int secondsSinceLastPulse=5;
 	bool digitalStablesUpload;
 	long dsLastUpload;
 	float latitude=-37.17139;

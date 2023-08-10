@@ -61,14 +61,14 @@ struct PanchoTankFlowData{
 	float tank1PressurePsi=0.0;
 	float tank1PressureVolts=0.0;
 	float tank1WaterLevel=0.0;
-	float tank1HeightMeters=.3;
+	float tank1HeightMeters=.31;
 	float tank1maxvollit;
 	float tank1heightmeters;
 
 	float tank2PressurePsi=0.0;
 	float tank2PressureVolts=0.0;
 	float tank2WaterLevel=0.0;
-	float tank2HeightMeters=.3;
+	float tank2HeightMeters=.32;
 	float tank2maxvollit;
 	float tank2heightmeters;
 	//
@@ -85,7 +85,7 @@ struct PanchoTankFlowData{
 	// 1 - WPS normal
 	// 2 - Active Normal
 	float operatingStatus=0;
-	long secondsSinceLastPulse;
+	int secondsSinceLastPulse=5;
 	bool digitalStablesUpload;
 	long dsLastUpload;
 	
