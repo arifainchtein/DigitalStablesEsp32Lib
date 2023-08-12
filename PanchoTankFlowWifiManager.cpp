@@ -36,12 +36,18 @@ void PanchoTankFlowWifiManager::start(){
     soft_ap_ssid = secretManager.getSoftAPSSID();
     soft_ap_password = secretManager.getSoftAPPASS();
     hostname=secretManager.getHostName();
+    uint8_t hostnamelength = hostname.length()+1;
+    hostname.toCharArray(panchoTankFlowData.devicename, hostnamelength);
+   
     stationmode = secretManager.getStationMode();
     _HardSerial.println("ssid=");
     _HardSerial.println(ssid);
     _HardSerial.println("stationmode=");
     _HardSerial.println(stationmode);
-    
+    _HardSerial.println("hosdname=");
+    _HardSerial.println(hostname);
+    _HardSerial.println("panchoTankFlowData.devicename=");
+    _HardSerial.println(panchoTankFlowData.devicename);
     _HardSerial.print("in  PanchoVisualizerWifiManager ssid=");
     _HardSerial.print(ssid);
     _HardSerial.print(" stationmode=");

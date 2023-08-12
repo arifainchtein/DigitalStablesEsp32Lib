@@ -50,8 +50,8 @@ struct PanchoTankFlowData{
 	uint8_t temperature=0;
 	float rtcBatVolt=0.0;
 	uint8_t opMode=0;
-	float rssi=0;
-	float snr=0;
+	float rssi=0.0;
+	float snr=0.0;
 	float flowRate=0.0;
 	float totalMilliLitres=0.0;
 
@@ -84,7 +84,7 @@ struct PanchoTankFlowData{
 	// 0 - Comma
 	// 1 - WPS normal
 	// 2 - Active Normal
-	float operatingStatus=0;
+	int operatingStatus=0;
 	int secondsSinceLastPulse=5;
 	bool digitalStablesUpload=false;
 	long dsLastUpload=0;

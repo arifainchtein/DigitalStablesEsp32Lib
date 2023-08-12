@@ -36,6 +36,10 @@ void GloriaTankFlowPumpWifiManager::start(){
     soft_ap_ssid = secretManager.getSoftAPSSID();
     soft_ap_password = secretManager.getSoftAPPASS();
     hostname=secretManager.getHostName();
+    uint8_t hostnamelength = hostname.length();
+    hostname.toCharArray(gloriaTankFlowPumpData.devicename, hostnamelength);
+      
+
     stationmode = secretManager.getStationMode();
     _HardSerial.println("ssid=");
     _HardSerial.println(ssid);

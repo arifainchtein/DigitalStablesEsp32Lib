@@ -7,7 +7,7 @@
 class PanchoTankFlowSerializer{
 
     public:
-        void pushToSerial(HardwareSerial& serial , PanchoTankFlowData& g);
+        void pushToSerial(HardwareSerial& serial , PanchoTankFlowData g);
         virtual ~PanchoTankFlowSerializer();
 };
 #endif

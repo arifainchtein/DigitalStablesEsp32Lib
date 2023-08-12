@@ -8,8 +8,8 @@
 #define FUN_2_TANK 5
 
 
-PanchoVisualizerWifiManager::PanchoVisualizerWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
-WifiManager(serial ,  t, e) , panchoTankFlowData(tf),panchoConfigData(p){
+PanchoVisualizerWifiManager::PanchoVisualizerWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  CajalData& tf,PanchoConfigData& p) :
+WifiManager(serial ,  t, e) , cajalData(tf),panchoConfigData(p){
 }
 
  
@@ -273,18 +273,18 @@ void PanchoVisualizerWifiManager::generateWebData(DynamicJsonDocument& json, Str
     json["hostname"] = hostname;
     json["stationmode"] = stationmode;
     json["ssid"] = ssid;
-    json["groupidentifier"]=panchoTankFlowData.groupidentifier;
-    json["secondsTime"] = panchoTankFlowData.secondsTime;
+    json["groupidentifier"]=cajalData.groupidentifier;
+    json["secondsTime"] = cajalData.secondsTime;
     json["ssids"] = ssids;
     json["lora"] = lora;
     json["internetAvailable"] = internetAvailable;
     json["internetPingTime"] = internetPingTime;
     json["ipAddress"] = ipAddress;
     json["totp"] = totpcode;
-    json["deviceTypeId"]=panchoTankFlowData.deviceTypeId;
-    json["dsLastUpload"]=panchoTankFlowData.dsLastUpload;
-    json["latitude"]=panchoTankFlowData.latitude;
-     json["longitude"]=panchoTankFlowData.longitude;
+    json["deviceTypeId"]=cajalData.deviceTypeId;
+    json["dsLastUpload"]=cajalData.dsLastUpload;
+    json["latitude"]=cajalData.latitude;
+     json["longitude"]=cajalData.longitude;
 }   
 
 int PanchoVisualizerWifiManager::uploadDataToDigitalStables(){
@@ -301,12 +301,12 @@ int PanchoVisualizerWifiManager::uploadDataToDigitalStables(){
   int httpResponseCode = http.POST(output);
   _HardSerial.print("upload digitalstables return ");
   _HardSerial.println(httpResponseCode);
-   panchoTankFlowData.digitalStablesUpload=false;
+   cajalData.digitalStablesUpload=false;
   if (httpResponseCode == 200) { //Check for the returning code
       String response = http.getString();  //Get the response to the request
       if(response=="Ok"){
         toReturn =true;
-         panchoTankFlowData.digitalStablesUpload=true;
+         cajalData.digitalStablesUpload=true;
       }else{
         httpResponseCode=500;
       }

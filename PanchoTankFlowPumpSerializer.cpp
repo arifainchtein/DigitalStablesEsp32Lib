@@ -1,7 +1,7 @@
 #include <PanchoTankFlowSerializer.h>
 
 
-void PanchoTankFlowSerializer::pushToSerial(HardwareSerial& serial , PanchoTankFlowData& panchoTankFlowData){
+void PanchoTankFlowSerializer::pushToSerial(HardwareSerial& serial , PanchoTankFlowData panchoTankFlowData){
     
     //definition
     for(int i = 0; i < sizeof(panchoTankFlowData.deviceTypeId); i++){
@@ -10,7 +10,7 @@ void PanchoTankFlowSerializer::pushToSerial(HardwareSerial& serial , PanchoTankF
     serial.print(F("#"));
 
     for(int i = 0; i < sizeof(panchoTankFlowData.devicename); i++){
-        if(panchoTankFlowData.deviceshortname[i]!=NULL &&  panchoTankFlowData.devicename[i]!='\n' &&  panchoTankFlowData.devicename[i]!='\r')Serial.print(panchoTankFlowData.devicename[i]);
+        if(panchoTankFlowData.devicename[i]!=NULL &&  panchoTankFlowData.devicename[i]!='\n' &&  panchoTankFlowData.devicename[i]!='\r')Serial.print(panchoTankFlowData.devicename[i]);
      }
     serial.print(F("#"));
     for(int i = 0; i < sizeof(panchoTankFlowData.deviceshortname); i++){
