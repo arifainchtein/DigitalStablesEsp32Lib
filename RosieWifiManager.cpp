@@ -7,11 +7,14 @@
 #define FUN_1_TANK 4
 #define FUN_2_TANK 5
 
+bool wifiActiveSwitchStatus=false;
 
 RosieWifiManager::RosieWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  RosieData& tf,RosieConfigData& p) :
 WifiManager(serial ,  t,e) , rosieData(tf),rosieConfigData(p){}
 
- 
+ void RosieWifiManager::setWifiActiveSwitchStatus(bool b){
+    wifiActiveSwitchStatus=b;
+ }
 
 void RosieWifiManager::start(){
 
@@ -53,7 +56,7 @@ void RosieWifiManager::start(){
       // the hostname is applied
       //  https://github.com/espressif/arduino-esp32/issues/6700
       WiFi.mode(WIFI_MODE_NULL);
-    if(stationmode && ssid){
+    if(    wifiActiveSwitchStatus && stationmode && ssid){
        connectSTA();
        
     }else{
@@ -321,7 +324,7 @@ asyncWebServer.on("/RosieTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerRe
       t1n.toCharArray(rosieData.tank1name,16);
 
       p = request->getParam(2);
-      rosieData.tank1heightmeters=p->value().toFloat();  
+      rosieData.tank1HeightMeters=p->value().toFloat();  
 
       p = request->getParam(2);
       rosieData.tank1maxvollit=p->value().toFloat();  
@@ -337,7 +340,7 @@ asyncWebServer.on("/RosieTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerRe
       t2n.toCharArray(rosieData.tank2name,16);
 
        p = request->getParam(2);
-      rosieData.tank2heightmeters=p->value().toFloat();  
+      rosieData.tank2HeightMeters=p->value().toFloat();  
 
       p = request->getParam(2);
       rosieData.tank2maxvollit=p->value().toFloat();  
@@ -395,7 +398,6 @@ void RosieWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy)
     json["dataSamplingSec"] = rosieData.dataSamplingSec;
     json["currentFunctionValue"] = rosieData.currentFunctionValue;
     json["temperature"] = rosieData.temperature;
-    json["reg33Voltage"] = rosieData.reg33Voltage;
     json["rtcBatVolt"] = rosieData.rtcBatVolt;
     json["opMode"] = rosieData.opMode;
     json["rssi"] = rosieData.rssi;

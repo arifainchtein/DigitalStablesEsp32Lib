@@ -18,7 +18,7 @@ void PanchoVisualizerWifiManager::start(){
 
 	if (!SPIFFS.begin(true)) {
 		// SPIFFS will be configured on reboot
-		_HardSerial.println("ERROR: Cannot mount SPIFFS, Rebooting");
+		//_HardSerial.println("ERROR: Cannot mount SPIFFS, Rebooting");
 		delay(1000);
 
 	}
@@ -31,11 +31,11 @@ void PanchoVisualizerWifiManager::start(){
     soft_ap_password = secretManager.getSoftAPPASS();
     hostname=secretManager.getHostName();
     stationmode = secretManager.getStationMode();
-    _HardSerial.print("in  PanchoVisualizerWifiManager ssid=");
-    _HardSerial.print(ssid);
-    _HardSerial.print(" stationmode=");
-    _HardSerial.println(stationmode);
-    _HardSerial.println("about to do start scan");
+    //_HardSerial.print("in  PanchoVisualizerWifiManager ssid=");
+    //_HardSerial.print(ssid);
+    //_HardSerial.print(" stationmode=");
+    //_HardSerial.println(stationmode);
+    //_HardSerial.println("about to do start scan");
     ssids = scanNetworks();
       //
       //set the mode to null so that 
@@ -45,16 +45,16 @@ void PanchoVisualizerWifiManager::start(){
     if(stationmode && ssid){
        bool gotConnection = connectSTA();
        if(!gotConnection){
-          _HardSerial.print("Coult not connect to ");
-          _HardSerial.println(ssid);
+          //_HardSerial.print("Coult not connect to ");
+          //_HardSerial.println(ssid);
 		      bool apModeActive = connectAP();
        }
     }else{
   	  
-      _HardSerial.print("ssids=");
-      _HardSerial.println(ssids);
+      //_HardSerial.print("ssids=");
+      //_HardSerial.println(ssids);
 
-		  _HardSerial.println("about to do connectAP");
+		  //_HardSerial.println("about to do connectAP");
         bool apModeActive = connectAP();
     }
     
@@ -299,8 +299,8 @@ int PanchoVisualizerWifiManager::uploadDataToDigitalStables(){
   http.addHeader("Content-Type", "application/json");
   boolean toReturn=false;
   int httpResponseCode = http.POST(output);
-  _HardSerial.print("upload digitalstables return ");
-  _HardSerial.println(httpResponseCode);
+  //_HardSerial.print("upload digitalstables return ");
+  //_HardSerial.println(httpResponseCode);
    cajalData.digitalStablesUpload=false;
   if (httpResponseCode == 200) { //Check for the returning code
       String response = http.getString();  //Get the response to the request

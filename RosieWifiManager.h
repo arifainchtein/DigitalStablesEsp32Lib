@@ -18,6 +18,7 @@ public:
 	
 	RosieWifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, RosieData& tf, RosieConfigData& p) ;
 	void start( );
+	void setWifiActiveSwitchStatus(bool b);
 	void generateWebData(DynamicJsonDocument& json, String s);
 	int uploadDataToDigitalStables();
     virtual ~RosieWifiManager();

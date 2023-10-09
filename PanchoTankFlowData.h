@@ -45,7 +45,7 @@ struct PanchoTankFlowData{
 	char groupidentifier[12];
 	char deviceTypeId[12];
 	long secondsTime=0L;
-	uint8_t dataSamplingSec=3;
+	uint8_t dataSamplingSec=20;
 	uint8_t currentFunctionValue=0;
 	uint8_t temperature=0;
 	float rtcBatVolt=0.0;

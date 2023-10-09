@@ -1,20 +1,6 @@
 #include <RosieTankAndFlowSensorController.h>
- #define SENSOR_INPUT_1 5
-    //
-    // for build 8 and below 
-    //
-    //#define SENSOR_INPUT_2  4
-
-
-    //
-    // for build 9 and below 
-    //
-    #define SENSOR_INPUT_2  18
-
-
-
-    // #define SENSOR_INPUT_1 5
-    // #define SENSOR_INPUT_2 4
+ #define SENSOR_INPUT_2 33
+#define SENSOR_INPUT_1 32
 
 static volatile int flowMeterPulseCount;
 static volatile int flowMeterPulseCount2;

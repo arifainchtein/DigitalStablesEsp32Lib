@@ -18,13 +18,13 @@ struct RosieData{
 	char flow2name[12];
 	char tank1name[12];
 	char tank2name[12];
+	uint8_t serialnumberarray[8];
 	char groupidentifier[12];
 	char deviceTypeId[12];
 	long secondsTime=0L;
-	uint8_t dataSamplingSec=3;
+	uint8_t dataSamplingSec=20;
 	uint8_t currentFunctionValue=0;
 	uint8_t temperature=0;
-	float reg33Voltage=0.0;
 	float rtcBatVolt=0.0;
 	uint8_t opMode=0;
 	float rssi=0;

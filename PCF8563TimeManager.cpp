@@ -14,8 +14,6 @@ static const byte monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
 #define I2C_SCL 22
 
 PCF8563TimeManager::PCF8563TimeManager( HardwareSerial& serial):TimeManager(serial ){
-	 Wire.begin();
-
 
 }
 
