@@ -237,8 +237,8 @@ void RosieTankAndFlowSensorController::readFlowMeter1(){
 		pulse1Sec = flowMeterPulseCount;
 
 		flowMeterPulseCount = 0;
-	//	  _HardSerial.print(" pulse1Sec=");
-	//	  _HardSerial.print(pulse1Sec);
+		  _HardSerial.print(" pulse1Sec=");
+		  _HardSerial.print(pulse1Sec);
 
 		// Because this loop may not complete in exactly 1 second intervals we calculate
 		// the number of milliseconds that have passed since the last execution and use
@@ -250,8 +250,8 @@ void RosieTankAndFlowSensorController::readFlowMeter1(){
 		//flowRate = ((1000.0 / (millis() - previousMillis)) * pulse1Sec) / calibrationFactor;
     
 		flowMeterPreviousMillis = millis();
-		//_HardSerial.print(" lo=");
-		//  _HardSerial.print(lo);
+		_HardSerial.print(" lo=");
+		  _HardSerial.print(lo);
 
 		//  _HardSerial.print(" flow=");
 		//  _HardSerial.println(flowRate);
