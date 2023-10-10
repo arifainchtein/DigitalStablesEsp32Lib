@@ -43,8 +43,8 @@ void RosieTankAndFlowSensorController::begin(uint8_t m){
 	flowMilliLitres = 0;
 	totalMilliLitres = 0;
 	flowMeterPreviousMillis = 0;
-	if(mode<3)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_1), RosieTankAndFlowSensorController::pulseCounter, FALLING);
-	if(mode==2)attachInterrupt(digitalPinToInterrupt(SENSOR_INPUT_2), RosieTankAndFlowSensorController::pulseCounter2, FALLING);
+	if(mode<3)attachInterrupt(SENSOR_INPUT_1, RosieTankAndFlowSensorController::pulseCounter, FALLING);
+	if(mode==2)attachInterrupt(SENSOR_INPUT_2, RosieTankAndFlowSensorController::pulseCounter2, FALLING);
 }
 
 
