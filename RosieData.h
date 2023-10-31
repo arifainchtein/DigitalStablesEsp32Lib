@@ -55,7 +55,7 @@ struct RosieData{
 	//  40mm flow meter qfactor = .45   https://www.aliexpress.com/item/32795067364.html
 	//  50mm flow meter qfactor = .2   https://www.alibaba.com/product-detail/YF-DN50-hall-sensor-small-inductive_1600196933068.html
 
- 	float qfactor1=.57;
+ 	float qfactor1=.4;
 	float qfactor2=.82;
 	// the status values are:
 	// 0 - Comma
