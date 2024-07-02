@@ -73,13 +73,17 @@ void RosieWifiManager::start(){
         int numberOfParameters = request->params();
         AsyncWebParameter* p = request->getParam(0);
         rosieData.qfactor1 = p->value().toFloat();
-       
         request->send_P(200, "text/plain", okString.c_str()); 
     });
 
+    asyncWebServer.on("/SetQFactor2", HTTP_GET, [this](AsyncWebServerRequest *request){
+        int numberOfParameters = request->params();
+        AsyncWebParameter* p = request->getParam(0);
+        rosieData.qfactor2 = p->value().toFloat();
+        request->send_P(200, "text/plain", okString.c_str()); 
+    });
 
-
-asyncWebServer.on("/assets/bootstrap/css/bootstrap.min.css", HTTP_GET, [this](AsyncWebServerRequest *request){
+  asyncWebServer.on("/assets/bootstrap/css/bootstrap.min.css", HTTP_GET, [this](AsyncWebServerRequest *request){
   //this->_HardSerial.println("request  bootstrap.min.css=");
     request->send(SPIFFS, "/bootstrap.min.css", String(), false);
     delay(5);
@@ -194,7 +198,7 @@ asyncWebServer.on("/assets/fonts/Roboto-Regular.woff", HTTP_GET, [this](AsyncWeb
   
   
 
-asyncWebServer.on("/RosieTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerRequest *request) {
+asyncWebServer.on("/RosieServlet", HTTP_POST, [this](AsyncWebServerRequest *request) {
     int paramsNr = request->params();
     this->_HardSerial.println(paramsNr);
    
@@ -344,19 +348,16 @@ asyncWebServer.on("/RosieTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerRe
 
       p = request->getParam(2);
       rosieData.tank2maxvollit=p->value().toFloat();  
-
+      
         DynamicJsonDocument json(1800);
        this->generateWebData(json, serialNumber);
         serializeJson(json, *response);
         request->send(response);
-
     }
-
-    
 });
 
 
-asyncWebServer.on("/RosieTankAndFlowServlet", HTTP_GET, [this](AsyncWebServerRequest *request) {
+asyncWebServer.on("/RosieServlet", HTTP_GET, [this](AsyncWebServerRequest *request) {
     int paramsNr = request->params();
     this->_HardSerial.println(paramsNr);
    

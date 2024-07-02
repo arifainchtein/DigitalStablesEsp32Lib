@@ -16,7 +16,7 @@ public:
 	SeedlingMonitoringWifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, SeedlingMonitorData& s) ;
 	void start( );
 	int uploadDataToDigitalStables();
-	void generateWebData(DynamicJsonDocument& json);
+	void generateWebData(DynamicJsonDocument& json, String s);
     virtual ~SeedlingMonitoringWifiManager();
 };
 #endif /* LIBRARIES_DIGITALSTABLES_SEEDLINGMONITORINGgOWWIFIMANAGER */

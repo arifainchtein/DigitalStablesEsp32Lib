@@ -32,8 +32,8 @@ static void IRAM_ATTR TankAndFlowSensorController::pulseCounter2()
 
 void RosieTankAndFlowSensorController::begin(uint8_t m){
     mode=m;
-    pinMode(SENSOR_INPUT_1, INPUT_PULLUP);
-    pinMode(SENSOR_INPUT_2, INPUT_PULLUP);
+    pinMode(SENSOR_INPUT_1, INPUT);
+    pinMode(SENSOR_INPUT_2, INPUT);
 
     //
 	// flowMeter variables init

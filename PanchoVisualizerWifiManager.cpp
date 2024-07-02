@@ -1,5 +1,6 @@
 #include <PanchoVisualizerWifiManager.h>
 #include <ArduinoJson.h>
+
 #include "SPIFFS.h"
  #define FUN_1_FLOW 1
 #define FUN_2_FLOW 2
@@ -265,6 +266,88 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_GET, [this](AsyncWebServerRe
     
 }  
  
+ int PanchoVisualizerWifiManager::uploadRosieDataToDigitalStables(RosieData& rosieData){
+
+  DynamicJsonDocument json(1800);
+  generateRosieWebData(rosieData,json, serialNumber);
+  
+  String output;
+  serializeJson(json, output);
+  const char* serverName = "http://devices.digitalstables.com/DeviceUploadServlet";
+  http.begin(serverName);    
+  http.addHeader("Content-Type", "application/json");
+  boolean toReturn=false;
+  int httpResponseCode = http.POST(output);
+  //_HardSerial.print("upload digitalstables return ");
+  //_HardSerial.println(httpResponseCode);
+   cajalData.digitalStablesUpload=false;
+  if (httpResponseCode == 200) { //Check for the returning code
+      String response = http.getString();  //Get the response to the request
+      if(response=="Ok"){
+        toReturn =true;
+         cajalData.digitalStablesUpload=true;
+      }else{
+        httpResponseCode=500;
+      }
+  }
+  http.end();
+  return httpResponseCode;//toReturn;
+}
+
+ void PanchoVisualizerWifiManager::generateRosieWebData(RosieData& rosieData,DynamicJsonDocument& json, String sentBy){
+    json["currentFunctionValue"]= rosieData.currentFunctionValue;
+    json["flow1name"] = rosieData.flow1name;
+    json["flow2name"] = rosieData.flow2name;
+    json["tank1name"] = rosieData.tank1name;
+    json["tank2name"] = rosieData.tank2name;
+    json["groupidentifier"]=rosieData.groupidentifier;
+    json["secondsTime"] = rosieData.secondsTime;
+    json["dataSamplingSec"] = rosieData.dataSamplingSec;
+    json["currentFunctionValue"] = rosieData.currentFunctionValue;
+    json["temperature"] = rosieData.temperature;
+    json["rtcBatVolt"] = rosieData.rtcBatVolt;
+    json["opMode"] = rosieData.opMode;
+    json["rssi"] = rosieData.rssi;
+    json["snr"] = rosieData.snr;
+    json["flowrate"] = rosieData.flowRate;
+    json["totalmilliLitres"] = rosieData.totalMilliLitres;
+    json["flowrate2"] = rosieData.flowRate2;
+    json["totalmilliLitres2"] = rosieData.totalMilliLitres2;
+    json["tank1pressurePsi"] = rosieData.tank1PressurePsi;
+    json["tank1pressureVolts"] = rosieData.tank1PressureVolts;
+    json["tank1waterLevel"] = rosieData.tank1WaterLevel;
+    json["tank1heightMeters"] = rosieData.tank1HeightMeters;
+    json["tank2pressurePsi"] = rosieData.tank2PressurePsi;
+    json["tank2pressureVolts"] = rosieData.tank2PressureVolts;
+    json["tank2waterLevel"] = rosieData.tank2WaterLevel;
+    json["tank2heightMeters"] = rosieData.tank2HeightMeters;
+    json["qfactor1"] = rosieData.qfactor1;
+    json["qfactor2"] = rosieData.qfactor2;
+    json["rtcBatVolt"] = rosieData.rtcBatVolt;        
+    json["operatingStatus"] = rosieData.operatingStatus;
+    json["sleepPingMinutes"] = rosieData.sleepPingMinutes;
+    json["digitalStablesUpload"] = rosieData.digitalStablesUpload;
+    json["secondsSinceLastPulse"] = rosieData.secondsSinceLastPulse;
+    json["soft_ap_ssid"] = soft_ap_ssid;
+    json["serialnumber"] = serialNumber;
+    json["sentBy"] = sentBy;
+    
+    json["apAddress"] = apAddress;
+    json["hostname"] = hostname;
+    json["stationmode"] = stationmode;
+    json["ssid"] = ssid;
+    json["ssids"] = ssids;
+    json["lora"] = lora;
+    json["internetAvailable"] = internetAvailable;
+    json["internetPingTime"] = internetPingTime;
+    json["ipAddress"] = ipAddress;
+    json["totp"] = totpcode;
+    json["deviceTypeId"]=rosieData.deviceTypeId;
+    json["dsLastUpload"]=rosieData.dsLastUpload;
+    json["latitude"]=rosieData.latitude;
+     json["longitude"]=rosieData.longitude;
+  }
+
 void PanchoVisualizerWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
 
 		json["soft_ap_ssid"] = this->soft_ap_ssid;
@@ -284,7 +367,7 @@ void PanchoVisualizerWifiManager::generateWebData(DynamicJsonDocument& json, Str
     json["deviceTypeId"]=cajalData.deviceTypeId;
     json["dsLastUpload"]=cajalData.dsLastUpload;
     json["latitude"]=cajalData.latitude;
-     json["longitude"]=cajalData.longitude;
+    json["longitude"]=cajalData.longitude;
 }   
 
 int PanchoVisualizerWifiManager::uploadDataToDigitalStables(){

@@ -6,7 +6,7 @@
 SeedlingMonitoringWifiManager::SeedlingMonitoringWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e, SeedlingMonitorData &s) :
 WifiManager(serial ,  t, e), seedlingMonitorData(s){}
 
-void SeedlingMonitoringWifiManager::generateWebData(DynamicJsonDocument& json){
+void SeedlingMonitoringWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
     json["soilTemperature"] = seedlingMonitorData.soilTemperature;
     json["greenhouseTemp"] = seedlingMonitorData.greenhouseTemp;
     json["greenhouseHum"] = seedlingMonitorData.greenhouseHum;
@@ -265,7 +265,7 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
     }else if(formName=="SetTimeViaInternet"){
       bool r = setTimeFromInternet();
         DynamicJsonDocument json(1800);
-       this->generateWebData(json);
+       this->generateWebData(json, serialNumber);
         serializeJson(json, *response);
         request->send(response);
 
@@ -276,7 +276,7 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
       this->_HardSerial.println(timeString);
       timeManager.setTime(timeString);
        DynamicJsonDocument json(1800);
-       this->generateWebData(json);
+       this->generateWebData(json,serialNumber);
        serializeJson(json, *response);
         request->send(response);
     }
@@ -297,7 +297,7 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_GET, [this](AsyncWebServerRe
    AsyncResponseStream *response = request->beginResponseStream("text/plain");
     if(formName=="GetWebData"){
        DynamicJsonDocument json(1800);
-      this->generateWebData(json);
+      this->generateWebData(json,serialNumber);
         serializeJson(json, *response);
         request->send(response);
 	  }
@@ -324,7 +324,7 @@ asyncWebServer.begin();
 asyncWebServer.on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
         AsyncResponseStream *response = request->beginResponseStream("application/json");
         DynamicJsonDocument json(1024);
-        generateWebData(json);
+        generateWebData(json,serialNumber);
         // json["seedlingtemp"] = this->panchoTankFlowData.flowRate;
         // json["roomtemp"] = this->panchoTankFlowData.flowRate2;
         
@@ -342,7 +342,7 @@ asyncWebServer.on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
     asyncWebServer.on("/index.html", HTTP_GET, [this](AsyncWebServerRequest *request){
         AsyncResponseStream *response = request->beginResponseStream("application/json");
         DynamicJsonDocument json(1024);
-        generateWebData(json);
+        generateWebData(json,serialNumber);
         // json["seedlingtemp"] = this->panchoTankFlowData.flow1name;
         // json["roomtemp"] = this->panchoTankFlowData.flow2name;
         
@@ -364,7 +364,7 @@ asyncWebServer.on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
 int SeedlingMonitoringWifiManager::uploadDataToDigitalStables(){
 
   DynamicJsonDocument json(1800);
-  generateWebData(json);
+  generateWebData(json,serialNumber);
   
   String output;
   serializeJson(json, output);
@@ -389,5 +389,6 @@ int SeedlingMonitoringWifiManager::uploadDataToDigitalStables(){
   return  httpResponseCode; //Check for the returning code
 ;
 }
+
 
 SeedlingMonitoringWifiManager::~SeedlingMonitoringWifiManager() {}
