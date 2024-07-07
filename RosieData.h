@@ -19,6 +19,7 @@ struct RosieData{
 	char tank1name[12];
 	char tank2name[12];
 	uint8_t serialnumberarray[8];
+	uint8_t checksum;
 	char groupidentifier[12];
 	char deviceTypeId[12];
 	long secondsTime=0L;

@@ -1,163 +1,113 @@
-#include <Preferences.h>
-#include <stdio.h>
-#include <string.h>
-#include <esp_partition.h>
 #include "GloriaTankFlowPumpData.h"
 #include "RosieData.h"
-#include "PanchoaTankFlowData.h"
+#include "PanchoTankFlowData.h"
 #include "DataManager.h"
-#include <nvs.h>       // Access to NVS
-#define MAXKEYS 200    // Max. number of NVS keys in table
-#define NAME "Headers" // Namespace used in NVS, NULL for all keys
 
-char nvskeys[MAXKEYS][NVS_KEY_NAME_MAX_SIZE]; // Space for NVS keys
+JsonObject obj;
+//GloriaTankFlowPumpData gloriaTankFlowPumpData;
+//RosieData rosieData;
+//PanchoTankFlowData panchoaTankFlowData;
+//String keys[126];
 
-Preferences preferences;
-GloriaTankFlowPumpData gloriaTankFlowPumpData;
-RosieData rosieData;
-PanchoaTankFlowData panchoaTankFlowData;
-String keys[126];
-#define DEBUG_BUFFER_SIZE 130
-#define DEBUG true
 
+String  sn="";
 DataManager::DataManager(HardwareSerial &serial) : _HardSerial(serial) {}
 
-void DataManager::start()
-{
+void DataManager::start(){
 }
 
-template <typename TStore>
-void DataManager::store(String name, const TStore &store)
-{
-  preferences.begin("Headers", false);
-  int size = name.length() + 1;
-  char buf[size];
-  // name.toCharArray(buf, size);
-  int dsize = sizeof(store);
-  preferences.putUInt(name.c_str(), dsize);
-  preferences.end();
-  Serial.print("storing key,size:");
-  Serial.println(size);
-  Serial.print("storing data22,size:");
-  Serial.println(dsize);
-
-  preferences.begin("DeviceData", false);
-  preferences.putBytes(name.c_str(), &store, dsize);
-  preferences.end();
-}
-
-void DataManager::getDeviceData(JsonArray &array)
-{
-  // StaticJsonDocument<200> doc;
-  // JsonArray array = doc.to<JsonArray>();
-  JsonObject obj;
-  preferences.begin("DeviceData", false);
-  for (int i = 0; i < keycounter; i++)
-  {
-    if (strlen(keys[i].c_str()) > 0)
-    {
-      obj = array.createNestedObject();
-      int size = readHeader(keys[i]);
-      if (size == sizeof(panchoaTankFlowData))
-      {
-        preferences.getBytes(keys[i], &panchoaTankFlowData, sizeof(panchoaTankFlowData));
-        generateRosieWebData(rosieData, obj);
-      }
-      else if (size == sizeof(rosieData))
-      {
-        preferences.getBytes(keys[i], &rosieData, sizeof(rosieData));
-        generateRosieWebData(rosieData, obj);
-      }
-      else if (size == sizeof(gloriaTankFlowPumpData))
-      {
-        preferences.getBytes(keys[i], &gloriaTankFlowPumpData, sizeof(gloriaTankFlowPumpData));
-        generateGloriaTankFlowPumpWebData(gloriaTankFlowPumpData, obj);
-      }
-    }
+void DataManager::storePancho(PanchoTankFlowData& panchoTankFlowData){
+   sn="";
+  uint8_t checksum=0;
+for (  uint8_t i = 0; i < 8; i++) {  
+  sn += String(panchoTankFlowData.serialnumberarray[i], HEX);
+    checksum += static_cast<uint8_t>(panchoTankFlowData.serialnumberarray[i]);
   }
-  preferences.end();
+  checksum &= 0xFF;
+  _HardSerial.print("adding a pancho serialNumber=");
+   _HardSerial.println(sn);
+    _HardSerial.print(" serialNumber length=");
+   _HardSerial.println(sn.length());
+
+if(panchoTankFlowData.checksum==checksum ){
+//if(serialNumber.length()==15){
+  obj = completeObject.createNestedObject(sn);
+  generatePanchoTankFlowDataWebData(panchoTankFlowData, obj);
+  
+  _HardSerial.print("number of devices=");
+   _HardSerial.println(completeObject.size());
+}else{
+   _HardSerial.println("pancho rejected pulse serialnumne=");
+   _HardSerial.println(sn);
+   
+}
+  
+   
 }
 
-void DataManager::readKeys()
-{
-  nvs_iterator_t it;     // Iterator for NVS
-  nvs_entry_info_t info; // Info in entry
-  uint16_t nvsinx = 0;
-  keycounter = 0;                                 // Index in nvskey table
-                                                  // Serial.println("reading key point 1");
-  it = nvs_entry_find("nvs", NAME, NVS_TYPE_ANY); // Get first entry
-  while (it)
-  {
-    nvs_entry_info(it, &info); // Get info on this entry
-                               // Serial.print("reading key point 2=");
-                               // Serial.println(info.type );
-                               // Serial.println(info.key );
-                               // Serial.println(info.namespace_name );
-                               //  Serial.println(nvsinx);
-                               //    Serial.print("in readdata keycounter=" );
-                               //     Serial.println(keycounter);
-                               //      Serial.print("in readdata contet=" );
-                               //       Serial.print(keys[keycounter] );
-    keys[keycounter] = info.key;
-    keycounter++;
-
-    ESP_LOGI(TAG, "%s::%s type=%d",
-             info.namespace_name, info.key, info.type);
-    //  if ( info.type == NVS_TYPE_STR ){                            // Only string are used
-
-    strcpy(nvskeys[nvsinx], info.key);
-    //     Serial.print("nvsinx =");
-    //       Serial.println( nvsinx);
-    //     Serial.print("contents =");
-    //
-    //      Serial.println( nvskeys[nvsinx]);                       // Save key in table
-    if (++nvsinx == MAXKEYS)
-    {
-      nvsinx--; // Prevent excessive index
-    }
-    // }
-    it = nvs_entry_next(it);
+void DataManager::storeRosie(RosieData& rosieData){
+ sn="";
+  uint8_t checksum=0;
+for (  uint8_t i = 0; i < 8; i++) {  
+    sn += String(rosieData.serialnumberarray[i], HEX);
+    checksum += static_cast<uint8_t>(rosieData.serialnumberarray[i]);
   }
-  nvs_release_iterator(it);  // Release resource
-  nvskeys[nvsinx][0] = '\0'; // Empty key at the end
-  ESP_LOGI(TAG, "Read %d keys from NVS", nvsinx);
-  return keycounter;
+  checksum &= 0xFF;
+if(rosieData.checksum==checksum ){
+//if(serialNumber.length()==15){
+
+ obj = completeObject.createNestedObject(sn);
+  generateRosieWebData(rosieData, obj);
+  
+  _HardSerial.print("adding a rosie  serialNumber=");
+   _HardSerial.println(sn);
+  _HardSerial.print("number of devices=");
+   _HardSerial.println(completeObject.size());
+}else{
+   _HardSerial.println("rosie rejected pulse serialnumne=");
+   _HardSerial.println(sn);
+   
+}
 }
 
-int DataManager::readHeader(String name)
-{
-  preferences.begin("Headers", false);
-  int nsize = name.length() + 1;
-  char buf[nsize];
-  Serial.print("readheaders data,size:");
-  Serial.println(nsize);
-  name.toCharArray(buf, nsize);
-  unsigned int size = preferences.getUInt(buf, 0);
-  preferences.end();
-  return size;
-}
-
-uint16_t DataManager::getTotalDataSize()
-{
-  readKeys();
-  uint16_t totalDataSize = 0;
-  // Serial.print("getTotalDataSize keycounter:");
-  // Serial.println(keycounter);
-  for (int i = 0; i < keycounter; i++)
-  {
-    // if (strlen( keys[i].c_str()) > 0) {
-    totalDataSize = totalDataSize + readHeader(keys[i]);
-    // Serial.print("i=");
-    // Serial.println(i);
-    // Serial.println(keys[i]);
-    // Serial.println( readHeader(keys[i]));
-    //  }
+void DataManager::storeGloria(GloriaTankFlowPumpData& gloriaTankFlowPumpData){
+ sn="";
+   uint8_t checksum=0;
+for (  uint8_t i = 0; i < 8; i++) {  
+    sn += String(gloriaTankFlowPumpData.serialnumberarray[i], HEX);
+    checksum += static_cast<uint8_t>(gloriaTankFlowPumpData.serialnumberarray[i]);
   }
-  return totalDataSize;
+  checksum &= 0xFF;
+if(gloriaTankFlowPumpData.checksum==checksum ){
+//if(serialNumber.length()==15){
+
+ obj = completeObject.createNestedObject(sn);
+  generateGloriaTankFlowPumpWebData(gloriaTankFlowPumpData, obj);
+
+  _HardSerial.print("adding a gloria serialNumber=");
+   _HardSerial.println(sn);
+  _HardSerial.print("number of devices=");
+   _HardSerial.println(completeObject.size());
+}else{
+   _HardSerial.println("gloria rejected pulse serialnumne=");
+   _HardSerial.println(sn);
+   
+}
 }
 
-void DataManager::generateRosieWebData(RosieData &rosieData, DynamicJsonDocument &json)
+
+void DataManager::generateRosieWebData(RosieData &rosieData, JsonObject &json)
 {
+  
+  json["devicename"] = rosieData.devicename;
+  json["deviceshortname"] = rosieData.deviceshortname;
+  json["flow1name"] = rosieData.flow1name;
+  json["flow2name"] = rosieData.flow2name;
+  json["tank1name"] = rosieData.tank1name;
+  json["tank2name"] = rosieData.tank2name;
+  
+
+
   json["currentFunctionValue"] = rosieData.currentFunctionValue;
   json["flow1name"] = rosieData.flow1name;
   json["flow2name"] = rosieData.flow2name;
@@ -191,28 +141,33 @@ void DataManager::generateRosieWebData(RosieData &rosieData, DynamicJsonDocument
   json["sleepPingMinutes"] = rosieData.sleepPingMinutes;
   json["digitalStablesUpload"] = rosieData.digitalStablesUpload;
   json["secondsSinceLastPulse"] = rosieData.secondsSinceLastPulse;
-  json["soft_ap_ssid"] = soft_ap_ssid;
-  json["serialnumber"] = serialNumber;
-  json["sentBy"] = serialNumber;
+  json["serialnumber"] = sn;
+   json["checksum"] = rosieData.checksum;
+  json["sentBy"] = sn;
+ 
+  // json["hostname"] = rosieData.hostname;
+  // json["stationmode"] = rosieData.stationmode;
+  // json["ssid"] = rosieData.ssid;
+  // json["lora"] = rosieData.lora;
+  // json["internetAvailable"] = rosieData.internetAvailable;
+  // json["internetPingTime"] = rosieData.internetPingTime;
+  // json["ipAddress"] = rosieData.ipAddress;
+  //json["totp"] = rosieData.totpcode;
 
-  json["apAddress"] = apAddress;
-  json["hostname"] = hostname;
-  json["stationmode"] = stationmode;
-  json["ssid"] = ssid;
-  json["ssids"] = ssids;
-  json["lora"] = lora;
-  json["internetAvailable"] = internetAvailable;
-  json["internetPingTime"] = internetPingTime;
-  json["ipAddress"] = ipAddress;
-  json["totp"] = totpcode;
   json["deviceTypeId"] = rosieData.deviceTypeId;
   json["dsLastUpload"] = rosieData.dsLastUpload;
   json["latitude"] = rosieData.latitude;
   json["longitude"] = rosieData.longitude;
 }
 
-void DataManager::generateGloriaTankFlowPumpWebData(GloriaTankFlowPumpData &gloriaTankFlowPumpData, DynamicJsonDocument &json)
+void DataManager::generateGloriaTankFlowPumpWebData(GloriaTankFlowPumpData &gloriaTankFlowPumpData, JsonObject &json)
 {
+    json["devicename"] = gloriaTankFlowPumpData.devicename;
+  json["deviceshortname"] = gloriaTankFlowPumpData.deviceshortname;
+  json["flow1name"] = gloriaTankFlowPumpData.flow1name;
+  json["flow2name"] = gloriaTankFlowPumpData.flow2name;
+  json["tank1name"] = gloriaTankFlowPumpData.tank1name;
+  json["tank2name"] = gloriaTankFlowPumpData.tank2name;
   json["currentFunctionValue"] = gloriaTankFlowPumpData.currentFunctionValue;
   json["flow1name"] = gloriaTankFlowPumpData.flow1name;
   json["flow2name"] = gloriaTankFlowPumpData.flow2name;
@@ -246,28 +201,34 @@ void DataManager::generateGloriaTankFlowPumpWebData(GloriaTankFlowPumpData &glor
   json["sleepPingMinutes"] = gloriaTankFlowPumpData.sleepPingMinutes;
   json["digitalStablesUpload"] = gloriaTankFlowPumpData.digitalStablesUpload;
   json["secondsSinceLastPulse"] = gloriaTankFlowPumpData.secondsSinceLastPulse;
-  json["soft_ap_ssid"] = soft_ap_ssid;
-  json["serialnumber"] = serialNumber;
-  json["sentBy"] = serialNumber;
+   json["checksum"] = gloriaTankFlowPumpData.checksum;
+  json["serialnumber"] =sn;
+  json["sentBy"] =sn;
 
-  json["apAddress"] = apAddress;
-  json["hostname"] = hostname;
-  json["stationmode"] = stationmode;
-  json["ssid"] = ssid;
-  json["ssids"] = ssids;
-  json["lora"] = lora;
-  json["internetAvailable"] = internetAvailable;
-  json["internetPingTime"] = internetPingTime;
-  json["ipAddress"] = ipAddress;
-  json["totp"] = totpcode;
+  // json["soft_ap_ssid"] = gloriaTankFlowPumpData.soft_ap_ssid;
+  // json["apAddress"] = gloriaTankFlowPumpData.apAddress;
+  // json["hostname"] = gloriaTankFlowPumpData.hostname;
+  // json["stationmode"] = gloriaTankFlowPumpData.stationmode;
+  // json["ssid"] = gloriaTankFlowPumpData.ssid;
+  // json["lora"] = gloriaTankFlowPumpData.lora;
+  // json["internetAvailable"] = gloriaTankFlowPumpData.internetAvailable;
+  // json["internetPingTime"] = gloriaTankFlowPumpData.internetPingTime;
+  // json["ipAddress"] = gloriaTankFlowPumpData.ipAddress;
+  // json["totp"] = gloriaTankFlowPumpData.totpcode;
   json["deviceTypeId"] = gloriaTankFlowPumpData.deviceTypeId;
   json["dsLastUpload"] = gloriaTankFlowPumpData.dsLastUpload;
   json["latitude"] = gloriaTankFlowPumpData.latitude;
   json["longitude"] = gloriaTankFlowPumpData.longitude;
 }
 
-void DataManager::generatePanchoTankFlowDataWebData(PanchoTankFlowData &panchoTankFlowData, DynamicJsonDocument &json)
+void DataManager::generatePanchoTankFlowDataWebData(PanchoTankFlowData &panchoTankFlowData, JsonObject &json)
 {
+      json["devicename"] = panchoTankFlowData.devicename;
+  json["deviceshortname"] = panchoTankFlowData.deviceshortname;
+  json["flow1name"] = panchoTankFlowData.flow1name;
+  json["flow2name"] = panchoTankFlowData.flow2name;
+  json["tank1name"] = panchoTankFlowData.tank1name;
+  json["tank2name"] = panchoTankFlowData.tank2name;
   json["currentFunctionValue"] = panchoTankFlowData.currentFunctionValue;
   json["flow1name"] = panchoTankFlowData.flow1name;
   json["flow2name"] = panchoTankFlowData.flow2name;
@@ -300,20 +261,19 @@ void DataManager::generatePanchoTankFlowDataWebData(PanchoTankFlowData &panchoTa
   json["operatingStatus"] = panchoTankFlowData.operatingStatus;
   json["digitalStablesUpload"] = panchoTankFlowData.digitalStablesUpload;
   json["secondsSinceLastPulse"] = panchoTankFlowData.secondsSinceLastPulse;
-  json["soft_ap_ssid"] = soft_ap_ssid;
-  json["serialnumber"] = serialNumber;
-  json["sentBy"] = serialNumber;
-
-  json["apAddress"] = apAddress;
-  json["hostname"] = hostname;
-  json["stationmode"] = stationmode;
-  json["ssid"] = ssid;
-  json["ssids"] = ssids;
-  json["lora"] = lora;
-  json["internetAvailable"] = internetAvailable;
-  json["internetPingTime"] = internetPingTime;
-  json["ipAddress"] = ipAddress;
-  json["totp"] = totpcode;
+  json["checksum"] = panchoTankFlowData.checksum;
+  json["serialnumber"] = sn;
+  json["sentBy"] = sn;
+  // json["soft_ap_ssid"] = panchoTankFlowData.soft_ap_ssid;
+  // json["apAddress"] = panchoTankFlowData.apAddress;
+  // json["hostname"] = panchoTankFlowData.hostname;
+  // json["stationmode"] = panchoTankFlowData.stationmode;
+  // json["ssid"] = panchoTankFlowData.ssid;
+  // json["lora"] = panchoTankFlowData.lora;
+  // json["internetAvailable"] = panchoTankFlowData.internetAvailable;
+  // json["internetPingTime"] = panchoTankFlowData.internetPingTime;
+  // json["ipAddress"] = panchoTankFlowData.ipAddress;
+  // json["totp"] = panchoTankFlowData.totpcode;
   json["deviceTypeId"] = panchoTankFlowData.deviceTypeId;
   json["dsLastUpload"] = panchoTankFlowData.dsLastUpload;
   json["latitude"] = panchoTankFlowData.latitude;

@@ -1,15 +1,12 @@
 #include <CajalWifiManager.h>
+
 #include <ArduinoJson.h>
 #include "SPIFFS.h"
 
-bool wifiActiveSwitchStatus = false;
 
-CajalWifiManager::CajalWifiManager(HardwareSerial &serial, DataManager &d, PCF8563TimeManager &t, Esp32SecretManager &e, CajalData &tf, CajalConfigData &p) : WifiManager(serial, t, e), DataManager() CajalData(tf), CajalConfigData(p) {}
+CajalWifiManager::CajalWifiManager(HardwareSerial &serial, DataManager &d, PCF8563TimeManager &t, Esp32SecretManager &e, CajalData &tf) : WifiManager(serial, t, e), dataManager(d), cajalData(tf) {}
 
-void CajalWifiManager::setWifiActiveSwitchStatus(bool b)
-{
-    wifiActiveSwitchStatus = b;
-}
+
 
 void CajalWifiManager::start()
 {
@@ -53,7 +50,7 @@ void CajalWifiManager::start()
     // the hostname is applied
     //  https://github.com/espressif/arduino-esp32/issues/6700
     WiFi.mode(WIFI_MODE_NULL);
-    if (wifiActiveSwitchStatus && stationmode && ssid)
+    if (stationmode && ssid)
     {
         connectSTA();
     }
@@ -73,73 +70,93 @@ void CajalWifiManager::start()
     request->send(SPIFFS, "/bootstrap.min.css", String(), false);
     delay(5); });
 
-    asyncWebServer.on("/assets/img/Cajal.svg", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-  //this->_HardSerial.println("request  Cajal.svg");
+    asyncWebServer.on("/assets/img/Cajal.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/Cajal.svg", String(), false);
+    delay(5); });
+
+
+ asyncWebServer.on("/assets/img/Pancho.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
+    request->send(SPIFFS, "/Pancho.svg", String(), false);
+    delay(5); });
+
+ asyncWebServer.on("/assets/img/Rosie.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
+    request->send(SPIFFS, "/Rosie.svg", String(), false);
+    delay(5); });
+
+asyncWebServer.on("/assets/img/Gloria.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
+    request->send(SPIFFS, "/Gloria.svg", String(), false);
     delay(5); });
 
     asyncWebServer.on("/assets/js/TankAndFlowConstants.js", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
- // this->_HardSerial.println("request TankFlowConstants.js");
+  this->_HardSerial.println("request TankFlowConstants.js");
     request->send(SPIFFS, "/TankAndFlowConstants.js", String(), false);
     delay(5); });
 
     asyncWebServer.on("/assets/js/jquery.min.js", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
- // this->_HardSerial.println("request  jquery/=");
+  this->_HardSerial.println("request  jquery/=");
     request->send(SPIFFS, "/jquery.min.js", String(), false);
     delay(5); });
 
     asyncWebServer.on("/assets/css/slideswitch.css", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
-  //this->_HardSerial.println("request  slideswitch/=");
+this->_HardSerial.println("request  slideswitch/=");
     request->send(SPIFFS, "/slideswitch.css", String(), false);
-    delay(5); });
+  //  delay(5);
+     });
 
     asyncWebServer.on("/assets/css/styles.css", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
-  //this->_HardSerial.println("request styles.css /=");
+  this->_HardSerial.println("request styles.css /=");
     request->send(SPIFFS, "/styles.css", String(), false);
-    delay(5); });
+//    delay(5);
+     });
 
     asyncWebServer.on("/assets/fonts/fa-solid-900.woff2", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
-  //this->_HardSerial.println("request solid woof2 /=");
+  this->_HardSerial.println("request solid woof2 /=");
     request->send(SPIFFS, "/fa-solid-900.woff2", String(), false);
-    delay(5); });
+   // delay(5); 
+   });
 
     asyncWebServer.on("/assets/fonts/fa-solid-900.woff", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
-  //this->_HardSerial.println("request solid woof900 /=");
+  this->_HardSerial.println("request solid woof900 /=");
     request->send(SPIFFS, "/fa-solid-900.woff", String(), false);
-    delay(5); });
+   // delay(5);
+    });
 
     asyncWebServer.on("/assets/fonts/fa-solid-900.ttf", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
-  //this->_HardSerial.println("request  solid woof ttf /=");
+  this->_HardSerial.println("request  solid woof ttf /=");
     request->send(SPIFFS, "/fa-solid-900.ttf", String(), false);
-    delay(5); });
+  // delay(5); 
+  });
 
     asyncWebServer.on("/assets/fonts/fontawesome-all.min.css", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
- // this->_HardSerial.println("request fontawesome /=");
+ this->_HardSerial.println("request fontawesome /=");
     request->send(SPIFFS, "/fontawesome-all.min.css", String(), false);
-    delay(5); });
+    //delay(5); 
+    
+    });
 
     asyncWebServer.on("/assets/bootstrap/js/bootstrap.min.js", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
-//  this->_HardSerial.println("request  bootstramo min js /=");
+ this->_HardSerial.println("request  bootstramo min js /=");
     request->send(SPIFFS, "/bootstrap.min.js", String(), false);
-    delay(5); });
+   // delay(5); 
+   });
 
     asyncWebServer.on("/js/index.js", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
  // delay(5);
- // this->_HardSerial.println("request  indexjs /=");
-  delay(5);
+ this->_HardSerial.println("request  indexjs /=");
+  //delay(5);
     request->send(SPIFFS, "/index.js", String(), false);
-    delay(5); });
+   // delay(5); 
+   });
 
     asyncWebServer.on("/", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
@@ -258,8 +275,8 @@ void CajalWifiManager::start()
 
       p = request->getParam(2);
       float log =p->value().toFloat();  
-      CajalData.latitude=lat;
-      CajalData.longitude=log;
+      cajalData.latitude=lat;
+      cajalData.longitude=log;
     
         DynamicJsonDocument json(1800);
        this->generateWebData(json,serialNumber);
@@ -279,39 +296,68 @@ void CajalWifiManager::start()
         this->_HardSerial.println(formName);
         AsyncResponseStream *response = request->beginResponseStream("text/plain");
         if (formName == "GetWebData"){
-            uint16_t totalSize = dataManager.getTotalSize();
-            int docSize = 1;
-            while (power < 1.2 * totalSize)
-                docSize *= 2;
-            StaticJsonDocument<docSize> doc;
-            JsonArray array = doc.to<JsonArray>();
-
-            this->generateWebData(array, serialNumber);
-
-            serializeJson(doc, *response);
+            DynamicJsonDocument json(1800);
+            this->generateWebData(json, serialNumber);
+            serializeJson(json, *response);
+            request->send(response);
+        } else if (formName == "GetDevicesData"){
+            serializeJson(dataManager.completeObject, *response);
             request->send(response);
         } 
     });
 
-    asyncWebServer.on("/GetSensorData", HTTP_GET, [this](AsyncWebServerRequest *request){
-        this->_HardSerial.println("curl request returning");
+     asyncWebServer.on("/GetSensorData", HTTP_GET, [this](AsyncWebServerRequest *request){
+       this->_HardSerial.println("curl request returning");
         this->_HardSerial.println(sensorString);
-        request->send_P(200, "text/plain", sensorString.c_str()); });
-        asyncWebServer.begin();
-    }
+        request->send_P(200, "text/plain", sensorString.c_str()); 
+    });
 
-void CajalWifiManager::generateWebData( JsonArray& array, String sentBy){
-    JsonObject obj2 = doc.createNestedObject();
+  asyncWebServer.begin();
+
 }
+
+
+
+void CajalWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
+    json["currentFunctionValue"]= cajalData.currentFunctionValue;
+    json["groupidentifier"]=cajalData.groupidentifier;
+    json["secondsTime"] = cajalData.secondsTime;
+    json["dataSamplingSec"] = cajalData.dataSamplingSec;
+    json["temperature"] = cajalData.temperature;
+    json["rtcBatVolt"] = cajalData.rtcBatVolt;
+    json["opMode"] = cajalData.opMode;
+    json["rssi"] = cajalData.rssi;
+    json["snr"] = cajalData.snr;
+    json["rtcBatVolt"] = cajalData.rtcBatVolt;        
+    json["operatingStatus"] = cajalData.operatingStatus;
+    json["digitalStablesUpload"] = cajalData.digitalStablesUpload;
+    json["secondsSinceLastPulse"] = cajalData.secondsSinceLastPulse;
+    json["soft_ap_ssid"] = soft_ap_ssid;
+    json["serialnumber"] = serialNumber;
+   
+    json["sentBy"] = sentBy;
+    json["apAddress"] = apAddress;
+    json["hostname"] = hostname;
+    json["stationmode"] = stationmode;
+    json["ssid"] = ssid;
+    json["ssids"] = ssids;
+    json["lora"] = lora;
+    json["internetAvailable"] = internetAvailable;
+    json["internetPingTime"] = internetPingTime;
+    json["ipAddress"] = ipAddress;
+    json["totp"] = totpcode;
+    json["deviceTypeId"]=cajalData.deviceTypeId;
+    json["dsLastUpload"]=cajalData.dsLastUpload;
+    json["latitude"]=cajalData.latitude;
+     json["longitude"]=cajalData.longitude;
+  }
 
 int CajalWifiManager::uploadDataToDigitalStables()
 {
 
-    DynamicJsonDocument json(1800);
-    generateWebData(json, serialNumber);
 
     String output;
-    serializeJson(json, output);
+    serializeJson(dataManager.completeObject, output);
     const char *serverName = "http://devices.digitalstables.com/DeviceUploadServlet";
     http.begin(serverName);
     http.addHeader("Content-Type", "application/json");

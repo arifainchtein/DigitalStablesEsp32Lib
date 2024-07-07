@@ -403,7 +403,9 @@ void WifiManager::internetConnectionAvailable(){
 
 bool WifiManager::setTimeFromInternet(){
     bool toReturn=false;
-    
+   // String timezone="AEST-10AEDT,M10.1.0,M4.1.0/3";
+  //   setenv("TZ",timezone.c_str(),1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
+  //tzset();
     struct tm timeinfo;
     if(getLocalTime(&timeinfo)){
        uint8_t date = timeinfo.tm_mday;

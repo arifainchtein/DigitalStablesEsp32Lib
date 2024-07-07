@@ -6,7 +6,7 @@
 #include "Arduino.h"
 #include <WifiManager.h>
 #include <CajalData.h>
-
+#include <DataManager.h>
 
 class CajalWifiManager : public WifiManager{
 
@@ -15,10 +15,9 @@ class CajalWifiManager : public WifiManager{
 public:
     DataManager& dataManager;
 	CajalData& cajalData;
-    CajalConfigData cajalConfigData;
-	CajalWifiManager(HardwareSerial& serial ,DataManager& d,PCF8563TimeManager& t, Esp32SecretManager& e, CajalData& tf, CajalConfigData& p) ;
+   
+	CajalWifiManager(HardwareSerial& serial ,DataManager& d,PCF8563TimeManager& t, Esp32SecretManager& e, CajalData& tf) ;
 	void start( );
-	void setWifiActiveSwitchStatus(bool b);
 	void generateWebData(DynamicJsonDocument& json, String s);
 	int uploadDataToDigitalStables();
     virtual ~CajalWifiManager();

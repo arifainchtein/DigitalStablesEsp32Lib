@@ -389,7 +389,6 @@ asyncWebServer.begin();
 }
 
 void RosieWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
-    json["currentFunctionValue"]= rosieData.currentFunctionValue;
     json["flow1name"] = rosieData.flow1name;
     json["flow2name"] = rosieData.flow2name;
     json["tank1name"] = rosieData.tank1name;
