@@ -13,7 +13,7 @@ struct RosieConfigData{
 #define ROSIEDATA_H
 struct RosieData{
 	char devicename[16];
-	char deviceshortname[4];
+	char deviceshortname[5];
 	char flow1name[12];
 	char flow2name[12];
 	char tank1name[12];
