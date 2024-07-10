@@ -25,19 +25,16 @@ for (  uint8_t i = 0; i < 8; i++) {
   }
   checksum &= 0xFF;
   _HardSerial.print("adding a pancho serialNumber=");
-   _HardSerial.println(sn);
-    _HardSerial.print(" serialNumber length=");
-   _HardSerial.println(sn.length());
-
-if(panchoTankFlowData.checksum==checksum ){
+   _HardSerial.print(sn);
+if(panchoTankFlowData.checksum==checksum  && sn.length()==15){
 //if(serialNumber.length()==15){
   obj = completeObject.createNestedObject(sn);
   generatePanchoTankFlowDataWebData(panchoTankFlowData, obj);
   
-  _HardSerial.print("number of devices=");
+  _HardSerial.print("  number of devices=");
    _HardSerial.println(completeObject.size());
 }else{
-   _HardSerial.println("pancho rejected pulse serialnumne=");
+   _HardSerial.print("  pancho rejected pulse serialnumne=");
    _HardSerial.println(sn);
    
 }
@@ -53,18 +50,17 @@ for (  uint8_t i = 0; i < 8; i++) {
     checksum += static_cast<uint8_t>(rosieData.serialnumberarray[i]);
   }
   checksum &= 0xFF;
-if(rosieData.checksum==checksum ){
-//if(serialNumber.length()==15){
-
+if(rosieData.checksum==checksum && sn.length()==15 ){
+//if(){
  obj = completeObject.createNestedObject(sn);
   generateRosieWebData(rosieData, obj);
   
   _HardSerial.print("adding a rosie  serialNumber=");
-   _HardSerial.println(sn);
-  _HardSerial.print("number of devices=");
+   _HardSerial.print(sn);
+  _HardSerial.print(" number of devices=");
    _HardSerial.println(completeObject.size());
 }else{
-   _HardSerial.println("rosie rejected pulse serialnumne=");
+   _HardSerial.println(" rosie rejected pulse serialnumne=");
    _HardSerial.println(sn);
    
 }
@@ -78,18 +74,18 @@ for (  uint8_t i = 0; i < 8; i++) {
     checksum += static_cast<uint8_t>(gloriaTankFlowPumpData.serialnumberarray[i]);
   }
   checksum &= 0xFF;
-if(gloriaTankFlowPumpData.checksum==checksum ){
+if(gloriaTankFlowPumpData.checksum==checksum  && sn.length()==15){
 //if(serialNumber.length()==15){
 
  obj = completeObject.createNestedObject(sn);
   generateGloriaTankFlowPumpWebData(gloriaTankFlowPumpData, obj);
 
   _HardSerial.print("adding a gloria serialNumber=");
-   _HardSerial.println(sn);
-  _HardSerial.print("number of devices=");
+   _HardSerial.print(sn);
+  _HardSerial.print("  number of devices=");
    _HardSerial.println(completeObject.size());
 }else{
-   _HardSerial.println("gloria rejected pulse serialnumne=");
+   _HardSerial.print("gloria rejected pulse serialnumne=");
    _HardSerial.println(sn);
    
 }
@@ -158,6 +154,8 @@ void DataManager::generateRosieWebData(RosieData &rosieData, JsonObject &json)
   json["dsLastUpload"] = rosieData.dsLastUpload;
   json["latitude"] = rosieData.latitude;
   json["longitude"] = rosieData.longitude;
+  json["solarVoltage"] = rosieData.solarVoltage;
+  json["capacitorVoltage"] = rosieData.capacitorVoltage;
 }
 
 void DataManager::generateGloriaTankFlowPumpWebData(GloriaTankFlowPumpData &gloriaTankFlowPumpData, JsonObject &json)

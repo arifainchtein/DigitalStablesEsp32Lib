@@ -32,10 +32,11 @@ String Esp32SecretManager::readSecret(){
 
 void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String deviceshortname, String flow1name, String flow2name, String tank1name, String tank2name){
 
-	preferences.begin("DeviceSensorInfo", false);
+	preferences.begin("DeviceSenInf", false);
 	preferences.putString("devicename", devicename);
 	preferences.putString("deviceshortname", deviceshortname);
 	preferences.putString("flow1name", flow1name);
+	preferences.putString("flow2name", flow2name);
 	preferences.putString("tank1name", tank1name);
 	preferences.putString("tank2name", tank2name);
 	preferences.end();
@@ -43,41 +44,41 @@ void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String devices
 
 
 String Esp32SecretManager::readDeviceName(){
-	preferences.begin("DeviceSensorInfo", false);
+	preferences.begin("DeviceSenInf", false);
 	String ret = preferences.getString("devicename");
 	preferences.end();
 	return ret;
 }
 String Esp32SecretManager::readDeviceShortName(){
-	preferences.begin("DeviceSensorInfo", false);
+	preferences.begin("DeviceSenInf", false);
 	String ret = preferences.getString("deviceshortname");
 	preferences.end();
 	return ret;
 }
 
 String Esp32SecretManager::readFlow1Name(){
-	preferences.begin("DeviceSensorInfo", false);
+	preferences.begin("DeviceSenInf", false);
 	String ret = preferences.getString("flow1name");
 	preferences.end();
 	return ret;
 }
 
 String Esp32SecretManager::readFlow2Name(){
-	preferences.begin("DeviceSensorInfo", false);
+	preferences.begin("DeviceSenInf", false);
 	String ret = preferences.getString("flow2name");
 	preferences.end();
 	return ret;
 }
 
 String Esp32SecretManager::readTank1Name(){
-	preferences.begin("DeviceSensorInfo", false);
+	preferences.begin("DeviceSenInf", false);
 	String ret = preferences.getString("tank1name");
 	preferences.end();
 	return ret;
 }
 
 String Esp32SecretManager::readTank2Name(){
-	preferences.begin("DeviceSensorInfo", false);
+	preferences.begin("DeviceSenInf", false);
 	String ret = preferences.getString("tank2name");
 	preferences.end();
 	return ret;

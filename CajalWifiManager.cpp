@@ -2,7 +2,8 @@
 
 #include <ArduinoJson.h>
 #include "SPIFFS.h"
-
+//#include <LittleFS.h>
+//#define SPIFFS LittleFS
 
 CajalWifiManager::CajalWifiManager(HardwareSerial &serial, DataManager &d, PCF8563TimeManager &t, Esp32SecretManager &e, CajalData &tf) : WifiManager(serial, t, e), dataManager(d), cajalData(tf) {}
 
@@ -16,6 +17,8 @@ void CajalWifiManager::start()
         // SPIFFS will be configured on reboot
         _HardSerial.println("ERROR: Cannot mount SPIFFS, Rebooting");
         delay(1000);
+    }else{
+      _HardSerial.println("SPIFF begin success");
     }
 
     // File root = SPIFFS.open("/") ;
@@ -68,36 +71,46 @@ void CajalWifiManager::start()
                       {
   //this->_HardSerial.println("request  bootstrap.min.css=");
     request->send(SPIFFS, "/bootstrap.min.css", String(), false);
-    delay(5); });
+    //delay(5);
+     });
 
     asyncWebServer.on("/assets/img/Cajal.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/Cajal.svg", String(), false);
-    delay(5); });
+   // delay(5); 
+    });
 
 
  asyncWebServer.on("/assets/img/Pancho.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/Pancho.svg", String(), false);
-    delay(5); });
+ //   delay(5); 
+    });
 
  asyncWebServer.on("/assets/img/Rosie.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/Rosie.svg", String(), false);
-    delay(5); });
+   // delay(5); 
+    });
 
 asyncWebServer.on("/assets/img/Gloria.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/Gloria.svg", String(), false);
-    delay(5); });
+   // delay(5); 
+    });
 
     asyncWebServer.on("/assets/js/TankAndFlowConstants.js", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
   this->_HardSerial.println("request TankFlowConstants.js");
     request->send(SPIFFS, "/TankAndFlowConstants.js", String(), false);
-    delay(5); });
+    //delay(5); 
+    });
 
     asyncWebServer.on("/assets/js/jquery.min.js", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
-  this->_HardSerial.println("request  jquery/=");
+  this->_HardSerial.println(" point 1request  jquery/=");
+
     request->send(SPIFFS, "/jquery.min.js", String(), false);
-    delay(5); });
+  this->_HardSerial.println(" point 2request  jquery/=");
+  
+   // delay(5);
+     });
 
     asyncWebServer.on("/assets/css/slideswitch.css", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
@@ -162,37 +175,43 @@ this->_HardSerial.println("request  slideswitch/=");
                       {
 	//this->_HardSerial.println("reqestubg  root =");
     request->send(SPIFFS, "/index.html", String(), false);
-    delay(5); });
+  //  delay(5); 
+    });
 
     asyncWebServer.on("/index.html", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
 	//this->_HardSerial.println("reqestubg index.html=");
     request->send(SPIFFS, "/index.html", String(), false);
-    delay(5); });
+ //   delay(5); 
+    });
 
     asyncWebServer.on("/assets/css/Roboto.css", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
 	//this->_HardSerial.println("reqestubg robottocss=");
     request->send(SPIFFS, "/Roboto.css", String(), false);
-    delay(5); });
+   // delay(5); 
+    });
 
     asyncWebServer.on("/assets/fonts/Roboto-Regular.woff", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
   //this->_HardSerial.println("request solid woof900 /=");
     request->send(SPIFFS, "/Roboto-Regular.woff", String(), false);
-    delay(5); });
+   // delay(5);
+     });
 
     asyncWebServer.on("/assets/fonts/Roboto-Regular.woff2", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
   //this->_HardSerial.println("request solid woof900 /=");
     request->send(SPIFFS, "/Roboto-Regular.woff2", String(), false);
-    delay(5); });
+   // delay(5); 
+    });
 
     asyncWebServer.on("/GetHostName", HTTP_GET, [this](AsyncWebServerRequest *request)
                       {
   //this->_HardSerial.println("request solid woof900 /=");
      request->send_P(200, "text/plain", hostname.c_str()); 
-    delay(5); });
+   // delay(5); 
+    });
 
     asyncWebServer.on("/CajalServlet", HTTP_POST, [this](AsyncWebServerRequest *request)
                       {
