@@ -14,10 +14,10 @@ struct RosieConfigData{
 struct RosieData{
 	char devicename[16];
 	char deviceshortname[5];
-	char flow1name[12];
-	char flow2name[12];
-	char tank1name[12];
-	char tank2name[12];
+	char flow1name[10];
+	char flow2name[10];
+	char tank1name[10];
+	char tank2name[10];
 	uint8_t serialnumberarray[8];
 	uint8_t checksum;
 	char groupidentifier[12];
@@ -30,6 +30,10 @@ struct RosieData{
 	uint8_t opMode=0;
 	float rssi=0;
 	float snr=0;
+
+	uint8_t loraActive=0;
+	char ipAddress[16];
+	bool internetAvailable;
 	float flowRate=0.0;
 	float totalMilliLitres=0.0;
 
@@ -62,7 +66,7 @@ struct RosieData{
 	// 0 - Comma
 	// 1 - WPS normal
 	// 2 - Active Normal
-	float operatingStatus=0;
+	uint8_t operatingStatus=0;
 	float sleepPingMinutes=30;
 	long secondsSinceLastPulse;
 	bool digitalStablesUpload;

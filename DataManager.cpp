@@ -118,6 +118,7 @@ void DataManager::generateRosieWebData(RosieData &rosieData, JsonObject &json)
   json["opMode"] = rosieData.opMode;
   json["rssi"] = rosieData.rssi;
   json["snr"] = rosieData.snr;
+  
   json["flowrate"] = rosieData.flowRate;
   json["totalmilliLitres"] = rosieData.totalMilliLitres;
   json["flowrate2"] = rosieData.flowRate2;
@@ -144,10 +145,10 @@ void DataManager::generateRosieWebData(RosieData &rosieData, JsonObject &json)
   // json["hostname"] = rosieData.hostname;
   // json["stationmode"] = rosieData.stationmode;
   // json["ssid"] = rosieData.ssid;
-  // json["lora"] = rosieData.lora;
-  // json["internetAvailable"] = rosieData.internetAvailable;
+   json["loraActive"] = rosieData.loraActive;
+   json["internetAvailable"] = rosieData.internetAvailable;
   // json["internetPingTime"] = rosieData.internetPingTime;
-  // json["ipAddress"] = rosieData.ipAddress;
+   json["ipAddress"] = rosieData.ipAddress;
   //json["totp"] = rosieData.totpcode;
 
   json["deviceTypeId"] = rosieData.deviceTypeId;
@@ -208,10 +209,10 @@ void DataManager::generateGloriaTankFlowPumpWebData(GloriaTankFlowPumpData &glor
   // json["hostname"] = gloriaTankFlowPumpData.hostname;
   // json["stationmode"] = gloriaTankFlowPumpData.stationmode;
   // json["ssid"] = gloriaTankFlowPumpData.ssid;
-  // json["lora"] = gloriaTankFlowPumpData.lora;
-  // json["internetAvailable"] = gloriaTankFlowPumpData.internetAvailable;
+   json["loraActive"] = gloriaTankFlowPumpData.loraActive;
+   json["internetAvailable"] = gloriaTankFlowPumpData.internetAvailable;
   // json["internetPingTime"] = gloriaTankFlowPumpData.internetPingTime;
-  // json["ipAddress"] = gloriaTankFlowPumpData.ipAddress;
+   json["ipAddress"] = gloriaTankFlowPumpData.ipAddress;
   // json["totp"] = gloriaTankFlowPumpData.totpcode;
   json["deviceTypeId"] = gloriaTankFlowPumpData.deviceTypeId;
   json["dsLastUpload"] = gloriaTankFlowPumpData.dsLastUpload;
@@ -261,16 +262,16 @@ void DataManager::generatePanchoTankFlowDataWebData(PanchoTankFlowData &panchoTa
   json["secondsSinceLastPulse"] = panchoTankFlowData.secondsSinceLastPulse;
   json["checksum"] = panchoTankFlowData.checksum;
   json["serialnumber"] = sn;
-  json["sentBy"] = sn;
+ // json["sentBy"] = sn;
   // json["soft_ap_ssid"] = panchoTankFlowData.soft_ap_ssid;
   // json["apAddress"] = panchoTankFlowData.apAddress;
   // json["hostname"] = panchoTankFlowData.hostname;
   // json["stationmode"] = panchoTankFlowData.stationmode;
   // json["ssid"] = panchoTankFlowData.ssid;
-  // json["lora"] = panchoTankFlowData.lora;
-  // json["internetAvailable"] = panchoTankFlowData.internetAvailable;
+   json["loraActive"] = panchoTankFlowData.loraActive;
+   json["internetAvailable"] = panchoTankFlowData.internetAvailable;
   // json["internetPingTime"] = panchoTankFlowData.internetPingTime;
-  // json["ipAddress"] = panchoTankFlowData.ipAddress;
+   json["ipAddress"] = panchoTankFlowData.ipAddress;
   // json["totp"] = panchoTankFlowData.totpcode;
   json["deviceTypeId"] = panchoTankFlowData.deviceTypeId;
   json["dsLastUpload"] = panchoTankFlowData.dsLastUpload;

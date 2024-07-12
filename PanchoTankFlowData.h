@@ -37,10 +37,10 @@ struct PanchoWifiData{
 struct PanchoTankFlowData{
 	char devicename[16];
 	char deviceshortname[5];
-	char flow1name[12];
-	char flow2name[12];
-	char tank1name[12];
-	char tank2name[12];
+	char flow1name[10];
+	char flow2name[10];
+	char tank1name[10];
+	char tank2name[10];
 	uint8_t serialnumberarray[8];
 	uint8_t checksum;
 	char groupidentifier[12];
@@ -53,6 +53,11 @@ struct PanchoTankFlowData{
 	uint8_t opMode=0;
 	float rssi=0.0;
 	float snr=0.0;
+	uint8_t loraActive=0;
+	char ipAddress[16];
+	bool internetAvailable;
+	
+	
 	float flowRate=0.0;
 	float totalMilliLitres=0.0;
 
@@ -82,10 +87,9 @@ struct PanchoTankFlowData{
  	float qfactor1=.82;
 	float qfactor2=.82;
 	// the status values are:
-	// 0 - Comma
+	// 0 - Active
 	// 1 - WPS normal
-	// 2 - Active Normal
-	int operatingStatus=0;
+	uint8_t operatingStatus=0;
 	int secondsSinceLastPulse=5;
 	bool digitalStablesUpload=false;
 	long dsLastUpload=0;

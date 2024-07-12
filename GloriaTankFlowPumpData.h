@@ -52,9 +52,12 @@ struct GloriaTankFlowPumpData{
 	uint8_t opMode=0;
 	float rssi=0.0;
 	float snr=0.0;
+	uint8_t loraActive=0;
+	char ipAddress[16];
+	bool internetAvailable;
+
 	float flowRate=0.0;
 	float totalMilliLitres=0.0;
-
 	float flowRate2=0.0;
 	float totalMilliLitres2=0.0;
 
