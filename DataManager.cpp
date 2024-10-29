@@ -57,9 +57,10 @@ for (  uint8_t i = 0; i < 8; i++) {
    _HardSerial.print(sn.length());
     _HardSerial.print(" checksum=");
    _HardSerial.println(checksum);
-
+ _HardSerial.print(" daffodilData.checksum=");
+   _HardSerial.println(daffodilData.checksum);
    
-if(daffodilData.checksum==checksum && sn.length()==15 ){
+if(daffodilData.checksum==checksum && sn.length()==14){
 //if(){
  obj = completeObject.createNestedObject(sn);
   generateDaffodilWebData(daffodilData, obj);
