@@ -351,6 +351,10 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
         serializeJson(json, *response);
         request->send(response);
 
+    }else  if(formName=="SetTimeZone"){
+      p = request->getParam(1);
+      String timezone =p->value();    
+      secretManager.setTimeZone(timezone);
     }
 
     

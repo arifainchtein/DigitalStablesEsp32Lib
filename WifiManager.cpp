@@ -9,6 +9,7 @@
 #include <WifiManager.h>
 
 
+
 WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e) :
  _HardSerial(serial),timeManager(t),secretManager(e),asyncWebServer(80)  {}
 
@@ -20,6 +21,10 @@ void WifiManager::setLora(boolean b){
     _HardSerial.print("setting lora to ");
     _HardSerial.println(lora);
     
+}
+
+void WifiManager::setTimezone(String t){
+    timezone=t;
 }
 
 void WifiManager::setCurrentToTpCode(long c){
@@ -200,14 +205,17 @@ String WifiManager::getTeleonomeData(String url, bool debug){
 
 String WifiManager::scanNetworks() {
     delay(5);
+     this->_HardSerial.println("startscan poiomnt 1");
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
+     this->_HardSerial.println("startscan poiomnt 2");
     delay(5);
     int n= WiFi.scanNetworks();
     delay(5);
+     this->_HardSerial.println("startscan poiomnt 3");
      String json = "[";
      n = WiFi.scanComplete();
-      this->_HardSerial.println("scan 2 complete");
+      this->_HardSerial.println("scan 4 complete");
     if(n){
       for (int i = 0; i < n; ++i){
         if(i) json += ",";
@@ -228,9 +236,9 @@ String WifiManager::scanNetworks() {
       return json;
 }
 
-uint8_t WifiManager::getWifiStatus(){
-    return WiFi.status();
-}
+// uint8_t WifiManager::getWifiStatus(){
+//     return WiFi.status();
+// }
 
 bool WifiManager::getAPStatus(){
     return apConnected;
@@ -266,17 +274,36 @@ bool WifiManager::configWifiSTA(String s, String p, String h ){
     WiFi.disconnect();
     return connectSTA();
 }
+    bool WifiManager::getWifiStatus(){
+        
+        if(getAPStatus()){
+            return true;
+        }else{
+            return (WiFi.status() == WL_CONNECTED);
+        } 
+    }
+
+
+    void WifiManager::stop(){
+    if (WiFi.status() == WL_CONNECTED) {
+      _HardSerial.println("WifiManager stop, Voltage low, turning off Wi-Fi");
+      WiFi.mode(WIFI_OFF);
+      apConnected=false;
+       WiFi.disconnect();
+    }
+}
 
 void WifiManager::restartWifi(){
     WiFi.disconnect();
      if(stationmode){
        bool gotConnection = connectSTA();
+        _HardSerial.println("restartwifi got connection station mode");
        if(!gotConnection){
-          _HardSerial.print("restartwifi could not connect ");
-          
+          _HardSerial.println("restartwifi could not connect ");
 		      connectAP();
        }
     }else{
+         _HardSerial.println("restartwifi c connectap ");
          connectAP();
     }
 }
@@ -316,7 +343,7 @@ bool WifiManager::connectSTA(){
     bool keepGoing=true;
     while (keepGoing){
         keepGoing=WiFi.status() != WL_CONNECTED;
-        delay(1000);
+     //   delay(1000);
         _HardSerial.print(".");
         counter++;
         if(counter>30){
@@ -363,7 +390,7 @@ bool WifiManager::connectAP(){
 
      soft_ap_ssid = secretManager.getSoftAPSSID();
     if(soft_ap_ssid=="" || soft_ap_ssid=="192.168.4.1"){
-        soft_ap_ssid="Pancho";
+        soft_ap_ssid="Daffodil";
     }
     soft_ap_password = secretManager.getSoftAPPASS();
     hostname = secretManager.getHostName();;
@@ -403,9 +430,10 @@ void WifiManager::internetConnectionAvailable(){
 
 bool WifiManager::setTimeFromInternet(){
     bool toReturn=false;
+     configTime(0, 0, "pool.ntp.org"); 
    // String timezone="AEST-10AEDT,M10.1.0,M4.1.0/3";
-  //   setenv("TZ",timezone.c_str(),1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
-  //tzset();
+     setenv("TZ",timezone.c_str(),1);  //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
+  tzset();
     struct tm timeinfo;
     if(getLocalTime(&timeinfo)){
        uint8_t date = timeinfo.tm_mday;
@@ -430,11 +458,14 @@ bool WifiManager::setTimeFromInternet(){
         commandTime.concat("#");
         commandTime.concat(second);
         commandTime.concat("#");
-        _HardSerial.print("Setting internetTime:");
-        _HardSerial.println(commandTime);
+        
         
         toReturn = timeManager.setTime(commandTime);
-      
+        _HardSerial.print("Setting internetTime:");
+        _HardSerial.print(commandTime);
+        _HardSerial.print(" returned ");
+        _HardSerial.println(toReturn);
+         currentTimerRecord = timeManager.now();
     }
     return toReturn;
 }

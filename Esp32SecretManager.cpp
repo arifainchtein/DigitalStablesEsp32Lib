@@ -30,7 +30,7 @@ String Esp32SecretManager::readSecret(){
 	return ret;
 }
 
-void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String deviceshortname, String flow1name, String flow2name, String tank1name, String tank2name){
+void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String deviceshortname, String flow1name, String flow2name, String tank1name, String tank2name, String timezone){
 
 	preferences.begin("DeviceSenInf", false);
 	preferences.putString("devicename", devicename);
@@ -39,9 +39,24 @@ void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String devices
 	preferences.putString("flow2name", flow2name);
 	preferences.putString("tank1name", tank1name);
 	preferences.putString("tank2name", tank2name);
+	preferences.putString("timezone", timezone);
 	preferences.end();
 }	
 
+
+void Esp32SecretManager::setTimeZone( String timezone ){
+	preferences.begin("DeviceSenInf", false);
+	preferences.putString("timezone", timezone);
+	preferences.end();
+}
+
+
+String Esp32SecretManager::readTimeZone(){
+	preferences.begin("DeviceSenInf", false);
+	String ret = preferences.getString("timezone");
+	preferences.end();
+	return ret;
+}
 
 String Esp32SecretManager::readDeviceName(){
 	preferences.begin("DeviceSenInf", false);

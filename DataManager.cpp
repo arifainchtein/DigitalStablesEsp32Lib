@@ -1,6 +1,7 @@
 #include "GloriaTankFlowPumpData.h"
 #include "RosieData.h"
 #include "PanchoTankFlowData.h"
+#include "DaffodilData.h"
 #include "DataManager.h"
 
 JsonObject obj;
@@ -40,6 +41,37 @@ if(panchoTankFlowData.checksum==checksum  && sn.length()==15){
 }
   
    
+}
+
+void DataManager::storeDaffodil(DaffodilData& daffodilData){
+ sn="";
+  uint8_t checksum=0;
+for (  uint8_t i = 0; i < 8; i++) {  
+    sn += String(daffodilData.serialnumberarray[i], HEX);
+    checksum += static_cast<uint8_t>(daffodilData.serialnumberarray[i]);
+  }
+  checksum &= 0xFF;
+   _HardSerial.print("adding a daffodilData  serialNumber=");
+   _HardSerial.print(sn);
+    _HardSerial.print(" l=");
+   _HardSerial.print(sn.length());
+    _HardSerial.print(" checksum=");
+   _HardSerial.println(checksum);
+
+   
+if(daffodilData.checksum==checksum && sn.length()==15 ){
+//if(){
+ obj = completeObject.createNestedObject(sn);
+  generateDaffodilWebData(daffodilData, obj);
+  
+ 
+  _HardSerial.print(" number of devices=");
+   _HardSerial.println(completeObject.size());
+}else{
+   _HardSerial.println(" daffodilData rejected pulse serialnumne=");
+   _HardSerial.println(sn);
+   
+}
 }
 
 void DataManager::storeRosie(RosieData& rosieData){
@@ -91,6 +123,48 @@ if(gloriaTankFlowPumpData.checksum==checksum  && sn.length()==15){
 }
 }
 
+void DataManager::generateDaffodilWebData(DaffodilData &daffodilData, JsonObject &json){
+    
+    json["devicename"] = daffodilData.devicename;
+    json["deviceshortname"] = daffodilData.deviceshortname;
+    json["groupidentifier"]=daffodilData.groupidentifier;
+    json["secondsTime"] = daffodilData.secondsTime;
+    json["dataSamplingSec"] = daffodilData.dataSamplingSec;
+    json["currentFunctionValue"] = daffodilData.currentFunctionValue;
+    json["temperature"] = daffodilData.temperature;
+    json["rtcBatVolt"] = daffodilData.rtcBatVolt;
+    json["opMode"] = daffodilData.opMode;
+    json["rtcBatVolt"] = daffodilData.rtcBatVolt;        
+    json["operatingStatus"] = daffodilData.operatingStatus;
+    json["sleepPingMinutes"] = daffodilData.sleepPingMinutes;
+    json["digitalStablesUpload"] = daffodilData.digitalStablesUpload;
+    json["secondsSinceLastPulse"] = daffodilData.secondsSinceLastPulse;
+    json["currentFunctionValue"]=daffodilData.currentFunctionValue;
+    json["outdoortemperature"] = daffodilData.outdoortemperature;
+    json["outdoorhumidity"] = daffodilData.outdoorhumidity;
+    json["minimumSepticHeight"] = daffodilData.minimumSepticHeight;
+    json["maximumScepticHeight"] = daffodilData.maximumScepticHeight;
+    json["scepticAvailablePercentage"] = daffodilData.scepticAvailablePercentage;
+    json["capacitorVoltage"]=daffodilData.capacitorVoltage;
+  //  json["soft_ap_ssid"] = sn;
+    json["serialnumber"] = sn;
+    json["sentBy"] = sn;
+    
+    // json["apAddress"] = apAddress;
+    // json["hostname"] = hostname;
+    // json["stationmode"] = stationmode;
+    // json["ssid"] = ssid;
+    // json["ssids"] = ssids;
+    // json["lora"] = lora;
+    json["internetAvailable"] = daffodilData.internetAvailable;
+    //json["internetPingTime"] = internetPingTime;
+    json["ipAddress"] = daffodilData.ipAddress;
+    //json["totp"] = totpcode;
+    json["deviceTypeId"]=daffodilData.deviceTypeId;
+    json["dsLastUpload"]=daffodilData.dsLastUpload;
+    json["latitude"]=daffodilData.latitude;
+     json["longitude"]=daffodilData.longitude;
+  }
 
 void DataManager::generateRosieWebData(RosieData &rosieData, JsonObject &json)
 {

@@ -9,6 +9,8 @@
 #include <PanchoTankFlowData.h>
 #include <LangleyData.h>
 #include <RosieData.h>
+#include <DaffodilData.h>
+
 #include <ArduinoJson.h>
 class DataManager{
 
@@ -25,13 +27,14 @@ public:
     void storePancho(PanchoTankFlowData& p);
     void storeRosie(RosieData& p);
     void storeGloria(GloriaTankFlowPumpData& p);
+     void storeDaffodil(DaffodilData& p);
     //virtual ~DataManager();
 
 protected:
 	HardwareSerial& _HardSerial;
 
 private:
-   
+    void generateDaffodilWebData(DaffodilData& p,JsonObject& json);
     void generatePanchoTankFlowDataWebData(PanchoTankFlowData& p,JsonObject& json);
 	void generateRosieWebData(RosieData& r,JsonObject& json);
     void generateGloriaTankFlowPumpWebData(GloriaTankFlowPumpData& r,JsonObject& json);

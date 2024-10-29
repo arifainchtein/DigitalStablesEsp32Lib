@@ -288,6 +288,10 @@ this->_HardSerial.println("request  slideswitch/=");
        this->generateWebData(json, serialNumber);
        serializeJson(json, *response);
         request->send(response);
+    }else  if(formName=="SetTimeZone"){
+      p = request->getParam(1);
+      String timezone =p->value();    
+      secretManager.setTimeZone(timezone);
     }else if(formName=="SetGPS"){
       p = request->getParam(1);
       float lat =p->value().toFloat();  
@@ -331,9 +335,11 @@ this->_HardSerial.println("request  slideswitch/=");
         request->send_P(200, "text/plain", sensorString.c_str()); 
     });
 
+
   asyncWebServer.begin();
 
 }
+
 
 
 
@@ -354,6 +360,8 @@ void CajalWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy)
     json["soft_ap_ssid"] = soft_ap_ssid;
     json["serialnumber"] = serialNumber;
    
+   
+
     json["sentBy"] = sentBy;
     json["apAddress"] = apAddress;
     json["hostname"] = hostname;

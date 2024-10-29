@@ -1,4 +1,4 @@
-#include <RosieWifiManager.h>
+#include <DaffodilWifiManager.h>
 #include <ArduinoJson.h>
 #include "SPIFFS.h"
  #define FUN_1_FLOW 1
@@ -9,19 +9,19 @@
 
 
 
-RosieWifiManager::RosieWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  RosieData& tf,RosieConfigData& p) :
-WifiManager(serial ,  t,e) , rosieData(tf),rosieConfigData(p){}
+DaffodilWifiManager::DaffodilWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  DaffodilData& tf,DaffodilConfigData& p) :
+WifiManager(serial ,  t,e) , daffodilData(tf),daffodilConfigData(p){}
 
- void RosieWifiManager::setWifiActiveSwitchStatus(bool b){
+ void DaffodilWifiManager::setWifiActiveSwitchStatus(bool b){
     wifiActiveSwitchStatus=b;
  }
 
-void RosieWifiManager::start(){
+void DaffodilWifiManager::start(){
 
 	if (!SPIFFS.begin(true)) {
 		// SPIFFS will be configured on reboot
 		_HardSerial.println("ERROR: Cannot mount SPIFFS, Rebooting");
-		delay(1000);
+	//	delay(1000);
 
 	}
 
@@ -45,17 +45,17 @@ void RosieWifiManager::start(){
     _HardSerial.println("stationmode=");
     _HardSerial.println(stationmode);
     
-    _HardSerial.print("in  RosieWifiManager ssid=");
+    _HardSerial.print("in  DaffodilWifiManager ssid=");
     _HardSerial.print(ssid);
     _HardSerial.print(" stationmode=");
     _HardSerial.println(stationmode);
-    _HardSerial.println("about to do start scan");
-    ssids = scanNetworks();
-      //
-      //set the mode to null so that 
-      // the hostname is applied
-      //  https://github.com/espressif/arduino-esp32/issues/6700
-      WiFi.mode(WIFI_MODE_NULL);
+    //_HardSerial.println("about to do start scan");
+     if(stationmode)ssids = scanNetworks();
+    //   //
+    //   //set the mode to null so that 
+    //   // the hostname is applied
+    //   //  https://github.com/espressif/arduino-esp32/issues/6700
+       WiFi.mode(WIFI_MODE_NULL);
     if(    wifiActiveSwitchStatus && stationmode && ssid){
        connectSTA();
        
@@ -69,90 +69,77 @@ void RosieWifiManager::start(){
     }
 
 
-    asyncWebServer.on("/SetQFactor1", HTTP_GET, [this](AsyncWebServerRequest *request){
-        int numberOfParameters = request->params();
-        AsyncWebParameter* p = request->getParam(0);
-        rosieData.qfactor1 = p->value().toFloat();
-        request->send_P(200, "text/plain", okString.c_str()); 
-    });
-
-    asyncWebServer.on("/SetQFactor2", HTTP_GET, [this](AsyncWebServerRequest *request){
-        int numberOfParameters = request->params();
-        AsyncWebParameter* p = request->getParam(0);
-        rosieData.qfactor2 = p->value().toFloat();
-        request->send_P(200, "text/plain", okString.c_str()); 
-    });
 
   asyncWebServer.on("/assets/bootstrap/css/bootstrap.min.css", HTTP_GET, [this](AsyncWebServerRequest *request){
-  //this->_HardSerial.println("request  bootstrap.min.css=");
+  this->_HardSerial.println("request  bootstrap.min.css=");
     request->send(SPIFFS, "/bootstrap.min.css", String(), false);
     delay(5);
   });
 
-asyncWebServer.on("/assets/img/Rosie.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
-  //this->_HardSerial.println("request  Rosie.svg");
-    request->send(SPIFFS, "/Rosie.svg", String(), false);
+asyncWebServer.on("/assets/img/Daffodil.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
+  this->_HardSerial.println("request  Daffodil.svg");
+    request->send(SPIFFS, "/Daffodil.svg", String(), false);
     delay(5);
   });
 
 asyncWebServer.on("/assets/js/TankAndFlowConstants.js", HTTP_GET, [this](AsyncWebServerRequest *request){
- // this->_HardSerial.println("request TankFlowConstants.js");
+ this->_HardSerial.println("request TankFlowConstants.js");
     request->send(SPIFFS, "/TankAndFlowConstants.js", String(), false);
     delay(5);
   });
 
 asyncWebServer.on("/assets/js/jquery.min.js", HTTP_GET, [this](AsyncWebServerRequest *request){
- // this->_HardSerial.println("request  jquery/=");
+  this->_HardSerial.println("request  jquery/=");
     request->send(SPIFFS, "/jquery.min.js", String(), false);
     delay(5);
   });
 
 asyncWebServer.on("/assets/css/slideswitch.css", HTTP_GET, [this](AsyncWebServerRequest *request){
-  //this->_HardSerial.println("request  slideswitch/=");
+  this->_HardSerial.println("request  slideswitch/=");
     request->send(SPIFFS, "/slideswitch.css", String(), false);
     delay(5);
   });
 
 
 asyncWebServer.on("/assets/css/styles.css", HTTP_GET, [this](AsyncWebServerRequest *request){
-  //this->_HardSerial.println("request styles.css /=");
+  this->_HardSerial.println("request styles.css /=");
     request->send(SPIFFS, "/styles.css", String(), false);
     delay(5);
   });
 
 asyncWebServer.on("/assets/fonts/fa-solid-900.woff2", HTTP_GET, [this](AsyncWebServerRequest *request){
-  //this->_HardSerial.println("request solid woof2 /=");
+  this->_HardSerial.println("request solid woof2 /=");
     request->send(SPIFFS, "/fa-solid-900.woff2", String(), false);
     delay(5);
   });
 
 asyncWebServer.on("/assets/fonts/fa-solid-900.woff", HTTP_GET, [this](AsyncWebServerRequest *request){
-  //this->_HardSerial.println("request solid woof900 /=");
+  this->_HardSerial.println("request solid woof900 /=");
     request->send(SPIFFS, "/fa-solid-900.woff", String(), false);
     delay(5);
   });
   
   asyncWebServer.on("/assets/fonts/fa-solid-900.ttf", HTTP_GET, [this](AsyncWebServerRequest *request){
-  //this->_HardSerial.println("request  solid woof ttf /=");
+  this->_HardSerial.println("request  solid woof ttf /=");
     request->send(SPIFFS, "/fa-solid-900.ttf", String(), false);
     delay(5);
   });
 
 
 asyncWebServer.on("/assets/fonts/fontawesome-all.min.css", HTTP_GET, [this](AsyncWebServerRequest *request){
- // this->_HardSerial.println("request fontawesome /=");
+  this->_HardSerial.println("request fontawesome /=");
     request->send(SPIFFS, "/fontawesome-all.min.css", String(), false);
     delay(5);
   });
 
 asyncWebServer.on("/assets/bootstrap/js/bootstrap.min.js", HTTP_GET, [this](AsyncWebServerRequest *request){
-//  this->_HardSerial.println("request  bootstramo min js /=");
+ this->_HardSerial.println("request  bootstramo min js /=");
     request->send(SPIFFS, "/bootstrap.min.js", String(), false);
     delay(5);
   });
 
 asyncWebServer.on("/js/index.js", HTTP_GET, [this](AsyncWebServerRequest *request){
- // delay(5);
+  delay(5);
  // this->_HardSerial.println("request  indexjs /=");
   delay(5);
     request->send(SPIFFS, "/index.js", String(), false);
@@ -160,45 +147,45 @@ asyncWebServer.on("/js/index.js", HTTP_GET, [this](AsyncWebServerRequest *reques
   });
   
 asyncWebServer.on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
-	//this->_HardSerial.println("reqestubg  root =");
+	this->_HardSerial.println("reqestubg  root =");
     request->send(SPIFFS, "/index.html", String(), false);
     delay(5);
   });
 
   asyncWebServer.on("/index.html", HTTP_GET, [this](AsyncWebServerRequest *request){
-	//this->_HardSerial.println("reqestubg index.html=");
+	this->_HardSerial.println("reqestubg index.html=");
     request->send(SPIFFS, "/index.html", String(), false);
     delay(5);
   });
 
    asyncWebServer.on("/assets/css/Roboto.css", HTTP_GET, [this](AsyncWebServerRequest *request){
-	//this->_HardSerial.println("reqestubg robottocss=");
+	this->_HardSerial.println("reqestubg robottocss=");
     request->send(SPIFFS, "/Roboto.css", String(), false);
     delay(5);
   });
 
 asyncWebServer.on("/assets/fonts/Roboto-Regular.woff", HTTP_GET, [this](AsyncWebServerRequest *request){
-  //this->_HardSerial.println("request solid woof900 /=");
+  this->_HardSerial.println("request solid woof900 /=");
     request->send(SPIFFS, "/Roboto-Regular.woff", String(), false);
     delay(5);
   });
 
   asyncWebServer.on("/assets/fonts/Roboto-Regular.woff2", HTTP_GET, [this](AsyncWebServerRequest *request){
-  //this->_HardSerial.println("request solid woof900 /=");
+  this->_HardSerial.println("request solid woof900 /=");
     request->send(SPIFFS, "/Roboto-Regular.woff2", String(), false);
     delay(5);
   });
   
 
    asyncWebServer.on("/GetHostName", HTTP_GET, [this](AsyncWebServerRequest *request){
-  //this->_HardSerial.println("request solid woof900 /=");
+  this->_HardSerial.println("request solid woof900 /=");
      request->send_P(200, "text/plain", hostname.c_str()); 
     delay(5);
   });
   
   
 
-asyncWebServer.on("/RosieServlet", HTTP_POST, [this](AsyncWebServerRequest *request) {
+asyncWebServer.on("/DaffodilServlet", HTTP_POST, [this](AsyncWebServerRequest *request) {
     int paramsNr = request->params();
     this->_HardSerial.println(paramsNr);
    
@@ -285,83 +272,19 @@ asyncWebServer.on("/RosieServlet", HTTP_POST, [this](AsyncWebServerRequest *requ
 
       p = request->getParam(2);
       float log =p->value().toFloat();  
-      rosieData.latitude=lat;
-      rosieData.longitude=log;
+      daffodilData.latitude=lat;
+      daffodilData.longitude=log;
     
         DynamicJsonDocument json(1800);
        this->generateWebData(json,serialNumber);
         serializeJson(json, *response);
         request->send(response);
 
-    }else if(formName=="SetFlowSensor2Param"){
-      p = request->getParam(1);
-      String fn2 =p->value();  
-     
-      fn2.toCharArray(rosieData.flow2name,16);
-
-      p = request->getParam(2);
-      rosieData.qfactor2=p->value().toFloat();  
-
-      DynamicJsonDocument json(1800);
-      this->generateWebData(json, serialNumber);
-      serializeJson(json, *response);
-      request->send(response);
-
-    }else if(formName=="SetFlowSensor1Param"){
-      p = request->getParam(1);
-      String fn1=p->value();  
-     
-      fn1.toCharArray(rosieData.flow1name,16);
-
-      p = request->getParam(2);
-      rosieData.qfactor1=p->value().toFloat();  
-
-      DynamicJsonDocument json(1800);
-      this->generateWebData(json, serialNumber);
-      serializeJson(json, *response);
-      request->send(response);
-
-    }else if(formName=="SetTank1Param"){
-      p = request->getParam(1);
-      String t1n =p->value();  
-     
-      t1n.toCharArray(rosieData.tank1name,16);
-
-      p = request->getParam(2);
-      rosieData.tank1HeightMeters=p->value().toFloat();  
-
-      p = request->getParam(2);
-      rosieData.tank1maxvollit=p->value().toFloat();  
-
-        DynamicJsonDocument json(1800);
-       this->generateWebData(json, serialNumber);
-        serializeJson(json, *response);
-        request->send(response);
-
-    }else if(formName=="SetTank2Param"){
-      p = request->getParam(1);
-      String t2n =p->value();  
-      t2n.toCharArray(rosieData.tank2name,16);
-
-       p = request->getParam(2);
-      rosieData.tank2HeightMeters=p->value().toFloat();  
-
-      p = request->getParam(2);
-      rosieData.tank2maxvollit=p->value().toFloat();  
-      
-        DynamicJsonDocument json(1800);
-       this->generateWebData(json, serialNumber);
-        serializeJson(json, *response);
-        request->send(response);
-    }else  if(formName=="SetTimeZone"){
-      p = request->getParam(1);
-      String timezone =p->value();    
-      secretManager.setTimeZone(timezone);
     }
 });
 
 
-asyncWebServer.on("/RosieServlet", HTTP_GET, [this](AsyncWebServerRequest *request) {
+asyncWebServer.on("/DaffodilServlet", HTTP_GET, [this](AsyncWebServerRequest *request) {
     int paramsNr = request->params();
     this->_HardSerial.println(paramsNr);
    
@@ -392,42 +315,29 @@ asyncWebServer.begin();
 
 }
 
-void RosieWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
+void DaffodilWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
     
-    json["devicename"] = rosieData.devicename;
-    json["deviceshortname"] = rosieData.deviceshortname;
-    json["flow1name"] = rosieData.flow1name;
-    json["flow2name"] = rosieData.flow2name;
-    json["tank1name"] = rosieData.tank1name;
-    json["tank2name"] = rosieData.tank2name;
-    json["groupidentifier"]=rosieData.groupidentifier;
-    json["secondsTime"] = rosieData.secondsTime;
-    json["dataSamplingSec"] = rosieData.dataSamplingSec;
-    json["currentFunctionValue"] = rosieData.currentFunctionValue;
-    json["temperature"] = rosieData.temperature;
-    json["rtcBatVolt"] = rosieData.rtcBatVolt;
-    json["opMode"] = rosieData.opMode;
-    json["rssi"] = rosieData.rssi;
-    json["snr"] = rosieData.snr;
-    json["flowrate"] = rosieData.flowRate;
-    json["totalmilliLitres"] = rosieData.totalMilliLitres;
-    json["flowrate2"] = rosieData.flowRate2;
-    json["totalmilliLitres2"] = rosieData.totalMilliLitres2;
-    json["tank1pressurePsi"] = rosieData.tank1PressurePsi;
-    json["tank1pressureVolts"] = rosieData.tank1PressureVolts;
-    json["tank1waterLevel"] = rosieData.tank1WaterLevel;
-    json["tank1heightMeters"] = rosieData.tank1HeightMeters;
-    json["tank2pressurePsi"] = rosieData.tank2PressurePsi;
-    json["tank2pressureVolts"] = rosieData.tank2PressureVolts;
-    json["tank2waterLevel"] = rosieData.tank2WaterLevel;
-    json["tank2heightMeters"] = rosieData.tank2HeightMeters;
-    json["qfactor1"] = rosieData.qfactor1;
-    json["qfactor2"] = rosieData.qfactor2;
-    json["rtcBatVolt"] = rosieData.rtcBatVolt;        
-    json["operatingStatus"] = rosieData.operatingStatus;
-    json["sleepPingMinutes"] = rosieData.sleepPingMinutes;
-    json["digitalStablesUpload"] = rosieData.digitalStablesUpload;
-    json["secondsSinceLastPulse"] = rosieData.secondsSinceLastPulse;
+    json["devicename"] = daffodilData.devicename;
+    json["deviceshortname"] = daffodilData.deviceshortname;
+    json["groupidentifier"]=daffodilData.groupidentifier;
+    json["secondsTime"] = daffodilData.secondsTime;
+    json["dataSamplingSec"] = daffodilData.dataSamplingSec;
+    json["currentFunctionValue"] = daffodilData.currentFunctionValue;
+    json["temperature"] = daffodilData.temperature;
+    json["rtcBatVolt"] = daffodilData.rtcBatVolt;
+    json["opMode"] = daffodilData.opMode;
+    json["rtcBatVolt"] = daffodilData.rtcBatVolt;        
+    json["operatingStatus"] = daffodilData.operatingStatus;
+    json["sleepPingMinutes"] = daffodilData.sleepPingMinutes;
+    json["digitalStablesUpload"] = daffodilData.digitalStablesUpload;
+    json["secondsSinceLastPulse"] = daffodilData.secondsSinceLastPulse;
+    json["currentFunctionValue"]=daffodilData.currentFunctionValue;
+    json["outdoortemperature"] = daffodilData.outdoortemperature;
+    json["outdoorhumidity"] = daffodilData.outdoorhumidity;
+    json["minimumSepticHeight"] = daffodilData.minimumSepticHeight;
+    json["maximumScepticHeight"] = daffodilData.maximumScepticHeight;
+    json["scepticAvailablePercentage"] = daffodilData.scepticAvailablePercentage;
+    json["capacitorVoltage"]=daffodilData.capacitorVoltage;
     json["soft_ap_ssid"] = soft_ap_ssid;
     json["serialnumber"] = serialNumber;
     json["sentBy"] = sentBy;
@@ -442,13 +352,13 @@ void RosieWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy)
     json["internetPingTime"] = internetPingTime;
     json["ipAddress"] = ipAddress;
     json["totp"] = totpcode;
-    json["deviceTypeId"]=rosieData.deviceTypeId;
-    json["dsLastUpload"]=rosieData.dsLastUpload;
-    json["latitude"]=rosieData.latitude;
-     json["longitude"]=rosieData.longitude;
+    json["deviceTypeId"]=daffodilData.deviceTypeId;
+    json["dsLastUpload"]=daffodilData.dsLastUpload;
+    json["latitude"]=daffodilData.latitude;
+     json["longitude"]=daffodilData.longitude;
   }
 
-int RosieWifiManager::uploadDataToDigitalStables(){
+int DaffodilWifiManager::uploadDataToDigitalStables(){
 
   DynamicJsonDocument json(1800);
   generateWebData(json, serialNumber);
@@ -462,14 +372,14 @@ int RosieWifiManager::uploadDataToDigitalStables(){
   int httpResponseCode = http.POST(output);
   _HardSerial.print("upload digitalstables return ");
   _HardSerial.println(httpResponseCode);
-   rosieData.digitalStablesUpload=false;
+   daffodilData.digitalStablesUpload=false;
   if (httpResponseCode == 200) { //Check for the returning code
       String response = http.getString();  //Get the response to the request
        _HardSerial.print("reponse= ");
       _HardSerial.println(response);
       if(response=="Ok"){
         toReturn =true;
-         rosieData.digitalStablesUpload=true;
+         daffodilData.digitalStablesUpload=true;
       }else{
         httpResponseCode =500;
       }
@@ -482,4 +392,4 @@ int RosieWifiManager::uploadDataToDigitalStables(){
 }
 
 
-RosieWifiManager::~RosieWifiManager() {}
+DaffodilWifiManager::~DaffodilWifiManager() {}

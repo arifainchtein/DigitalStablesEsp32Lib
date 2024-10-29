@@ -29,6 +29,7 @@ protected:
     RTCInfoRecord currentTimerRecord, lastReceptionRTCInfoRecord;
     PCF8563TimeManager& timeManager;
     Esp32SecretManager& secretManager;
+    bool wifiActiveSwitchStatus=false;
 
     JsonArray availablessids;
     String ssid;
@@ -36,6 +37,7 @@ protected:
     long  totpcode;    
     String password;
     String soft_ap_ssid ;
+    String timezone;    
     String soft_ap_password;
     AsyncWebServer asyncWebServer;
     HTTPClient http;
@@ -43,6 +45,7 @@ protected:
     String ipAddress;
     String sensorString;
     String serialNumber;
+    String tiumezone;
     uint8_t delayT=10;
     float fieldId;
     String hostname;
@@ -68,6 +71,8 @@ protected:
 public:
 	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e) ;
 	virtual void start( )=0;
+    void stop( );
+     bool getWifiStatus();
     virtual int uploadDataToDigitalStables()=0;
     void setCurrentToTpCode(long t);
     void setCurrentSSID(String s);
@@ -80,7 +85,7 @@ public:
     String scanNetworks();
     String getSoft_ap_password();
     void setSoft_ap_password(String s);
-    uint8_t getWifiStatus();
+   // uint8_t getWifiStatus();
     String getTeleonomeData(String url, bool b);
     String getIpAddress();
     double getRSSI();
@@ -91,15 +96,15 @@ public:
     String getSSID();
     void setSSID(String s);
     void setSerialNumber(String s);
-     void setLora(bool b);
+    void setLora(bool b);
+    void setTimezone(String timezone);
     bool getStationMode( );
     void setCurrentTimerRecord(RTCInfoRecord currentTimerRecord);
     bool configWifiAP(String sas, String sap, String h);
     bool configWifiSTA(String s, String p, String h);
    // void configWifi(String s, String p, String sas, String sap, String h);
     bool getAPStatus();
-    
-
+   
 
     virtual ~WifiManager();
     

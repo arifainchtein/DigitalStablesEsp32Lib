@@ -96,7 +96,7 @@ RTCInfoRecord PCF8563TimeManager::now(){
 		aRTCInfoRecord.second     = bcdToDec(Wire.read() & B01111111); // remove VL error bit
 		aRTCInfoRecord.minute     = bcdToDec(Wire.read() & B01111111); // remove unwanted bits from MSB
 		aRTCInfoRecord.hour       = bcdToDec(Wire.read() & B00111111);
-		aRTCInfoRecord.date = bcdToDec(Wire.read() & B00111111);
+		aRTCInfoRecord.date =       bcdToDec(Wire.read() & B00111111);
 		aRTCInfoRecord.dayOfWeek  = bcdToDec(Wire.read() & B00000111);
 		aRTCInfoRecord.month      = bcdToDec(Wire.read() & B00011111);  // remove century bit, 1999 is over
 		aRTCInfoRecord.year       = bcdToDec(Wire.read());
@@ -312,6 +312,7 @@ long PCF8563TimeManager::getCurrentTimeInSeconds(){
 	  Wire.beginTransmission(PCF8563address);
 	  Wire.write(0x0D);
 	  Wire.write(B10000011);
+	 
 	  Wire.endTransmission();
 	}
 

@@ -27,8 +27,9 @@ public:
 	void saveSleepPingMinutes(float pingMinutes );
 	float getSleepPingMinutes();
 	void saveWifiParameters(String ssid, String password, String softAPSSID, String softAPPASS,  String hostName, bool stationmode);
-	void saveDeviceSensorConfig(String devicename,String deviceshortname, String flow1name, String flow2name, String tank1name, String tank2name);
-
+	void saveDeviceSensorConfig(String devicename,String deviceshortname, String flow1name, String flow2name, String tank1name, String tank2name, String tz);
+	void setTimeZone(String s);
+	String readTimeZone( );
 	String readDeviceName();
 	String readDeviceShortName();
 	String readFlow1Name();

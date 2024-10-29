@@ -281,6 +281,10 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
     }else if(formName=="SetTimeViaInternet"){
       bool r = setTimeFromInternet();
         DynamicJsonDocument json(1800);
+      
+        panchoTankFlowData.secondsTime=timeManager.getCurrentTimeInSeconds(currentTimerRecord);
+        this->_HardSerial.print(" after setting time, seconds=");
+         this->_HardSerial.println(panchoTankFlowData.secondsTime);
        this->generateWebData(json,serialNumber);
         serializeJson(json, *response);
         request->send(response);
@@ -370,6 +374,10 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
         serializeJson(json, *response);
         request->send(response);
 
+    }else  if(formName=="SetTimeZone"){
+      p = request->getParam(1);
+      String timezone =p->value();    
+      secretManager.setTimeZone(timezone);
     }
 
     
