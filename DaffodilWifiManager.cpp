@@ -6,7 +6,7 @@
 #define FUN_1_FLOW_1_TANK 3
 #define FUN_1_TANK 4
 #define FUN_2_TANK 5
-
+#define WATCHDOG_WDI 18
 
 
 DaffodilWifiManager::DaffodilWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  DaffodilData& tf,DaffodilConfigData& p) :
@@ -50,13 +50,19 @@ void DaffodilWifiManager::start(){
     _HardSerial.print(" stationmode=");
     _HardSerial.println(stationmode);
     //_HardSerial.println("about to do start scan");
-     if(stationmode)ssids = scanNetworks();
+     digitalWrite(WATCHDOG_WDI, HIGH);
+    delay(2);
+    digitalWrite(WATCHDOG_WDI, LOW);
+     ssids = scanNetworks();
+      digitalWrite(WATCHDOG_WDI, HIGH);
+    delay(2);
+    digitalWrite(WATCHDOG_WDI, LOW);
     //   //
     //   //set the mode to null so that 
     //   // the hostname is applied
     //   //  https://github.com/espressif/arduino-esp32/issues/6700
        WiFi.mode(WIFI_MODE_NULL);
-    if(    wifiActiveSwitchStatus && stationmode && ssid){
+    if(   stationmode && ssid){
        connectSTA();
        
     }else{

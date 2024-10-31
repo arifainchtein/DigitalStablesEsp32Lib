@@ -8,6 +8,7 @@
 #ifndef LIBRARIES_DIGITALSTABLES_WIFIMANAGER_H_
 #define LIBRARIES_DIGITALSTABLES_WIFIMANAGER_H_
 #include "Arduino.h"
+#include <AsyncUDP.h>
 #include <RTCInfoRecord.h>
 #include <PCF8563TimeManager.h>
 #include <Esp32SecretManager.h>
@@ -20,6 +21,7 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <ESP32Ping.h>
+#include <ping.h>
 class WifiManager{
 
 
@@ -64,7 +66,11 @@ protected:
     void createDeneWord(JsonObject& deneWord, String name, long value, String valueType);
     void internetConnectionAvailable();
     bool setTimeFromInternet();
-    
+    void setupTime();
+    void handlePingResponse(void* opt, void* resp);
+    //static void pingResults(void* opt, void* resp);
+
+
     virtual void generateWebData(DynamicJsonDocument& json, String s)=0;
    
 

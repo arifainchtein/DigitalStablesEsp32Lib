@@ -60,11 +60,12 @@ for (  uint8_t i = 0; i < 8; i++) {
  _HardSerial.print(" daffodilData.checksum=");
    _HardSerial.println(daffodilData.checksum);
    
-if(daffodilData.checksum==checksum && sn.length()==14){
+if(daffodilData.checksum==checksum && sn.length()==15){
 //if(){
  obj = completeObject.createNestedObject(sn);
   generateDaffodilWebData(daffodilData, obj);
   
+  serializeJsonPretty(obj, _HardSerial);
  
   _HardSerial.print(" number of devices=");
    _HardSerial.println(completeObject.size());
@@ -87,7 +88,8 @@ if(rosieData.checksum==checksum && sn.length()==15 ){
 //if(){
  obj = completeObject.createNestedObject(sn);
   generateRosieWebData(rosieData, obj);
-  
+   serializeJsonPretty(obj, _HardSerial);
+ 
   _HardSerial.print("adding a rosie  serialNumber=");
    _HardSerial.print(sn);
   _HardSerial.print(" number of devices=");
