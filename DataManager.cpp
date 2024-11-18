@@ -109,7 +109,7 @@ for (  uint8_t i = 0; i < 8; i++) {
     checksum += static_cast<uint8_t>(gloriaTankFlowPumpData.serialnumberarray[i]);
   }
   checksum &= 0xFF;
-if(gloriaTankFlowPumpData.checksum==checksum  && sn.length()==15){
+if(gloriaTankFlowPumpData.checksum==checksum  && (sn.length()==15|| sn.length()==14)){
 //if(serialNumber.length()==15){
 
  obj = completeObject.createNestedObject(sn);
@@ -122,6 +122,10 @@ if(gloriaTankFlowPumpData.checksum==checksum  && sn.length()==15){
 }else{
    _HardSerial.print("gloria rejected pulse serialnumne=");
    _HardSerial.println(sn);
+    _HardSerial.print("gloriatata checksum=");
+   _HardSerial.println(gloriaTankFlowPumpData.checksum);
+   _HardSerial.print("checksum=");
+   _HardSerial.println(checksum);
    
 }
 }
