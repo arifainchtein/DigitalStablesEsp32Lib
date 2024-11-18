@@ -95,6 +95,6 @@ struct GloriaTankFlowPumpData{
 	float solarvoltage=0.0;
 	float capacitorvoltage=0.0;
 	bool relaystatus=false;
-	long relaysecondson=0
+	long relaysecondson=0;
 };
 #endif
