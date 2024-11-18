@@ -1,5 +1,5 @@
 #include <CajalWifiManager.h>
-
+#include <ArduinoJson.h>
 #include <ArduinoJson.h>
 #include "SPIFFS.h"
 //#include <LittleFS.h>
@@ -391,7 +391,7 @@ int CajalWifiManager::uploadDataToDigitalStables()
     http.addHeader("Content-Type", "application/json");
     boolean toReturn = false;
     int httpResponseCode = http.POST(output);
-    _HardSerial.print("upload digitalstables return ");
+   _HardSerial.print("upload digitalstables return ");
     _HardSerial.println(httpResponseCode);
     cajalData.digitalStablesUpload = false;
     if (httpResponseCode == 200)
@@ -415,5 +415,69 @@ int CajalWifiManager::uploadDataToDigitalStables()
 
     return httpResponseCode; // toReturn;
 }
+
+int CajalWifiManager::uploadRosieDataToDigitalStables(RosieData& rosieData){
+
+  DynamicJsonDocument json(1800);
+//  JSONObjectTransformer::generateRosieWebData(rosieData,json, serialNumber);
+  
+  String output;
+  serializeJson(json, output);
+  const char* serverName = "http://devices.digitalstables.com/DeviceUploadServlet";
+  http.begin(serverName);    
+  http.addHeader("Content-Type", "application/json");
+  boolean toReturn=false;
+  int httpResponseCode = http.POST(output);
+
+    _HardSerial.print("upload  rosie ");
+  _HardSerial.print(rosieData.devicename);
+  _HardSerial.print(" to digitalstables return ");
+_HardSerial.println(httpResponseCode);
+  //_HardSerial.print("upload digitalstables return ");
+  //_HardSerial.println(httpResponseCode);
+   cajalData.digitalStablesUpload=false;
+  if (httpResponseCode == 200) { //Check for the returning code
+      String response = http.getString();  //Get the response to the request
+      if(response=="Ok"){
+        toReturn =true;
+         cajalData.digitalStablesUpload=true;
+      }else{
+        httpResponseCode=500;
+      }
+  }
+  http.end();
+  return httpResponseCode;//toReturn;
+}
+
+ int CajalWifiManager::uploadDaffodilDataToDigitalStables(DaffodilData& daffodilData){
+
+  DynamicJsonDocument json(1800);
+ // JSONObjectTransformer::generateDaffodilWebData(daffodilData,json, serialNumber);
+  
+  String output;
+  serializeJson(json, output);
+  const char* serverName = "http://devices.digitalstables.com/DeviceUploadServlet";
+  http.begin(serverName);    
+  http.addHeader("Content-Type", "application/json");
+  boolean toReturn=false;
+  int httpResponseCode = http.POST(output);
+  _HardSerial.print("upload  daffodil ");
+ _HardSerial.print(daffodilData.devicename);
+  _HardSerial.print(" to digitalstables return ");
+_HardSerial.println(httpResponseCode);
+   cajalData.digitalStablesUpload=false;
+  if (httpResponseCode == 200) { //Check for the returning code
+      String response = http.getString();  //Get the response to the request
+      if(response=="Ok"){
+        toReturn =true;
+         cajalData.digitalStablesUpload=true;
+      }else{
+        httpResponseCode=500;
+      }
+  }
+  http.end();
+  return httpResponseCode;//toReturn;
+}
+
 
 CajalWifiManager::~CajalWifiManager() {}

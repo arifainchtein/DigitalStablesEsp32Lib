@@ -526,11 +526,11 @@ bool WifiManager::connectSTA()
         digitalWrite(WATCHDOG_WDI, HIGH);
         delay(2);
         digitalWrite(WATCHDOG_WDI, LOW);
-        internetConnectionAvailable();
+        checkInternetConnectionAvailable();
         digitalWrite(WATCHDOG_WDI, HIGH);
         delay(2);
         digitalWrite(WATCHDOG_WDI, LOW);
-        _HardSerial.print(" after internetConnectionAvailable");
+        _HardSerial.print(" after checkInternetConnectionAvailable");
     }
     else
     {
@@ -583,69 +583,22 @@ bool WifiManager::connectAP()
     return apConnected;
 }
 
-void WifiManager::internetConnectionAvailable()
+void WifiManager::checkInternetConnectionAvailable()
 {
     digitalWrite(WATCHDOG_WDI, HIGH);
     delay(2);
     digitalWrite(WATCHDOG_WDI, LOW);
-    // Start ping task
-    //   xTaskCreate(
-    //     [](void* parameter) {
-    //         WifiManager* instance = (WifiManager*)parameter;
-    //       instance->doPing();
-    //       vTaskDelete(NULL);
-    //     },
-    //     "PingTask",
-    //     TASK_STACK_SIZE,
-    //     NULL,
-    //     1,
-    //     NULL
-    //   );
-
-    // bool keepGoing=true;
-    // int counter=0;
-    //     while (keepGoing){
-
-    //        digitalWrite(WATCHDOG_WDI, HIGH);
-    //     delay(2);
-    //     digitalWrite(WATCHDOG_WDI, LOW);
-    //       delay(500);
-    //        if (pingComplete) keepGoing=false;
-    //        digitalWrite(WATCHDOG_WDI, HIGH);
-    //     delay(2);
-    //     digitalWrite(WATCHDOG_WDI, LOW);
-    //         counter++;
-    //         if(counter>10){
-    //             keepGoing=false;
-
-    //         }
-    //     }
-    //  digitalWrite(WATCHDOG_WDI, HIGH);
-    //     delay(2);
-    //     digitalWrite(WATCHDOG_WDI, LOW);
-
-    // internetAvailable =  Ping.ping("www.google.com",2,300);
-    IPAddress target(8, 8, 8, 8); // Google's DNS server
-    struct ping_option ping;
-    ping.count = 2;
-    ping.ip = target;
-    ping.coarse_time = 300; // timeout
-
-    //  ping.recv_function = &pingResults;
-
-    bool internetAvailable = ping_start(&ping);
-
-    // internetAvailable = ping_start(target, 2, 300, 0, 32);
-    // internetAvailable= ping_start(&ping);
-
-    digitalWrite(WATCHDOG_WDI, HIGH);
-    delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
-    internetPingTime = 0;
-    if (internetAvailable)
-    {
-        internetPingTime = 300;
-    }
+     internetPingTime = 0;
+      digitalWrite(WATCHDOG_WDI, HIGH);
+        delay(2);
+        digitalWrite(WATCHDOG_WDI, LOW);
+        delay(500);
+    ping();
+        digitalWrite(WATCHDOG_WDI, HIGH);
+        delay(2);
+        digitalWrite(WATCHDOG_WDI, LOW);
+        delay(500);
+    
     _HardSerial.print("called ping, speed=");
     _HardSerial.println(internetPingTime);
 }
@@ -680,11 +633,10 @@ void WifiManager::setupTime()
 //   pingComplete = true;
 // }
 
-bool WifiManager::setTimeFromInternet()
-{
+bool WifiManager::setTimeFromInternet(){
     bool toReturn = false;
     configTime(0, 0, "pool.ntp.org");
-    // String timezone="AEST-10AEDT,M10.1.0,M4.1.0/3";
+    String timezone="AEST-10AEDT,M10.1.0,M4.1.0/3";
     setenv("TZ", timezone.c_str(), 1); //  Now adjust the TZ.  Clock settings are adjusted to show the new local time
     tzset();
     struct tm timeinfo;
@@ -712,7 +664,6 @@ bool WifiManager::setTimeFromInternet()
         commandTime.concat("#");
         commandTime.concat(second);
         commandTime.concat("#");
-
         toReturn = timeManager.setTime(commandTime);
         _HardSerial.print("Setting internetTime:");
         _HardSerial.print(commandTime);
@@ -723,4 +674,53 @@ bool WifiManager::setTimeFromInternet()
     return toReturn;
 }
 
+void WifiManager::ping(){
+     digitalWrite(WATCHDOG_WDI, HIGH);
+        delay(2);
+        digitalWrite(WATCHDOG_WDI, LOW);
+       
+    HTTPClient http;
+    http.setTimeout(950);
+    String url = "http://devices.digitalstables.com/DevicePingServlet?"; // Specify the URL with the Ping parameter
+    //String url = "http://www.google.com"; // Specify the URL with the Ping parameter
+    _HardSerial.println(" startmg http");
+     digitalWrite(WATCHDOG_WDI, HIGH);
+        delay(2);
+        digitalWrite(WATCHDOG_WDI, LOW);
+    http.begin(url); // Start the request
+         digitalWrite(WATCHDOG_WDI, HIGH);
+        delay(2);
+        digitalWrite(WATCHDOG_WDI, LOW);
+    unsigned long startTime = millis(); // Start time
+    int httpResponseCode = http.GET(); // Send the request
+    internetPingTime = millis() - startTime; // Calculate elapsed time
+    _HardSerial.print(" end http,httpResponseCode=");
+    _HardSerial.println(httpResponseCode);
+    digitalWrite(WATCHDOG_WDI, HIGH);
+    delay(2);
+    digitalWrite(WATCHDOG_WDI, LOW);
+    // Check for the response code
+    if (httpResponseCode >0) {
+      String payload = http.getString(); // Get the response payload
+      Serial.println(httpResponseCode); // Print HTTP response code
+      Serial.println(payload); // Print response payload
+      Serial.print("Response time: ");
+      Serial.print(internetPingTime); // Print the time taken for response
+      internetAvailable= true;
+      Serial.println(" ms");
+    } else {
+     // Serial.print("Error on HTTP request: ");
+      _HardSerial.printf("Error on HTTP request: %s\n", http.errorToString(httpResponseCode).c_str());
+       internetAvailable= false;
+    }
+      _HardSerial.print(" finished ping internetAvailable=");
+    _HardSerial.println(internetAvailable);
+         digitalWrite(WATCHDOG_WDI, HIGH);
+        delay(2);
+        digitalWrite(WATCHDOG_WDI, LOW);
+    http.end(); // Free resources
+         digitalWrite(WATCHDOG_WDI, HIGH);
+        delay(2);
+        digitalWrite(WATCHDOG_WDI, LOW);
+}
 WifiManager::~WifiManager() {}

@@ -372,13 +372,24 @@ int DaffodilWifiManager::uploadDataToDigitalStables(){
   String output;
   serializeJson(json, output);
   const char* serverName = "http://devices.digitalstables.com/DeviceUploadServlet";
+  http.setTimeout(950);
+   digitalWrite(WATCHDOG_WDI, HIGH);
+    delay(2);
+    digitalWrite(WATCHDOG_WDI, LOW);
   http.begin(serverName);    
+   digitalWrite(WATCHDOG_WDI, HIGH);
+    delay(2);
+    digitalWrite(WATCHDOG_WDI, LOW);
   http.addHeader("Content-Type", "application/json");
   boolean toReturn=false;
   int httpResponseCode = http.POST(output);
   _HardSerial.print("upload digitalstables return ");
   _HardSerial.println(httpResponseCode);
    daffodilData.digitalStablesUpload=false;
+   daffodilData.internetAvailable=false;
+    digitalWrite(WATCHDOG_WDI, HIGH);
+    delay(2);
+    digitalWrite(WATCHDOG_WDI, LOW);
   if (httpResponseCode == 200) { //Check for the returning code
       String response = http.getString();  //Get the response to the request
        _HardSerial.print("reponse= ");
@@ -386,11 +397,24 @@ int DaffodilWifiManager::uploadDataToDigitalStables(){
       if(response=="Ok"){
         toReturn =true;
          daffodilData.digitalStablesUpload=true;
+          daffodilData.internetAvailable=true;
       }else{
         httpResponseCode =500;
+         daffodilData.digitalStablesUpload=false;
+          daffodilData.internetAvailable=false;
+        _HardSerial.print("line 405 upload digitalstables failed=");
+         _HardSerial.print(response);
       }
+  }else{
+      _HardSerial.printf("Error Upload Digital Stables: %s\n", http.errorToString(httpResponseCode).c_str());
   }
+   digitalWrite(WATCHDOG_WDI, HIGH);
+    delay(2);
+    digitalWrite(WATCHDOG_WDI, LOW);
   http.end();
+   digitalWrite(WATCHDOG_WDI, HIGH);
+    delay(2);
+    digitalWrite(WATCHDOG_WDI, LOW);
    _HardSerial.print("upload digitalstables return ");
   _HardSerial.println(httpResponseCode);
   

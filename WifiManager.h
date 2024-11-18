@@ -20,8 +20,7 @@
 #include <ESPAsyncWebServer.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
-#include <ESP32Ping.h>
-#include <ping.h>
+
 class WifiManager{
 
 
@@ -64,13 +63,12 @@ protected:
     void createDeneWord(JsonObject& deneWord, String name, float value, String valueType);
     void createDeneWord(JsonObject& deneWord, String name, int value, String valueType);
     void createDeneWord(JsonObject& deneWord, String name, long value, String valueType);
-    void internetConnectionAvailable();
-    bool setTimeFromInternet();
+    
+   
     void setupTime();
     void handlePingResponse(void* opt, void* resp);
     //static void pingResults(void* opt, void* resp);
-
-
+    void ping();
     virtual void generateWebData(DynamicJsonDocument& json, String s)=0;
    
 
@@ -78,6 +76,7 @@ public:
 	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e) ;
 	virtual void start( )=0;
     void stop( );
+     bool setTimeFromInternet();
      bool getWifiStatus();
     virtual int uploadDataToDigitalStables()=0;
     void setCurrentToTpCode(long t);
@@ -110,7 +109,7 @@ public:
     bool configWifiSTA(String s, String p, String h);
    // void configWifi(String s, String p, String sas, String sap, String h);
     bool getAPStatus();
-   
+   void checkInternetConnectionAvailable();
 
     virtual ~WifiManager();
     

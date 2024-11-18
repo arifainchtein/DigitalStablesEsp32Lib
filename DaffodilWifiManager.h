@@ -6,6 +6,8 @@
 #include "Arduino.h"
 #include <WifiManager.h>
 #include <DaffodilData.h>
+#include <RosieData.h>
+
 
 
 class DaffodilWifiManager : public WifiManager{
@@ -21,6 +23,8 @@ public:
 	void setWifiActiveSwitchStatus(bool b);
 	void generateWebData(DynamicJsonDocument& json, String s);
 	int uploadDataToDigitalStables();
+
+
     virtual ~DaffodilWifiManager();
 
 private:

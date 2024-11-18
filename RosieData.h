@@ -20,7 +20,7 @@ struct RosieData{
 	char tank2name[10];
 	uint8_t serialnumberarray[8];
 	uint8_t checksum;
-	char groupidentifier[12];
+	//char groupidentifier[12];
 	char deviceTypeId[12];
 	long secondsTime=0L;
 	uint8_t dataSamplingSec=2;
@@ -41,15 +41,15 @@ struct RosieData{
 	float totalMilliLitres2=0.0;
 
 	float tank1PressurePsi=0.0;
-	float tank1PressureVolts=0.0;
-	float tank1WaterLevel=0.0;
+	//float tank1PressureVolts=0.0;
+	//float tank1WaterLevel=0.0;
 	float tank1HeightMeters=.3;
 	float tank1maxvollit;
 	float tank1heightmeters;
 
 	float tank2PressurePsi=0.0;
-	float tank2PressureVolts=0.0;
-	float tank2WaterLevel=0.0;
+//	float tank2PressureVolts=0.0;
+//	float tank2WaterLevel=0.0;
 	float tank2HeightMeters=.3;
 	float tank2maxvollit;
 	float tank2heightmeters;
@@ -75,5 +75,12 @@ struct RosieData{
 	float longitude;
 	float solarVoltage=0.0;
 	float capacitorVoltage=0.0;
+	long totpcode;
+	float outdoortemperature=0.0;
+	float outdoorhumidity=0.0;
+	float minimumSepticHeight=0.0;
+	float maximumScepticHeight=0.0;
+    float measuredHeight=0.0;
+	float scepticAvailablePercentage=0.0;
 };
 #endif

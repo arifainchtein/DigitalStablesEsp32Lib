@@ -60,7 +60,7 @@ for (  uint8_t i = 0; i < 8; i++) {
  _HardSerial.print(" daffodilData.checksum=");
    _HardSerial.println(daffodilData.checksum);
    
-if(daffodilData.checksum==checksum && sn.length()==15){
+if(daffodilData.checksum==checksum && (sn.length()==15 ||sn.length()==14)){
 //if(){
  obj = completeObject.createNestedObject(sn);
   generateDaffodilWebData(daffodilData, obj);
@@ -177,7 +177,7 @@ void DataManager::generateRosieWebData(RosieData &rosieData, JsonObject &json)
   json["flow1name"] = rosieData.flow1name;
   json["flow2name"] = rosieData.flow2name;
   json["tank1name"] = rosieData.tank1name;
-  json["tank2name"] = rosieData.tank2name;
+  //json["tank2name"] = rosieData.tank2name;
   
 
 
@@ -186,7 +186,7 @@ void DataManager::generateRosieWebData(RosieData &rosieData, JsonObject &json)
   json["flow2name"] = rosieData.flow2name;
   json["tank1name"] = rosieData.tank1name;
   json["tank2name"] = rosieData.tank2name;
-  json["groupidentifier"] = rosieData.groupidentifier;
+ // json["groupidentifier"] = rosieData.groupidentifier;
   json["secondsTime"] = rosieData.secondsTime;
   json["dataSamplingSec"] = rosieData.dataSamplingSec;
   json["currentFunctionValue"] = rosieData.currentFunctionValue;
@@ -201,12 +201,12 @@ void DataManager::generateRosieWebData(RosieData &rosieData, JsonObject &json)
   json["flowrate2"] = rosieData.flowRate2;
   json["totalmilliLitres2"] = rosieData.totalMilliLitres2;
   json["tank1pressurePsi"] = rosieData.tank1PressurePsi;
-  json["tank1pressureVolts"] = rosieData.tank1PressureVolts;
-  json["tank1waterLevel"] = rosieData.tank1WaterLevel;
+ // json["tank1pressureVolts"] = rosieData.tank1PressureVolts;
+//  json["tank1waterLevel"] = rosieData.tank1WaterLevel;
   json["tank1heightMeters"] = rosieData.tank1HeightMeters;
   json["tank2pressurePsi"] = rosieData.tank2PressurePsi;
-  json["tank2pressureVolts"] = rosieData.tank2PressureVolts;
-  json["tank2waterLevel"] = rosieData.tank2WaterLevel;
+  //json["tank2pressureVolts"] = rosieData.tank2PressureVolts;
+ // json["tank2waterLevel"] = rosieData.tank2WaterLevel;
   json["tank2heightMeters"] = rosieData.tank2HeightMeters;
   json["qfactor1"] = rosieData.qfactor1;
   json["qfactor2"] = rosieData.qfactor2;

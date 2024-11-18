@@ -211,9 +211,9 @@ void TankAndFlowSensorController::readTank1(){
 	// since the psi is 5 for 4.5 then
 	float psi = vol45*5/4.5;
 	
-    panchoTankFlowData.tank1PressureVolts=average;
+  //  panchoTankFlowData.tank1PressureVolts=average;
     panchoTankFlowData.tank1PressurePsi=psi;
-    panchoTankFlowData.tank1WaterLevel=psi*.7;
+    //panchoTankFlowData.tank1WaterLevel=psi*.7;
 }
 
 
@@ -242,9 +242,9 @@ void TankAndFlowSensorController::readTank2(){
 	// since the psi is 5 for 4.5 then
 	float psi = vol45*5/4.5;
 	
-    panchoTankFlowData.tank2PressureVolts=average;
+   // panchoTankFlowData.tank2PressureVolts=average;
     panchoTankFlowData.tank2PressurePsi=psi;
-    panchoTankFlowData.tank2WaterLevel=psi*.7;
+   // panchoTankFlowData.tank2WaterLevel=psi*.7;
 }
 
 void TankAndFlowSensorController::readFlowMeter1(){

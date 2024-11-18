@@ -144,7 +144,7 @@ void RosieTankAndFlowSensorController::refreshDisplays(){
 				////display21.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
 			}
 
-			if(rosieData.tank1WaterLevel==(int)rosieData.tank1WaterLevel){
+			if(rosieData.tank1PressurePsi==(int)rosieData.tank1PressurePsi){
     			//display22.showNumberDec(rosieData.tank1WaterLevel, false);
   			}else{
 				scaledFlow=rosieData.flowRate2*100;
@@ -152,20 +152,20 @@ void RosieTankAndFlowSensorController::refreshDisplays(){
 			}
             break;
         case 4:
-            if(rosieData.tank1WaterLevel==(int)rosieData.tank1WaterLevel){
+            if(rosieData.tank1PressurePsi==(int)rosieData.tank1PressurePsi){
     			////display21.showNumberDec(rosieData.tank1WaterLevel, false);
   			}else{
 				////display21.showNumberDecEx(rosieData.tank1WaterLevel, (0x80 >> 1), false);
 			}
             break;
         case 5:
-            if(rosieData.tank1WaterLevel==(int)rosieData.tank1WaterLevel){
+            if(rosieData.tank1PressurePsi==(int)rosieData.tank1PressurePsi){
     			////display21.showNumberDec(rosieData.tank1WaterLevel, false);
   			}else{
 				////display21.showNumberDecEx(rosieData.tank1WaterLevel, (0x80 >> 1), false);
 			}
             
-			if(rosieData.tank2WaterLevel==(int)rosieData.tank2WaterLevel){
+			if(rosieData.tank2PressurePsi==(int)rosieData.tank2PressurePsi){
     			//display22.showNumberDec(rosieData.tank2WaterLevel, false);
   			}else{
 				//display22.showNumberDecEx(rosieData.tank2WaterLevel, (0x80 >> 1), false);
@@ -197,9 +197,9 @@ void RosieTankAndFlowSensorController::readTank1(){
 	// since the psi is 5 for 4.5 then
 	float psi = vol45*5/4.5;
 	
-    rosieData.tank1PressureVolts=average;
+   // rosieData.tank1PressureVolts=average;
     rosieData.tank1PressurePsi=psi;
-    rosieData.tank1WaterLevel=psi*.7;
+  //  rosieData.tank1WaterLevel=psi*.7;
 }
 
 
@@ -228,9 +228,9 @@ void RosieTankAndFlowSensorController::readTank2(){
 	// since the psi is 5 for 4.5 then
 	float psi = vol45*5/4.5;
 	
-    rosieData.tank2PressureVolts=average;
+    //rosieData.tank2PressureVolts=average;
     rosieData.tank2PressurePsi=psi;
-    rosieData.tank2WaterLevel=psi*.7;
+  //  rosieData.tank2WaterLevel=psi*.7;
 }
 
 void RosieTankAndFlowSensorController::readFlowMeter1(){

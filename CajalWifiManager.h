@@ -20,6 +20,10 @@ public:
 	void start( );
 	void generateWebData(DynamicJsonDocument& json, String s);
 	int uploadDataToDigitalStables();
+		
+	int uploadRosieDataToDigitalStables(RosieData& r);
+	int uploadDaffodilDataToDigitalStables(DaffodilData& r);
+
     virtual ~CajalWifiManager();
 
 private:

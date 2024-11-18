@@ -176,11 +176,20 @@ long PCF8563TimeManager::dateAsSeconds(uint16_t year, uint8_t month, uint8_t dat
 
 
 
-
-
 long PCF8563TimeManager::getTimeForCodeGeneration(){
 
 	RTCInfoRecord anRTCInfoRecord =now();
+	uint8_t seconds = anRTCInfoRecord.second+SECONDOFFSET;
+	uint8_t month = anRTCInfoRecord.month-1;
+	uint16_t year = anRTCInfoRecord.year;
+
+	return dateAsSeconds(year, month, anRTCInfoRecord.date, anRTCInfoRecord.hour, anRTCInfoRecord.minute, anRTCInfoRecord.second );
+}
+
+
+long PCF8563TimeManager::getTimeForCodeGeneration(RTCInfoRecord anRTCInfoRecord){
+
+	//RTCInfoRecord anRTCInfoRecord =now();
 	uint8_t seconds = anRTCInfoRecord.second+SECONDOFFSET;
 	uint8_t month = anRTCInfoRecord.month-1;
 	uint16_t year = anRTCInfoRecord.year;

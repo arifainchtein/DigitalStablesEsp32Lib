@@ -30,6 +30,7 @@ public:
 	long getCurrentTimeInSeconds(RTCInfoRecord r);
     bool printTimeToSerial(RTCInfoRecord aRTCInfoRecord);
 	RTCInfoRecord now();
+	long getTimeForCodeGeneration(RTCInfoRecord aRTCInfoRecord);
 	long getTimeForCodeGeneration();
 	//
 	// Functions that represent Serial commands

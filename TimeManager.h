@@ -21,7 +21,7 @@ class TimeManager{
 	
 		#define LEAP_YEAR(_year) ((_year%4)==0)
 
-		int timeZoneHours=10;
+		int timeZoneHours=11;
 		int SECONDOFFSET=10;
 
 		TimeManager( HardwareSerial& serial);
@@ -35,6 +35,7 @@ class TimeManager{
 		virtual long getCurrentTimeInSeconds()=0;
 		void setTimeZoneOffset(uint8_t h);
 		virtual RTCInfoRecord now()=0;
+		virtual long getTimeForCodeGeneration(RTCInfoRecord)=0;
 		virtual long getTimeForCodeGeneration()=0;
 		//
 		// Functions that represent Serial commands

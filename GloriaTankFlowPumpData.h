@@ -42,7 +42,7 @@ struct GloriaTankFlowPumpData{
 	char tank2name[12];
 	uint8_t serialnumberarray[8];
 	uint8_t checksum;
-	char groupidentifier[12];
+	//char groupidentifier[12];
 	char deviceTypeId[12];
 	long secondsTime=0L;
 	uint8_t dataSamplingSec=3;
@@ -62,14 +62,14 @@ struct GloriaTankFlowPumpData{
 	float totalMilliLitres2=0.0;
 
 	float tank1PressurePsi=0.0;
-	float tank1PressureVolts=0.0;
-	float tank1WaterLevel=0.0;
+	//float tank1PressureVolts=0.0;
+	//float tank1WaterLevel=0.0;
 	float tank1HeightMeters=.3;
 	float tank1maxvollit=0;
 
 	float tank2PressurePsi=0.0;
-	float tank2PressureVolts=0.0;
-	float tank2WaterLevel=0.0;
+	//float tank2PressureVolts=0.0;
+	//float tank2WaterLevel=0.0;
 	float tank2HeightMeters=.3;
 	float tank2maxvollit=0.0;
 	//
@@ -94,5 +94,7 @@ struct GloriaTankFlowPumpData{
 	float longitude=144.48861;
 	float solarvoltage=0.0;
 	float capacitorvoltage=0.0;
+	bool relaystatus=false;
+	long relaysecondson=0
 };
 #endif
