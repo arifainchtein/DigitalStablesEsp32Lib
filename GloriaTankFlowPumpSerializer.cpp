@@ -24,11 +24,11 @@ void GloriaTankFlowPumpSerializer::pushToSerial(HardwareSerial& serial , GloriaT
     }
     serial.print(F("#"));
 
-     for(int i = 0; i < sizeof(gloriaTankFlowPumpData.groupidentifier); i++){
-        if(gloriaTankFlowPumpData.groupidentifier[i]!=NULL &&  gloriaTankFlowPumpData.groupidentifier[i]!='\n' &&  gloriaTankFlowPumpData.groupidentifier[i]!='\r'){
-            Serial.print(gloriaTankFlowPumpData.groupidentifier[i]);
-        }
-    }
+    //  for(int i = 0; i < sizeof(gloriaTankFlowPumpData.groupidentifier); i++){
+    //     if(gloriaTankFlowPumpData.groupidentifier[i]!=NULL &&  gloriaTankFlowPumpData.groupidentifier[i]!='\n' &&  gloriaTankFlowPumpData.groupidentifier[i]!='\r'){
+    //         Serial.print(gloriaTankFlowPumpData.groupidentifier[i]);
+    //     }
+    // }
      serial.print(F("#"));
 
     serial.print(gloriaTankFlowPumpData.currentFunctionValue);
@@ -96,17 +96,17 @@ void GloriaTankFlowPumpSerializer::pushToSerial(HardwareSerial& serial , GloriaT
      serial.print(F("#"));
     serial.print(gloriaTankFlowPumpData.tank1PressurePsi);
      serial.print(F("#"));
-    serial.print(gloriaTankFlowPumpData.tank1PressureVolts);
-     serial.print(F("#"));
-    serial.print(gloriaTankFlowPumpData.tank1WaterLevel);
-     serial.print(F("#"));
+    // serial.print(gloriaTankFlowPumpData.tank1PressureVolts);
+    //  serial.print(F("#"));
+    // serial.print(gloriaTankFlowPumpData.tank1WaterLevel);
+    //  serial.print(F("#"));
    
     serial.print(gloriaTankFlowPumpData.tank2PressurePsi);
      serial.print(F("#"));
-    serial.print(gloriaTankFlowPumpData.tank2PressureVolts);
-     serial.print(F("#"));
-    serial.print( gloriaTankFlowPumpData.tank2WaterLevel);
-     serial.print(F("#"));
+    // serial.print(gloriaTankFlowPumpData.tank2PressureVolts);
+    //  serial.print(F("#"));
+    // serial.print( gloriaTankFlowPumpData.tank2WaterLevel);
+    //  serial.print(F("#"));
      
     serial.print(gloriaTankFlowPumpData.operatingStatus);
      serial.print(F("#"));

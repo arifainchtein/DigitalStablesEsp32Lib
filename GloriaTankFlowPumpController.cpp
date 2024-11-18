@@ -146,31 +146,32 @@ void GloriaTankAndFlowPumpController::refreshDisplays(){
 				display1.showNumberDecEx(scaledFlow, (0x80 >> 1), false);
 			}
 
-			if(gloriaTankFlowPumpData.tank1WaterLevel==(int)gloriaTankFlowPumpData.tank1WaterLevel){
-    			display2.showNumberDec(gloriaTankFlowPumpData.tank1WaterLevel, false);
+			if(gloriaTankFlowPumpData.tank1PressurePsi==(int)gloriaTankFlowPumpData.tank1PressurePsi){
+    			display2.showNumberDec(gloriaTankFlowPumpData.tank1PressurePsi*.7, false);
   			}else{
 				scaledFlow=gloriaTankFlowPumpData.flowRate2*100;
-				display2.showNumberDecEx(gloriaTankFlowPumpData.tank1WaterLevel, (0x80 >> 1), false);
+				display2.showNumberDecEx(gloriaTankFlowPumpData.tank1PressurePsi*.7, (0x80 >> 1), false);
 			}
             break;
         case 4:
-            if(gloriaTankFlowPumpData.tank1WaterLevel==(int)gloriaTankFlowPumpData.tank1WaterLevel){
-    			display1.showNumberDec(gloriaTankFlowPumpData.tank1WaterLevel, false);
+            if(gloriaTankFlowPumpData.tank1PressurePsi==(int)gloriaTankFlowPumpData.tank1PressurePsi){
+    			display1.showNumberDec(gloriaTankFlowPumpData.tank1PressurePsi*.7, false);
   			}else{
-				display1.showNumberDecEx(gloriaTankFlowPumpData.tank1WaterLevel, (0x80 >> 1), false);
+				display1.showNumberDecEx(gloriaTankFlowPumpData.tank1PressurePsi*.7, (0x80 >> 1), false);
 			}
             break;
         case 5:
-            if(gloriaTankFlowPumpData.tank1WaterLevel==(int)gloriaTankFlowPumpData.tank1WaterLevel){
-    			display1.showNumberDec(gloriaTankFlowPumpData.tank1WaterLevel, false);
+            if(gloriaTankFlowPumpData.tank1PressurePsi==(int)gloriaTankFlowPumpData.tank1PressurePsi){
+    			display1.showNumberDec(gloriaTankFlowPumpData.tank1PressurePsi*.7, false);
   			}else{
-				display1.showNumberDecEx(gloriaTankFlowPumpData.tank1WaterLevel, (0x80 >> 1), false);
+				display1.showNumberDecEx(gloriaTankFlowPumpData.tank1PressurePsi*.7, (0x80 >> 1), false);
 			}
             
-			if(gloriaTankFlowPumpData.tank2WaterLevel==(int)gloriaTankFlowPumpData.tank2WaterLevel){
-    			display2.showNumberDec(gloriaTankFlowPumpData.tank2WaterLevel, false);
+			if(gloriaTankFlowPumpData.tank2PressurePsi==(int)gloriaTankFlowPumpData.tank2PressurePsi){
+				 
+    			display2.showNumberDec(gloriaTankFlowPumpData.tank2PressurePsi*.7, false);
   			}else{
-				display2.showNumberDecEx(gloriaTankFlowPumpData.tank2WaterLevel, (0x80 >> 1), false);
+				display2.showNumberDecEx(gloriaTankFlowPumpData.tank2PressurePsi*.7, (0x80 >> 1), false);
 			}
 
             break;
@@ -199,9 +200,9 @@ void GloriaTankAndFlowPumpController::readTank1(){
 	// since the psi is 5 for 4.5 then
 	float psi = vol45*5/4.5;
 	
-    gloriaTankFlowPumpData.tank1PressureVolts=average;
+    // gloriaTankFlowPumpData.tank1PressureVolts=average;
     gloriaTankFlowPumpData.tank1PressurePsi=psi;
-    gloriaTankFlowPumpData.tank1WaterLevel=psi*.7;
+    // gloriaTankFlowPumpData.tank1WaterLevel=psi*.7;
 }
 
 
@@ -230,9 +231,9 @@ void GloriaTankAndFlowPumpController::readTank2(){
 	// since the psi is 5 for 4.5 then
 	float psi = vol45*5/4.5;
 	
-    gloriaTankFlowPumpData.tank2PressureVolts=average;
+    // gloriaTankFlowPumpData.tank2PressureVolts=average;
     gloriaTankFlowPumpData.tank2PressurePsi=psi;
-    gloriaTankFlowPumpData.tank2WaterLevel=psi*.7;
+    // gloriaTankFlowPumpData.tank2WaterLevel=psi*.7;
 }
 
 void GloriaTankAndFlowPumpController::readFlowMeter1(){

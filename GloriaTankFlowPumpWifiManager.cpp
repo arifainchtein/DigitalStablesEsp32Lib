@@ -398,7 +398,7 @@ void GloriaTankFlowPumpWifiManager::generateWebData(DynamicJsonDocument& json, S
     json["flow2name"] = gloriaTankFlowPumpData.flow2name;
     json["tank1name"] = gloriaTankFlowPumpData.tank1name;
     json["tank2name"] = gloriaTankFlowPumpData.tank2name;
-    json["groupidentifier"]=gloriaTankFlowPumpData.groupidentifier;
+  //  json["groupidentifier"]=gloriaTankFlowPumpData.groupidentifier;
     json["secondsTime"] = gloriaTankFlowPumpData.secondsTime;
     json["dataSamplingSec"] = gloriaTankFlowPumpData.dataSamplingSec;
     json["currentFunctionValue"] = gloriaTankFlowPumpData.currentFunctionValue;
@@ -412,12 +412,12 @@ void GloriaTankFlowPumpWifiManager::generateWebData(DynamicJsonDocument& json, S
     json["flowrate2"] = gloriaTankFlowPumpData.flowRate2;
     json["totalmilliLitres2"] = gloriaTankFlowPumpData.totalMilliLitres2;
     json["tank1pressurePsi"] = gloriaTankFlowPumpData.tank1PressurePsi;
-    json["tank1pressureVolts"] = gloriaTankFlowPumpData.tank1PressureVolts;
-    json["tank1waterLevel"] = gloriaTankFlowPumpData.tank1WaterLevel;
+   // json["tank1pressureVolts"] = gloriaTankFlowPumpData.tank1PressureVolts;
+  //  json["tank1waterLevel"] = gloriaTankFlowPumpData.tank1WaterLevel;
     json["tank1heightMeters"] = gloriaTankFlowPumpData.tank1HeightMeters;
     json["tank2pressurePsi"] = gloriaTankFlowPumpData.tank2PressurePsi;
-    json["tank2pressureVolts"] = gloriaTankFlowPumpData.tank2PressureVolts;
-    json["tank2waterLevel"] = gloriaTankFlowPumpData.tank2WaterLevel;
+   // json["tank2pressureVolts"] = gloriaTankFlowPumpData.tank2PressureVolts;
+ //   json["tank2waterLevel"] = gloriaTankFlowPumpData.tank2WaterLevel;
     json["tank2heightMeters"] = gloriaTankFlowPumpData.tank2HeightMeters;
     json["qfactor1"] = gloriaTankFlowPumpData.qfactor1;
     json["qfactor2"] = gloriaTankFlowPumpData.qfactor2;
