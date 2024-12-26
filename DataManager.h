@@ -29,14 +29,15 @@ public:
     void storeGloria(GloriaTankFlowPumpData& p);
      void storeDaffodil(DaffodilData& p);
     //virtual ~DataManager();
+      void generateDaffodilWebData(DaffodilData& p,DynamicJsonDocument& json);
+    void generatePanchoTankFlowDataWebData(PanchoTankFlowData& p,JsonObject& json);
+	void generateRosieWebData(RosieData& r,JsonObject& json);
+    void generateGloriaTankFlowPumpWebData(GloriaTankFlowPumpData& r,JsonObject& json);
 
 protected:
 	HardwareSerial& _HardSerial;
 
 private:
-    void generateDaffodilWebData(DaffodilData& p,JsonObject& json);
-    void generatePanchoTankFlowDataWebData(PanchoTankFlowData& p,JsonObject& json);
-	void generateRosieWebData(RosieData& r,JsonObject& json);
-    void generateGloriaTankFlowPumpWebData(GloriaTankFlowPumpData& r,JsonObject& json);
+   
 };
 #endif /* LIBRARIES_DIGITALSTABLES_PANCHOVISUALIZEROWWIFIMANAGER */

@@ -15,7 +15,7 @@
 #include <DataStorageManagerInitParams.h>
 #include <WPSSensorRecord.h>
 #include <LCDDisplay.h>
-
+	
 class DataStorageManager {
 public:
 	DataStorageManager();

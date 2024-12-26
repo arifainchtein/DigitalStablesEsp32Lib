@@ -61,11 +61,10 @@ for (  uint8_t i = 0; i < 8; i++) {
    _HardSerial.println(daffodilData.checksum);
    
 if(daffodilData.checksum==checksum && (sn.length()==15 ||sn.length()==14)){
-//if(){
- obj = completeObject.createNestedObject(sn);
-  generateDaffodilWebData(daffodilData, obj);
+ DynamicJsonDocument json(1800);
+   generateDaffodilWebData(daffodilData, json);
   
-  serializeJsonPretty(obj, _HardSerial);
+  serializeJsonPretty(json, _HardSerial);
  
   _HardSerial.print(" number of devices=");
    _HardSerial.println(completeObject.size());
@@ -109,12 +108,13 @@ for (  uint8_t i = 0; i < 8; i++) {
     checksum += static_cast<uint8_t>(gloriaTankFlowPumpData.serialnumberarray[i]);
   }
   checksum &= 0xFF;
-if(gloriaTankFlowPumpData.checksum==checksum  && (sn.length()==15|| sn.length()==14)){
+if(gloriaTankFlowPumpData.checksum==checksum  && (sn.length()==13|| sn.length()==15|| sn.length()==14)){
 //if(serialNumber.length()==15){
 
  obj = completeObject.createNestedObject(sn);
   generateGloriaTankFlowPumpWebData(gloriaTankFlowPumpData, obj);
-
+serializeJsonPretty(obj, _HardSerial);
+ 
   _HardSerial.print("adding a gloria serialNumber=");
    _HardSerial.print(sn);
   _HardSerial.print("  number of devices=");
@@ -130,7 +130,7 @@ if(gloriaTankFlowPumpData.checksum==checksum  && (sn.length()==15|| sn.length()=
 }
 }
 
-void DataManager::generateDaffodilWebData(DaffodilData &daffodilData, JsonObject &json){
+void DataManager::generateDaffodilWebData(DaffodilData &daffodilData, DynamicJsonDocument &json){
     
     json["devicename"] = daffodilData.devicename;
     json["deviceshortname"] = daffodilData.deviceshortname;
@@ -166,7 +166,7 @@ void DataManager::generateDaffodilWebData(DaffodilData &daffodilData, JsonObject
     json["internetAvailable"] = daffodilData.internetAvailable;
     //json["internetPingTime"] = internetPingTime;
     json["ipAddress"] = daffodilData.ipAddress;
-    //json["totp"] = totpcode;
+    json["totp"] = daffodilData.totpcode;
     json["deviceTypeId"]=daffodilData.deviceTypeId;
     json["dsLastUpload"]=daffodilData.dsLastUpload;
     json["latitude"]=daffodilData.latitude;

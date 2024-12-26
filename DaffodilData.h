@@ -42,6 +42,7 @@ struct DaffodilData{
 	char tank2name[10];
 
 	uint8_t serialnumberarray[8];
+	uint8_t sentbyarray[8];
 	uint8_t checksum;
 	char groupidentifier[12];
 	char deviceTypeId[12];
@@ -73,6 +74,6 @@ struct DaffodilData{
 	float latitude=-37.17139;
 	float longitude=144.48861;
     float capacitorVoltage=0.0;
-
+	long totpcode;
 };
 #endif

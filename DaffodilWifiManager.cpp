@@ -372,7 +372,7 @@ int DaffodilWifiManager::uploadDataToDigitalStables(){
   String output;
   serializeJson(json, output);
   const char* serverName = "http://devices.digitalstables.com/DeviceUploadServlet";
-  http.setTimeout(950);
+  http.setTimeout(1150);
    digitalWrite(WATCHDOG_WDI, HIGH);
     delay(2);
     digitalWrite(WATCHDOG_WDI, LOW);

@@ -363,7 +363,7 @@ void CajalWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy)
    
    
 
-    json["sentBy"] = sentBy;
+    json["sentBy"] = serialNumber;
     json["apAddress"] = apAddress;
     json["hostname"] = hostname;
     json["stationmode"] = stationmode;
@@ -383,9 +383,11 @@ void CajalWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy)
 int CajalWifiManager::uploadDataToDigitalStables()
 {
 
-
+    DynamicJsonDocument json(1800);
+    generateWebData(json,"");
     String output;
-    serializeJson(dataManager.completeObject, output);
+    serializeJson(json, output);
+    
     const char *serverName = "http://devices.digitalstables.com/DeviceUploadServlet";
     http.begin(serverName);
     http.addHeader("Content-Type", "application/json");
@@ -452,8 +454,10 @@ _HardSerial.println(httpResponseCode);
  int CajalWifiManager::uploadDaffodilDataToDigitalStables(DaffodilData& daffodilData){
 
   DynamicJsonDocument json(1800);
- // JSONObjectTransformer::generateDaffodilWebData(daffodilData,json, serialNumber);
-  
+  // JSONObjectTransformer::generateDaffodilWebData(daffodilData,json, serialNumber);
+  memcpy(daffodilData.sentbyarray, cajalData.serialnumberarray, sizeof(cajalData.serialnumberarray));
+ 
+  dataManager.generateDaffodilWebData(daffodilData, json);
   String output;
   serializeJson(json, output);
   const char* serverName = "http://devices.digitalstables.com/DeviceUploadServlet";
