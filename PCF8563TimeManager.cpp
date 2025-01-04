@@ -13,9 +13,7 @@ static const byte monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
 #define I2C_SDA 21
 #define I2C_SCL 22
 
-PCF8563TimeManager::PCF8563TimeManager( HardwareSerial& serial):TimeManager(serial ){
-
-}
+PCF8563TimeManager::PCF8563TimeManager( HardwareSerial& serial):TimeManager(serial ){}
 
 void PCF8563TimeManager::hourlyTasks(long time, int previousHour ){
 
@@ -100,9 +98,12 @@ RTCInfoRecord PCF8563TimeManager::now(){
 		aRTCInfoRecord.dayOfWeek  = bcdToDec(Wire.read() & B00000111);
 		aRTCInfoRecord.month      = bcdToDec(Wire.read() & B00011111);  // remove century bit, 1999 is over
 		aRTCInfoRecord.year       = bcdToDec(Wire.read());
-
+		aRTCInfoRecord.timezoneInfo=timezoneInfo;
+		aRTCInfoRecord.timezoneOffset=getTimezoneOffset(aRTCInfoRecord.year ,aRTCInfoRecord.month ,aRTCInfoRecord.date) ;
+		
 		return aRTCInfoRecord;
 	}
+
 
 bool PCF8563TimeManager::printTimeToSerial(RTCInfoRecord aRTCInfoRecord){
 
@@ -130,9 +131,9 @@ bool PCF8563TimeManager::printTimeToSerial(RTCInfoRecord aRTCInfoRecord){
 //
 
 
-void PCF8563TimeManager::start(){
-
-//	 Wire.begin();
+void PCF8563TimeManager::start(const char* tz){
+	strncpy(timezoneInfo, tz, sizeof(timezoneInfo) - 1);
+    timezoneInfo[sizeof(timezoneInfo) - 1] = '\0';
 }
 
 
@@ -174,6 +175,85 @@ long PCF8563TimeManager::dateAsSeconds(uint16_t year, uint8_t month, uint8_t dat
 	return seconds;
 }
 
+
+long PCF8563TimeManager::getTimezoneOffset(const uint16_t year,uint8_t month,uint8_t date) {
+        // Get standard time offset
+        char* ptr = strchr(timezoneInfo, '-');
+        if (!ptr) ptr = strchr(timezoneInfo, '+');
+        if (!ptr) return 0;
+        
+        int std_offset = atoi(ptr + 1) * 3600;
+        if (*ptr == '+') std_offset = -std_offset;
+
+        // Parse DST rules
+        char* dst_rules = strchr(timezoneInfo, ',');
+        if (!dst_rules) return std_offset;
+        
+        int current_month = month;  // 1-12
+        int current_day = date;     // 1-31
+
+        // Parse DST start rule (M10.1.0)
+        dst_rules++; // Skip comma
+        int dst_start_month = atoi(dst_rules + 1);
+        char* week_ptr = strchr(dst_rules, '.') + 1;
+        int dst_start_week = atoi(week_ptr);
+        char* day_ptr = strchr(week_ptr, '.') + 1;
+        int dst_start_day = atoi(day_ptr);
+
+        // Parse DST end rule (M4.1.0)
+        char* end_rule = strchr(dst_rules, ',') + 1;
+        int dst_end_month = atoi(end_rule + 1);
+        week_ptr = strchr(end_rule, '.') + 1;
+        int dst_end_week = atoi(week_ptr);
+        day_ptr = strchr(week_ptr, '.') + 1;
+        int dst_end_day = atoi(day_ptr);
+
+        // Calculate actual start and end days
+        int dst_start_date = calculateNthWeekday(dst_start_month, dst_start_week, dst_start_day, year);
+        int dst_end_date = calculateNthWeekday(dst_end_month, dst_end_week, dst_end_day, year);
+
+        // For Southern Hemisphere (like Melbourne)
+        if (dst_start_month > dst_end_month) {
+            if (current_month > dst_start_month || current_month < dst_end_month) {
+                return std_offset + 3600;
+            }
+            else if (current_month == dst_start_month && current_day >= dst_start_date) {
+                return std_offset + 3600;
+            }
+            else if (current_month == dst_end_month && current_day < dst_end_date) {
+                return std_offset + 3600;
+            }
+        }
+        // For Northern Hemisphere
+        else {
+            if (current_month > dst_start_month && current_month < dst_end_month) {
+                return std_offset + 3600;
+            }
+            else if (current_month == dst_start_month && current_day >= dst_start_date) {
+                return std_offset + 3600;
+            }
+            else if (current_month == dst_end_month && current_day < dst_end_date) {
+                return std_offset + 3600;
+            }
+        }
+
+        return std_offset;
+    }
+
+    int PCF8563TimeManager::calculateNthWeekday(int month, int nth, int weekday, int year) {
+        struct tm timeinfo = {0};
+        timeinfo.tm_year = year - 1900;
+        timeinfo.tm_mon = month - 1;
+        timeinfo.tm_mday = 1;
+        
+        mktime(&timeinfo);  // Normalize timeinfo
+        
+        int first_weekday = timeinfo.tm_wday;
+        int day = 1 + (weekday - first_weekday + 7) % 7;
+        day += (nth - 1) * 7;
+        
+        return day;
+    }
 
 
 long PCF8563TimeManager::getTimeForCodeGeneration(){

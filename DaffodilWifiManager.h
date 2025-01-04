@@ -5,9 +5,9 @@
 #define LIBRARIES_DIGITALSTABLES_DAFFODILWIFIMANAGER_H_
 #include "Arduino.h"
 #include <WifiManager.h>
-#include <DaffodilData.h>
-#include <RosieData.h>
-
+// #include <DaffodilData.h>
+//#include <RosieData.h>
+#include <DigitalStablesData.h>
 
 
 class DaffodilWifiManager : public WifiManager{
@@ -15,10 +15,10 @@ class DaffodilWifiManager : public WifiManager{
 
 
 public:
-	DaffodilData& daffodilData;
-    DaffodilConfigData& daffodilConfigData;
+	DigitalStablesData& digitalStablesData;
+    DigitalStablesConfigData& digitalStablesConfigData;
 	
-	DaffodilWifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, DaffodilData& tf, DaffodilConfigData& p) ;
+	DaffodilWifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, DigitalStablesData& tf, DigitalStablesConfigData& p) ;
 	void start( );
 	void setWifiActiveSwitchStatus(bool b);
 	void generateWebData(DynamicJsonDocument& json, String s);

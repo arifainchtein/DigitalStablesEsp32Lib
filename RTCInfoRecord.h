@@ -10,5 +10,7 @@ struct RTCInfoRecord{
 		uint8_t minute;
 		uint8_t second;
 		uint8_t dayOfWeek;
+		const char* timezoneInfo;
+		long timezoneOffset;
 };
 #endif

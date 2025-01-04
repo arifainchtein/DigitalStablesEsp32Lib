@@ -9,8 +9,7 @@
 #define WATCHDOG_WDI 18
 
 
-DaffodilWifiManager::DaffodilWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  DaffodilData& tf,DaffodilConfigData& p) :
-WifiManager(serial ,  t,e) , daffodilData(tf),daffodilConfigData(p){}
+DaffodilWifiManager::DaffodilWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  DigitalStablesData& tf,DigitalStablesConfigData& p) : WifiManager(serial ,  t,e) , digitalStablesData(tf),digitalStablesConfigData(p){}
 
  void DaffodilWifiManager::setWifiActiveSwitchStatus(bool b){
     wifiActiveSwitchStatus=b;
@@ -278,8 +277,8 @@ asyncWebServer.on("/DaffodilServlet", HTTP_POST, [this](AsyncWebServerRequest *r
 
       p = request->getParam(2);
       float log =p->value().toFloat();  
-      daffodilData.latitude=lat;
-      daffodilData.longitude=log;
+      digitalStablesData.latitude=lat;
+      digitalStablesData.longitude=log;
     
         DynamicJsonDocument json(1800);
        this->generateWebData(json,serialNumber);
@@ -323,27 +322,27 @@ asyncWebServer.begin();
 
 void DaffodilWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
     
-    json["devicename"] = daffodilData.devicename;
-    json["deviceshortname"] = daffodilData.deviceshortname;
-    json["groupidentifier"]=daffodilData.groupidentifier;
-    json["secondsTime"] = daffodilData.secondsTime;
-    json["dataSamplingSec"] = daffodilData.dataSamplingSec;
-    json["currentFunctionValue"] = daffodilData.currentFunctionValue;
-    json["temperature"] = daffodilData.temperature;
-    json["rtcBatVolt"] = daffodilData.rtcBatVolt;
-    json["opMode"] = daffodilData.opMode;
-    json["rtcBatVolt"] = daffodilData.rtcBatVolt;        
-    json["operatingStatus"] = daffodilData.operatingStatus;
-    json["sleepPingMinutes"] = daffodilData.sleepPingMinutes;
-    json["digitalStablesUpload"] = daffodilData.digitalStablesUpload;
-    json["secondsSinceLastPulse"] = daffodilData.secondsSinceLastPulse;
-    json["currentFunctionValue"]=daffodilData.currentFunctionValue;
-    json["outdoortemperature"] = daffodilData.outdoortemperature;
-    json["outdoorhumidity"] = daffodilData.outdoorhumidity;
-    json["minimumSepticHeight"] = daffodilData.minimumSepticHeight;
-    json["maximumScepticHeight"] = daffodilData.maximumScepticHeight;
-    json["scepticAvailablePercentage"] = daffodilData.scepticAvailablePercentage;
-    json["capacitorVoltage"]=daffodilData.capacitorVoltage;
+    json["devicename"] = digitalStablesData.devicename;
+    json["deviceshortname"] = digitalStablesData.deviceshortname;
+   // json["groupidentifier"]=digitalStablesData.groupidentifier;
+    json["secondsTime"] = digitalStablesData.secondsTime;
+    json["dataSamplingSec"] = digitalStablesData.dataSamplingSec;
+    json["currentFunctionValue"] = digitalStablesData.currentFunctionValue;
+    json["temperature"] = digitalStablesData.temperature;
+    json["rtcBatVolt"] = digitalStablesData.rtcBatVolt;
+    json["opMode"] = digitalStablesData.opMode;
+    json["rtcBatVolt"] = digitalStablesData.rtcBatVolt;        
+    json["operatingStatus"] = digitalStablesData.operatingStatus;
+   // json["sleepPingMinutes"] = digitalStablesData.sleepPingMinutes;
+    json["digitalStablesUpload"] = digitalStablesData.digitalStablesUpload;
+    json["secondsSinceLastPulse"] = digitalStablesData.secondsSinceLastPulse;
+    json["currentFunctionValue"]=digitalStablesData.currentFunctionValue;
+    json["outdoortemperature"] = digitalStablesData.outdoortemperature;
+    json["outdoorhumidity"] = digitalStablesData.outdoorhumidity;
+ //  json["minimumSepticHeight"] = digitalStablesData.minimumSepticHeight;
+    json["maximumScepticHeight"] = digitalStablesData.maximumScepticHeight;
+    json["scepticAvailablePercentage"] = digitalStablesData.scepticAvailablePercentage;
+    json["capacitorVoltage"]=digitalStablesData.capacitorVoltage;
     json["soft_ap_ssid"] = soft_ap_ssid;
     json["serialnumber"] = serialNumber;
     json["sentBy"] = sentBy;
@@ -358,10 +357,10 @@ void DaffodilWifiManager::generateWebData(DynamicJsonDocument& json, String sent
     json["internetPingTime"] = internetPingTime;
     json["ipAddress"] = ipAddress;
     json["totp"] = totpcode;
-    json["deviceTypeId"]=daffodilData.deviceTypeId;
-    json["dsLastUpload"]=daffodilData.dsLastUpload;
-    json["latitude"]=daffodilData.latitude;
-     json["longitude"]=daffodilData.longitude;
+    json["deviceTypeId"]=digitalStablesData.deviceTypeId;
+    json["dsLastUpload"]=digitalStablesData.dsLastUpload;
+    json["latitude"]=digitalStablesData.latitude;
+     json["longitude"]=digitalStablesData.longitude;
   }
 
 int DaffodilWifiManager::uploadDataToDigitalStables(){
@@ -385,8 +384,8 @@ int DaffodilWifiManager::uploadDataToDigitalStables(){
   int httpResponseCode = http.POST(output);
   _HardSerial.print("upload digitalstables return ");
   _HardSerial.println(httpResponseCode);
-   daffodilData.digitalStablesUpload=false;
-   daffodilData.internetAvailable=false;
+   digitalStablesData.digitalStablesUpload=false;
+   digitalStablesData.internetAvailable=false;
     digitalWrite(WATCHDOG_WDI, HIGH);
     delay(2);
     digitalWrite(WATCHDOG_WDI, LOW);
@@ -396,12 +395,12 @@ int DaffodilWifiManager::uploadDataToDigitalStables(){
       _HardSerial.println(response);
       if(response=="Ok"){
         toReturn =true;
-         daffodilData.digitalStablesUpload=true;
-          daffodilData.internetAvailable=true;
+         digitalStablesData.digitalStablesUpload=true;
+          digitalStablesData.internetAvailable=true;
       }else{
         httpResponseCode =500;
-         daffodilData.digitalStablesUpload=false;
-          daffodilData.internetAvailable=false;
+         digitalStablesData.digitalStablesUpload=false;
+          digitalStablesData.internetAvailable=false;
         _HardSerial.print("line 405 upload digitalstables failed=");
          _HardSerial.print(response);
       }

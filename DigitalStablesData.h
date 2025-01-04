@@ -30,7 +30,7 @@ struct DigitalStablesData{
 	uint8_t opMode=0;
 	float rssi=0;
 	float snr=0;
-
+	uint8_t operatingStatus=0;
 	uint8_t loraActive=0;
 	char ipAddress[16];
 	bool internetAvailable;
@@ -56,8 +56,6 @@ struct DigitalStablesData{
 
  	float qfactor1=.35;
 	float qfactor2=.82;
-	
-	float sleepPingMinutes=30;
 	long secondsSinceLastPulse;
 	bool digitalStablesUpload;
 	long dsLastUpload;
@@ -71,5 +69,7 @@ struct DigitalStablesData{
 	float maximumScepticHeight=0.0;
     float measuredHeight=0.0;
 	float scepticAvailablePercentage=0.0;
+	float lux=0;
+	long sleepTime;
 };
 #endif

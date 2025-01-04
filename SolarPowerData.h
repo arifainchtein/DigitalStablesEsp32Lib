@@ -8,6 +8,7 @@
         int cloudiness;  // percentage
         double humidity; // percentage
         double pressure; // hPa
+        long secondsTime=0L;
     };
     
 
@@ -15,8 +16,18 @@
     {
         double sunrise;
         double sunset;
+        char sunrisetime[6];
+        char sunsettime[6];
+        
     };
     
+    struct DailySolarPowerSchedule
+    {
+        long time;
+        double efficiency;
+        float power;
+        
+    };
 
     struct HourlySolarPowerData
     {

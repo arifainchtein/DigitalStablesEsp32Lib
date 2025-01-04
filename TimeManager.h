@@ -26,16 +26,16 @@ class TimeManager{
 
 		TimeManager( HardwareSerial& serial);
 
-		virtual void start()=0;
+		virtual void start(const char* tz)=0;
 		virtual long dateAsSeconds(uint16_t year, uint8_t month, uint8_t date, uint8_t hour, uint8_t minute, uint8_t second)=0;
 		virtual void hourlyTasks(long time, int previousHour )=0;
 		virtual void dailyTasks(long time, int yesterdayDate, int yesterdayMonth, int yesterdayYear )=0;
 		virtual void monthlyTasks(long time)=0;
 		virtual void yearlyTasks(long time)=0;
 		virtual long getCurrentTimeInSeconds()=0;
-		void setTimeZoneOffset(uint8_t h);
 		virtual RTCInfoRecord now()=0;
 		virtual long getTimeForCodeGeneration(RTCInfoRecord)=0;
+		
 		virtual long getTimeForCodeGeneration()=0;
 		//
 		// Functions that represent Serial commands
@@ -44,7 +44,13 @@ class TimeManager{
 		virtual bool setTime(String)=0;
         virtual ~TimeManager();
 
-
+	protected:
+		char timezoneInfo[50]; 
+		
+	private:
+		
+		virtual long getTimezoneOffset(const uint16_t year,uint8_t month,uint8_t date)=0;
+		virtual int calculateNthWeekday(int month, int nth, int weekday, int year)=0;
 
 	};
 #endif /* TIMEMANAGER_H_ */
