@@ -26,7 +26,7 @@ class TimeManager{
 
 		TimeManager( HardwareSerial& serial);
 
-		virtual void start(const char* tz)=0;
+		virtual void start()=0;
 		virtual long dateAsSeconds(uint16_t year, uint8_t month, uint8_t date, uint8_t hour, uint8_t minute, uint8_t second)=0;
 		virtual void hourlyTasks(long time, int previousHour )=0;
 		virtual void dailyTasks(long time, int yesterdayDate, int yesterdayMonth, int yesterdayYear )=0;

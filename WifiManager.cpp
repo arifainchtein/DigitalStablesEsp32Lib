@@ -407,19 +407,12 @@ bool WifiManager::connectSTA()
     hostname = secretManager.getHostName();
     _HardSerial.print("Setting hostname=");
     _HardSerial.println(hostname);
-    // digitalWrite(WATCHDOG_WDI, HIGH);
-    // delay(2);
-    // digitalWrite(WATCHDOG_WDI, LOW);
-    //
-    // the host name needs to be set before setting
-    // the mode
-    //
+    
     const char *hnchar = hostname.c_str();
     int hnl = hostname.length();
     int hnlt = hnl + 1;
     char hname[hnlt];
-    // hname[hnlt] = '\0';
-
+    
     snprintf(hname, hnlt, hnchar, 32);
     WiFi.disconnect();
     WiFi.mode(WIFI_STA);
@@ -433,13 +426,8 @@ bool WifiManager::connectSTA()
     _HardSerial.println(ssid);
 
     _HardSerial.println(WiFi.localIP());
-    // digitalWrite(WATCHDOG_WDI, HIGH);
-    // delay(2);
-    // digitalWrite(WATCHDOG_WDI, LOW);
     WiFi.begin(const_cast<char *>(ssid.c_str()), const_cast<char *>(password.c_str()));
-    // digitalWrite(WATCHDOG_WDI, HIGH);
-    // delay(2);
-    // digitalWrite(WATCHDOG_WDI, LOW);
+    
     bool gotConnection = true;
     uint8_t counter = 0;
     bool keepGoing = true;
@@ -451,23 +439,15 @@ bool WifiManager::connectSTA()
         _HardSerial.print(".");
         WiFi.disconnect();
         WiFi.begin(const_cast<char *>(ssid.c_str()), const_cast<char *>(password.c_str()));
-        // digitalWrite(WATCHDOG_WDI, HIGH);
-        // delay(2);
-        // digitalWrite(WATCHDOG_WDI, LOW);
-        // delay(500);
-        // digitalWrite(WATCHDOG_WDI, HIGH);
-        // delay(2);
-        // digitalWrite(WATCHDOG_WDI, LOW);
+        
         counter++;
         if (counter > 10)
         {
             keepGoing = false;
             gotConnection = false;
         }
-    // }
-    // digitalWrite(WATCHDOG_WDI, HIGH);
-    // delay(2);
-    // digitalWrite(WATCHDOG_WDI, LOW);
+     }
+
     _HardSerial.print("in connectSTA after settmg wifi, ip=");
     _HardSerial.println(WiFi.localIP());
 
