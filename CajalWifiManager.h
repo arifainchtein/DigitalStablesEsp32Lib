@@ -23,6 +23,7 @@ public:
 		
 	int uploadRosieDataToDigitalStables(RosieData& r);
 	int uploadDaffodilDataToDigitalStables(DaffodilData& r);
+	int uploadDigitalStablesDataToDigitalStables(DigitalStablesData& r);
 
     virtual ~CajalWifiManager();
 

@@ -5,6 +5,9 @@
 #include <time.h>
 #include <RTCInfoRecord.h>
 #include <SolarPowerData.h>
+#include <Dusk2Dawn.h>
+#include <TimeLib.h>
+#include <TimeUtils.h>
 
 // Constants
 
@@ -28,19 +31,39 @@ const double MEDIUM_CLOUDS_FACTOR = 0.4; // 31-70% clouds
 const double HEAVY_CLOUDS_FACTOR = 0.2;  // 71-90% clouds
 const double OVERCAST_FACTOR = 0.1;      // 91-100% clouds
 
+
 class SolarInfo
 {
+
+    protected:
+		HardwareSerial& _HardSerial;
+
 public:
     
-    SolarInfo(double latitude, double altitude);
-     DailySolarData getDailySolarData(RTCInfoRecord& r);
+    SolarInfo( HardwareSerial& serial,double latitude,double longitude, double altitude);
+    DailySolarData getDailySolarData(RTCInfoRecord& r);
+    void calculateDailySolarPowerSchedule(DailySolarPowerSchedule schedules[], int year, int month, int date);
+    void calculateDailySolarPowerSchedule(DailySolarPowerSchedule schedules[], RTCInfoRecord& r);
+    void setWeatherForecast(WeatherForecast forecasts[], int size);
     int getDayOfYear(int year, int month, int day);
     HourlySolarPowerData calculateActualPower(RTCInfoRecord& r);
+    HourlySolarPowerData calculateActualPower(int year, int month, int date, int hour, int minute);
     WeatherForecast getWeatherForHour(double hour);
+   void invalidateWeatherForecast()    ; // New method to handle invalidation
 
 private:
+   // DailySolarPowerSchedule dailySolarPowerSchedule[48];
+    WeatherForecast* weatherForecasts; // Pointer to store the array
+    int forecastSize; // To store the size of the array
+     bool weatherDataAvailable; 
+     // char* timezoneinfo;
+       bool isForecastValid; 
     double latitude;
     double altitude = 420;
+    double longitude;
+    Dusk2Dawn* dusk2Dawn;
+    long gmtOffset_sec;
+    int daylightOffset_sec;
     double calculateSolarDeclination(int dayOfYear);
     double calculateIrradiance(double elevation);
    

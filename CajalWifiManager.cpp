@@ -484,4 +484,37 @@ _HardSerial.println(httpResponseCode);
 }
 
 
+int CajalWifiManager::uploadDigitalStablesDataToDigitalStables(DigitalStablesData& digitalStablesData){
+
+  DynamicJsonDocument json(1800);
+  // JSONObjectTransformer::generateDaffodilWebData(daffodilData,json, serialNumber);
+  memcpy(digitalStablesData.sentbyarray, cajalData.serialnumberarray, sizeof(cajalData.serialnumberarray));
+ 
+  dataManager.generateDigitalStablesData(digitalStablesData, json);
+  String output;
+  serializeJson(json, output);
+  const char* serverName = "http://devices.digitalstables.com/DeviceUploadServlet";
+  http.begin(serverName);    
+  http.addHeader("Content-Type", "application/json");
+  boolean toReturn=false;
+  int httpResponseCode = http.POST(output);
+  _HardSerial.print("upload  digitalStablesData ");
+ _HardSerial.print(digitalStablesData.devicename);
+  _HardSerial.print(" to digitalstables return ");
+_HardSerial.println(httpResponseCode);
+   cajalData.digitalStablesUpload=false;
+  if (httpResponseCode == 200) { //Check for the returning code
+      String response = http.getString();  //Get the response to the request
+      if(response=="Ok"){
+        toReturn =true;
+         cajalData.digitalStablesUpload=true;
+      }else{
+        httpResponseCode=500;
+      }
+  }
+  http.end();
+  return httpResponseCode;//toReturn;
+}
+
+
 CajalWifiManager::~CajalWifiManager() {}

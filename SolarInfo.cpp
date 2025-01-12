@@ -1,17 +1,20 @@
 #include <SolarInfo.h>
 
-// Sample weather forecast data (replace with actual API data)
-WeatherForecast forecasts[] = {
-        {0, 18.0, 20, 65, 1013},
-        {3, 17.0, 30, 70, 1012},
-        {6, 16.0, 10, 75, 1012},
-        {9, 22.0, 15, 60, 1013},
-        {12, 25.0, 5, 55, 1014},
-        {15, 26.0, 25, 50, 1013},
-        {18, 20.0, 15, 60, 1013},
-        {21, 19.0, 20, 65, 1014}
-    };
-SolarInfo::SolarInfo(double l, double a) : latitude(l), altitude(a){}
+// // Sample weather forecast data (replace with actual API data)
+// WeatherForecast forecasts[] = {
+//         {0, 18.0, 20, 65, 1013},
+//         {3, 17.0, 30, 70, 1012},
+//         {6, 16.0, 10, 75, 1012},
+//         {9, 22.0, 15, 60, 1013},
+//         {12, 25.0, 5, 55, 1014},
+//         {15, 26.0, 25, 50, 1013},
+//         {18, 20.0, 15, 60, 1013},
+//         {21, 19.0, 20, 65, 1014}
+//     };
+SolarInfo::SolarInfo( HardwareSerial& serial,double l, double lo,double a) : _HardSerial(serial), latitude(l),longitude(lo), altitude(a){
+    // strncpy(timezoneinfo, tz, sizeof(timezoneinfo) - 1);
+    // timezoneinfo[sizeof(timezoneinfo) - 1] = '\0';
+}
 
 
 
@@ -40,6 +43,19 @@ TimeOfDayFactors SolarInfo::calculateTimeFactors(double hour, int dayOfYear, dou
     factors.absorption = exp(-0.2 * factors.airMass);
 
     return factors;
+}
+
+void SolarInfo::setWeatherForecast(WeatherForecast forecasts[] ,int size){
+   forecastSize = size;
+
+    // Allocate memory for the forecasts
+    weatherForecasts = new WeatherForecast[forecastSize];
+
+    // Copy the data from the passed array to the class variable
+    memcpy(weatherForecasts, forecasts, sizeof(WeatherForecast) * forecastSize);
+    
+    // Set the flag to true as weather data is now available
+    weatherDataAvailable = true;
 }
 
 double SolarInfo::getCloudFactor(int cloudiness) {
@@ -78,33 +94,34 @@ double SolarInfo::getCloudFactor(int cloudiness) {
 
 // Calculate actual power output with all factors
 HourlySolarPowerData  SolarInfo::calculateActualPower(RTCInfoRecord& currentTimerRecord ) {
-    HourlySolarPowerData data;
-
-    uint8_t year = currentTimerRecord.year;
+   uint8_t year = currentTimerRecord.year;
     uint8_t month = currentTimerRecord.month;
     uint8_t date = currentTimerRecord.date;
     uint8_t hour = currentTimerRecord.hour;
     uint8_t minute = currentTimerRecord.minute;
+    return calculateActualPower( year,  month,  date,  hour,  minute );
+}
 
-    double timeDecimal = hour + (minute / 60.0);
-    WeatherForecast weather = getWeatherForHour(timeDecimal);
+HourlySolarPowerData  SolarInfo::calculateActualPower(int year, int month, int date, int hour, int minute ) {
+   HourlySolarPowerData data;
     
+    double timeDecimal = hour + (minute / 60.0);
+    WeatherForecast weather = getWeatherForHour(timeDecimal); // Get the weather data
+
     double elevation = calculateSolarElevation(timeDecimal, 
                         calculateSolarDeclination(getDayOfYear(year, month, date)));
 
     if (elevation <= 0) return data;
     
     // Calculate base solar irradiance
-    double baseIrradiance = STC_IRRADIANCE * sin(elevation * PI/180);
+    double baseIrradiance = STC_IRRADIANCE * sin(elevation * PI / 180);
     
     // Apply atmospheric effects
     double transmission = calculateAtmosphericTransmission(elevation, weather);
     double actualIrradiance = baseIrradiance * transmission;
 
-
-
     // Calculate base efficiency
-    double baseEfficiency = cos((90 - elevation) * PI/180);
+    double baseEfficiency = cos((90 - elevation) * PI / 180);
     
     // Apply temperature adjustment
     double adjustedEfficiency = calculateTempAdjustedEfficiency(baseEfficiency, weather.temperature);
@@ -112,12 +129,55 @@ HourlySolarPowerData  SolarInfo::calculateActualPower(RTCInfoRecord& currentTime
     // Calculate final power
     double power = actualIrradiance * PANEL_AREA * adjustedEfficiency;
     data.efficiency = adjustedEfficiency;
-    data.actualPower =  min(power, PANEL_PEAK_WATTS);
-    data.irradiance=actualIrradiance;
+    data.actualPower = min(power, PANEL_PEAK_WATTS);
+    data.irradiance = actualIrradiance;
     data.temperature = weather.temperature;
     return data;
 }
 
+void SolarInfo::invalidateWeatherForecast() {
+    isForecastValid = false; // Set the flag to false
+    forecastSize = 0; // Optionally reset the size
+}
+
+//
+// calculate the DailySolarPowerSchedule
+//
+void SolarInfo::calculateDailySolarPowerSchedule(DailySolarPowerSchedule schedules[], RTCInfoRecord& r){
+    calculateDailySolarPowerSchedule(schedules, r.year, r.month, r.date);
+}
+
+void SolarInfo::calculateDailySolarPowerSchedule(DailySolarPowerSchedule schedules[], int year, int month, int date){
+    HourlySolarPowerData h;
+    DailySolarPowerSchedule d;
+    uint8_t index=0;
+    //tmElements_t tm;
+    //tm.Year = year - 1970;  // Year since 1970
+   // tm.Month = month;
+   // tm.Day = date;
+
+    for (int hour = 0; hour < 24; hour++) {
+      //  tm.Hour = hour;
+        for (int minute = 0; minute < 60; minute += 30) {  // Half-hour intervals
+            // double timeDecimal = hour + (minute / 60.0);
+            // SolarData data = getSolarData(timeDecimal);
+           // tm.Minute = minute;
+               // tm.Second = 0;
+            // // Calculate actual power
+            // double irradiance = calculateIrradiance(calculateSolarElevation(timeDecimal, 
+            //                     calculateSolarDeclination(getDayOfYear(year, month, date))));
+            h = calculateActualPower(year, month, date, hour, minute);
+           // time_t epochTime = makeTime(tm);
+
+            schedules[index].time = TimeUtils::getEpochTime( year,  month,  date,  hour,  minute,  0);
+
+            schedules[index].power = h.actualPower;      // Set your power calculation here
+            schedules[index].efficiency = h.efficiency;  // Set your efficiency calculation here
+            index++;
+            
+        }
+    }
+}
 // Calculate day of year from date
 int SolarInfo::getDayOfYear(int year, int month, int day)
 {
@@ -185,15 +245,20 @@ DailySolarData SolarInfo::getDailySolarData(RTCInfoRecord& r){
     struct tm timeinfo;
     DailySolarData data;
 
-   
+    Dusk2Dawn dusk2Dawn(latitude, longitude, 10);
+    data.sunrise  = dusk2Dawn.sunrise(year, month, date, true);
+    data.sunset  = dusk2Dawn.sunset(year, month, date, true);
 
-    int dayOfYear = getDayOfYear(year, month, date);
-    double declination = calculateSolarDeclination(dayOfYear);
+    Dusk2Dawn::min2str(data.sunrisetime, data.sunrise);
+    Dusk2Dawn::min2str(data.sunsettime, data.sunset);
 
-    // Calculate sunrise and sunset
-    double sunrise = calculateSunriseHour(declination);
-    data.sunrise = sunrise;
-    data.sunset = 24 - sunrise; // Approximate sunset
+    // int dayOfYear = getDayOfYear(year, month, date);
+    // double declination = calculateSolarDeclination(dayOfYear);
+
+    // // Calculate sunrise and sunset
+    // double sunrise = calculateSunriseHour(declination);
+    // data.sunrise = sunrise;
+    // data.sunset = 24 - sunrise; // Approximate sunset
 
    
     return data;
@@ -202,24 +267,41 @@ DailySolarData SolarInfo::getDailySolarData(RTCInfoRecord& r){
 // Get interpolated weather data for specific hour
 WeatherForecast SolarInfo::getWeatherForHour(double hour)
 {
-    WeatherForecast result;
-    int forecastCount = sizeof(forecasts) / sizeof(forecasts[0]);
+   WeatherForecast result;
+    int forecastCount = forecastSize; // Use the actual size of the weather forecasts
 
-    // Find nearest forecasts
+    // Check if there are any forecasts available
+    if (!weatherDataAvailable || forecastCount == 0) {
+        // Return a default weather forecast if no data is available
+        result.temperature = 25.0; // Default temperature
+        result.cloudiness = 0;      // Clear sky
+        result.humidity = 50.0;     // Default humidity
+        result.pressure = 1013.25;  // Default pressure
+        return result;
+    }
+
+    // Get the current epoch time
+    time_t currentTime = time(nullptr);
+    
+    // Find the latest valid forecast
     int index = 0;
-    while (index < forecastCount - 1 && forecasts[index + 1].hour <= hour)
-    {
+    while (index < forecastCount - 1 && weatherForecasts[index + 1].secondsTime <= currentTime) {
         index++;
     }
 
-    if (index >= forecastCount - 1)
-    {
-        return forecasts[forecastCount - 1];
+    // Check if the latest forecast is in the past
+    if (weatherForecasts[index].secondsTime < currentTime) {
+        // Return a default weather forecast if the latest forecast is stale
+        result.temperature = 25.0; // Default temperature
+        result.cloudiness = 0;      // Clear sky
+        result.humidity = 50.0;     // Default humidity
+        result.pressure = 1013.25;  // Default pressure
+        return result;
     }
 
-    // Linear interpolation
-    WeatherForecast before = forecasts[index];
-    WeatherForecast after = forecasts[index + 1];
+    // Linear interpolation for the nearest forecasts
+    WeatherForecast before = weatherForecasts[index];
+    WeatherForecast after = weatherForecasts[index + 1];
     double ratio = (hour - before.hour) / (after.hour - before.hour);
 
     result.temperature = before.temperature + (after.temperature - before.temperature) * ratio;

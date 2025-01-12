@@ -193,8 +193,8 @@ float PowerManager::calculateVoltageDrop(float startVoltage, float current, floa
     float R = startVoltage / current;
     float RC = R * CAP_CAPACITANCE;
     float dropVoltage = startVoltage * (1 - exp(-duration / RC));
-    // _HardSerial.print("dropVoltage=");
-    //   _HardSerial.println(dropVoltage);
+     _HardSerial.print(" line 196 dropVoltage=");
+       _HardSerial.println(dropVoltage);
     return dropVoltage;
 }
 
@@ -234,28 +234,36 @@ uint8_t PowerManager::calculateSafeLEDBrightness(float startingVoltage, uint8_t 
 {
     //
     // check the different levels of brightness
+    float duration=5.0;
     float ledCurrent=numLeds*currentPerLed*LED_FULL_BRIGHTNESS/255;
-    float afterLedDrop = predictVoltageDrop(startingVoltage,ledCurrent, 0.100);;
+    float afterLedDrop = startingVoltage-predictVoltageDrop(startingVoltage,ledCurrent, duration);;
+    // _HardSerial.print("line 239, ledCurrent=");
+    // _HardSerial.print(ledCurrent);
+    //  _HardSerial.print(" startingVoltage");
+    // _HardSerial.print(startingVoltage);
+    // _HardSerial.print(" afterLedDrop=");
+    // _HardSerial.println(afterLedDrop);
+    
     if(afterLedDrop >= MIN_OPERATING_VOLTAGE){
         return LED_FULL_BRIGHTNESS;
     }
 
     ledCurrent=numLeds*currentPerLed*LED_MEDIUM_BRIGHTNESS/255;
-     afterLedDrop = predictVoltageDrop(startingVoltage,ledCurrent, 0.100);;
+     afterLedDrop = startingVoltage-predictVoltageDrop(startingVoltage,ledCurrent, duration);;
     
     if(afterLedDrop >= MIN_OPERATING_VOLTAGE){
         return LED_MEDIUM_BRIGHTNESS;
     }
 
     ledCurrent=numLeds*currentPerLed*LED_DIM_BRIGHTNESS/255;
-     afterLedDrop = predictVoltageDrop(startingVoltage,ledCurrent, 0.100);;
+     afterLedDrop = startingVoltage-predictVoltageDrop(startingVoltage,ledCurrent, duration);;
     
     if(afterLedDrop >= MIN_OPERATING_VOLTAGE){
         return LED_DIM_BRIGHTNESS;
     }
 
     ledCurrent=numLeds*currentPerLed*LED_OFF_BRIGHTNESS/255;
-     afterLedDrop = predictVoltageDrop(startingVoltage,ledCurrent, 0.100);;
+     afterLedDrop = startingVoltage-predictVoltageDrop(startingVoltage,ledCurrent, duration);;
     
     if(afterLedDrop >= MIN_OPERATING_VOLTAGE){
         return LED_OFF_BRIGHTNESS;
@@ -267,7 +275,11 @@ float PowerManager::predictVoltageDrop(float startingVoltage, float current, flo
 {
     float R = startingVoltage / current;
     float RC = R * CAP_CAPACITANCE;
-    return startingVoltage * (1 - exp(-duration / RC));
+    float dropVoltage = startingVoltage * (1 - exp(-duration / RC));
+   // _HardSerial.print(" line 277 dropVoltage=");
+   //    _HardSerial.println(dropVoltage);
+
+    return dropVoltage;
 }
 
 // Check if LoRa transmission is safe

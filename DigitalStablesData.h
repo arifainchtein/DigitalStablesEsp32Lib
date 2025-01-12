@@ -17,9 +17,11 @@ struct DigitalStablesConfigData{
 struct DigitalStablesData{
 	char devicename[16];
 	char deviceshortname[5];
+	char groupidentifier[8];
 	char sensor1name[10];
 	char sensor2name[10];
 	uint8_t serialnumberarray[8];
+	uint8_t sentbyarray[8];
 	uint8_t checksum;
 	char deviceTypeId[12];
 	long secondsTime=0L;
@@ -30,7 +32,7 @@ struct DigitalStablesData{
 	uint8_t opMode=0;
 	float rssi=0;
 	float snr=0;
-
+	uint8_t operatingStatus=0;
 	uint8_t loraActive=0;
 	char ipAddress[16];
 	bool internetAvailable;
@@ -56,8 +58,6 @@ struct DigitalStablesData{
 
  	float qfactor1=.35;
 	float qfactor2=.82;
-	
-	float sleepPingMinutes=30;
 	long secondsSinceLastPulse;
 	bool digitalStablesUpload;
 	long dsLastUpload;
@@ -71,5 +71,7 @@ struct DigitalStablesData{
 	float maximumScepticHeight=0.0;
     float measuredHeight=0.0;
 	float scepticAvailablePercentage=0.0;
+	float lux=0;
+	long sleepTime;
 };
 #endif

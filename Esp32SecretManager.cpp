@@ -30,15 +30,13 @@ String Esp32SecretManager::readSecret(){
 	return ret;
 }
 
-void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String deviceshortname, String flow1name, String flow2name, String tank1name, String tank2name, String timezone){
+void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String deviceshortname, String sensor1name, String sensor2name, String timezone){
 
 	preferences.begin("DeviceSenInf", false);
 	preferences.putString("devicename", devicename);
 	preferences.putString("deviceshortname", deviceshortname);
-	preferences.putString("flow1name", flow1name);
-	preferences.putString("flow2name", flow2name);
-	preferences.putString("tank1name", tank1name);
-	preferences.putString("tank2name", tank2name);
+	preferences.putString("sensor1name", sensor1name);
+	preferences.putString("sensor2name", sensor2name);
 	preferences.putString("timezone", timezone);
 	preferences.end();
 }	

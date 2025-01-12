@@ -17,6 +17,13 @@ class PowerManager
 {
 
 public:
+
+   const uint8_t LED_FULL_BRIGHTNESS = 255;
+    const uint8_t LED_MEDIUM_BRIGHTNESS = 125;
+    const uint8_t LED_DIM_BRIGHTNESS =  50;
+    const uint8_t LED_OFF_BRIGHTNESS =  1;
+    const uint8_t LORA_TX_NOT_ALLOWED =  0;
+    
     struct PowerThresholds
     {
         float minLoraTxVoltage;
@@ -135,11 +142,7 @@ private:
     const float LED_FULL_THRESHOLD = 4.75;
     const float LED_DIM_THRESHOLD = 4.25;
 
-    const uint8_t LED_FULL_BRIGHTNESS = 255;
-    const uint8_t LED_MEDIUM_BRIGHTNESS = 125;
-    const uint8_t LED_DIM_BRIGHTNESS =  50;
-    const uint8_t LED_OFF_BRIGHTNESS =  1;
-    const uint8_t LORA_TX_NOT_ALLOWED =  0;
+ 
 
     const float ESP32_OPERATING_VOLTAGE = 3.3;  // V
     const float ESP32_AVERAGE_CURRENT = 150;    // mA (this varies based on what features you're using)

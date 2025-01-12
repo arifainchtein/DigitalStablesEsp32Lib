@@ -9,6 +9,7 @@
 #define LIBRARIES_DIGITALSTABLES_PCF8563TIMEMANAGER_H_
 
 #include <TimeManager.h>
+#include <TimeUtils.h>
 
 #include <RTCInfoRecord.h>
 
@@ -32,6 +33,7 @@ public:
 	RTCInfoRecord now();
 	long getTimeForCodeGeneration(RTCInfoRecord aRTCInfoRecord);
 	long getTimeForCodeGeneration();
+	//char* epochToString(unsigned long epoch);
 	//
 	// Functions that represent Serial commands
 	//
@@ -55,7 +57,10 @@ public:
 private:
 	byte bcdToDec(byte value);
 	byte decToBcd(byte value);
+	long getTimezoneOffset(const uint16_t year,uint8_t month,uint8_t date);
+	int calculateNthWeekday(int month, int nth, int weekday, int year);
 
+	
 
 };
 
