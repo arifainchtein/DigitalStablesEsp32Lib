@@ -407,9 +407,9 @@ bool WifiManager::connectSTA()
     hostname = secretManager.getHostName();
     _HardSerial.print("Setting hostname=");
     _HardSerial.println(hostname);
-    digitalWrite(WATCHDOG_WDI, HIGH);
-    delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
+    // digitalWrite(WATCHDOG_WDI, HIGH);
+    // delay(2);
+    // digitalWrite(WATCHDOG_WDI, LOW);
     //
     // the host name needs to be set before setting
     // the mode
@@ -433,13 +433,13 @@ bool WifiManager::connectSTA()
     _HardSerial.println(ssid);
 
     _HardSerial.println(WiFi.localIP());
-    digitalWrite(WATCHDOG_WDI, HIGH);
-    delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
+    // digitalWrite(WATCHDOG_WDI, HIGH);
+    // delay(2);
+    // digitalWrite(WATCHDOG_WDI, LOW);
     WiFi.begin(const_cast<char *>(ssid.c_str()), const_cast<char *>(password.c_str()));
-    digitalWrite(WATCHDOG_WDI, HIGH);
-    delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
+    // digitalWrite(WATCHDOG_WDI, HIGH);
+    // delay(2);
+    // digitalWrite(WATCHDOG_WDI, LOW);
     bool gotConnection = true;
     uint8_t counter = 0;
     bool keepGoing = true;
@@ -451,23 +451,23 @@ bool WifiManager::connectSTA()
         _HardSerial.print(".");
         WiFi.disconnect();
         WiFi.begin(const_cast<char *>(ssid.c_str()), const_cast<char *>(password.c_str()));
-        digitalWrite(WATCHDOG_WDI, HIGH);
-        delay(2);
-        digitalWrite(WATCHDOG_WDI, LOW);
-        delay(500);
-        digitalWrite(WATCHDOG_WDI, HIGH);
-        delay(2);
-        digitalWrite(WATCHDOG_WDI, LOW);
+        // digitalWrite(WATCHDOG_WDI, HIGH);
+        // delay(2);
+        // digitalWrite(WATCHDOG_WDI, LOW);
+        // delay(500);
+        // digitalWrite(WATCHDOG_WDI, HIGH);
+        // delay(2);
+        // digitalWrite(WATCHDOG_WDI, LOW);
         counter++;
         if (counter > 10)
         {
             keepGoing = false;
             gotConnection = false;
         }
-    }
-    digitalWrite(WATCHDOG_WDI, HIGH);
-    delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
+    // }
+    // digitalWrite(WATCHDOG_WDI, HIGH);
+    // delay(2);
+    // digitalWrite(WATCHDOG_WDI, LOW);
     _HardSerial.print("in connectSTA after settmg wifi, ip=");
     _HardSerial.println(WiFi.localIP());
 
@@ -478,9 +478,9 @@ bool WifiManager::connectSTA()
         _HardSerial.print(" Connected with ip=");
         _HardSerial.println(ipAddress);
 
-        digitalWrite(WATCHDOG_WDI, HIGH);
-        delay(2);
-        digitalWrite(WATCHDOG_WDI, LOW);
+        // digitalWrite(WATCHDOG_WDI, HIGH);
+        // delay(2);
+        // digitalWrite(WATCHDOG_WDI, LOW);
 
         xTaskCreate(
             [](void *parameter)
@@ -500,36 +500,36 @@ bool WifiManager::connectSTA()
         while (keepGoing)
         {
 
-            digitalWrite(WATCHDOG_WDI, HIGH);
-            delay(2);
-            digitalWrite(WATCHDOG_WDI, LOW);
+            // digitalWrite(WATCHDOG_WDI, HIGH);
+            // delay(2);
+            // digitalWrite(WATCHDOG_WDI, LOW);
             delay(500);
             if (timeConfigured)
                 keepGoing = false;
-            digitalWrite(WATCHDOG_WDI, HIGH);
-            delay(2);
-            digitalWrite(WATCHDOG_WDI, LOW);
+            // digitalWrite(WATCHDOG_WDI, HIGH);
+            // delay(2);
+            // digitalWrite(WATCHDOG_WDI, LOW);
             counter++;
             if (counter > 10)
             {
                 keepGoing = false;
             }
         }
-        digitalWrite(WATCHDOG_WDI, HIGH);
-        delay(2);
-        digitalWrite(WATCHDOG_WDI, LOW);
+        // digitalWrite(WATCHDOG_WDI, HIGH);
+        // delay(2);
+        // digitalWrite(WATCHDOG_WDI, LOW);
 
         // configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
         _HardSerial.print(" after config time");
         _HardSerial.println(ipAddress);
-        digitalWrite(WATCHDOG_WDI, HIGH);
-        delay(2);
-        digitalWrite(WATCHDOG_WDI, LOW);
+        // digitalWrite(WATCHDOG_WDI, HIGH);
+        // delay(2);
+        // digitalWrite(WATCHDOG_WDI, LOW);
         checkInternetConnectionAvailable();
-        digitalWrite(WATCHDOG_WDI, HIGH);
-        delay(2);
-        digitalWrite(WATCHDOG_WDI, LOW);
+        // digitalWrite(WATCHDOG_WDI, HIGH);
+        // delay(2);
+        // digitalWrite(WATCHDOG_WDI, LOW);
         _HardSerial.print(" after checkInternetConnectionAvailable");
     }
     else

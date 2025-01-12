@@ -21,7 +21,7 @@ public:
 	//	String days[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 
 	PCF8563TimeManager( HardwareSerial& serial);
-	void start();
+	void start(const char* tz);
 	long dateAsSeconds(uint16_t year, uint8_t month, uint8_t date, uint8_t hour, uint8_t minute, uint8_t second);
 	void hourlyTasks(long time, int previousHour );
 	void dailyTasks(long time, int yesterdayDate, int yesterdayMonth, int yesterdayYear );

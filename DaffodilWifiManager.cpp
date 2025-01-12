@@ -324,7 +324,11 @@ void DaffodilWifiManager::generateWebData(DynamicJsonDocument& json, String sent
     
     json["devicename"] = digitalStablesData.devicename;
     json["deviceshortname"] = digitalStablesData.deviceshortname;
+<<<<<<< HEAD
     json["groupidentifier"]=digitalStablesData.groupidentifier;
+=======
+   // json["groupidentifier"]=digitalStablesData.groupidentifier;
+>>>>>>> b6458ca8eb31733407fc42c84f65eed558ad01c8
     json["secondsTime"] = digitalStablesData.secondsTime;
     json["dataSamplingSec"] = digitalStablesData.dataSamplingSec;
     json["currentFunctionValue"] = digitalStablesData.currentFunctionValue;
