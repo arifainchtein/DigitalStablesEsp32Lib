@@ -13,6 +13,5 @@ struct RTCInfoRecord{
 		const char* timezoneInfo;
 		long timezoneOffset;
 		long epoch;
-
 };
 #endif

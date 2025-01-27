@@ -17,7 +17,7 @@
 class WeatherForecastManager {
 public:
     WeatherForecastManager(RTCInfoRecord& currentTimerRecord, double latitude, double longitude,const char* apiKey);
-    boolean downloadWeatherData(SolarInfo* solarInfo, HardwareSerial& serial); // Method to fetch weather data and update SolarInfo
+    boolean downloadWeatherData(SolarInfo* solarInfo); // Method to fetch weather data and update SolarInfo
     WeatherForecast* getForecasts();
     WeatherForecast getForecast(int index);
     bool hasValidForecasts();
@@ -37,7 +37,7 @@ private:
     const char* ntpServer = "pool.ntp.org";
     String apiKey; // Store the API key
     long getDaylightOffset(RTCInfoRecord& timerRecord) ;
-    void saveForecasts(const WeatherForecast newForecasts[8], HardwareSerial& serial);
+    void saveForecasts(const WeatherForecast newForecasts[8]);
 };
 
 #endif // WEATHERFORECASTMANAGER_H

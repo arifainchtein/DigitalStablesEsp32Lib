@@ -1,8 +1,35 @@
 
 #include "Arduino.h"
+#include <TM1637Display.h>
 
 #ifndef DIGITALSTABLESCONFIGDATA_H
 #define DIGITALSTABLESCONFIGDATA_H
+
+#define FUN_1_FLOW 1
+#define FUN_2_FLOW 2
+#define FUN_1_FLOW_1_TANK 3
+#define FUN_1_TANK 4
+#define FUN_2_TANK 5
+#define DAFFODIL_SCEPTIC_TANK 6
+#define DAFFODIL_WATER_TROUGH 7
+#define DAFFODIL_TEMP_SOILMOISTURE 8
+#define DAFFODIL_LIGHT_DETECTOR 9
+
+
+const uint8_t tank[] = {
+  SEG_F | SEG_G | SEG_D | SEG_E,                  // t
+  SEG_C | SEG_D | SEG_E | SEG_B | SEG_A | SEG_G,  // a
+  SEG_C | SEG_E | SEG_G,                          // n
+  SEG_G | SEG_D | SEG_E                           // c
+};
+
+const uint8_t templabel[] = {
+
+  SEG_F | SEG_G | SEG_D | SEG_E,                  // t
+  SEG_A | SEG_D | SEG_E | SEG_F | SEG_G  // e
+};
+
+
 struct DigitalStablesConfigData{
 	float fieldId=0;
 	long commandcode=0;
@@ -34,6 +61,7 @@ struct DigitalStablesData{
 	float snr=0;
 	uint8_t operatingStatus=0;
 	uint8_t loraActive=0;
+	uint8_t ledBrightness=0;
 	char ipAddress[16];
 	bool internetAvailable;
 	float flowRate=0.0;

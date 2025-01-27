@@ -114,10 +114,8 @@ RTCInfoRecord PCF8563TimeManager::now(){
 		aRTCInfoRecord.month      = bcdToDec(Wire.read() & B00011111);  // remove century bit, 1999 is over
 		aRTCInfoRecord.year       = 2000+bcdToDec(Wire.read());
 		aRTCInfoRecord.timezoneInfo=timezoneInfo;
-		aRTCInfoRecord.timezoneOffset=getTimezoneOffset(aRTCInfoRecord.year ,aRTCInfoRecord.month ,aRTCInfoRecord.date) ;
-		
+		aRTCInfoRecord.timezoneOffset=getTimezoneOffset(aRTCInfoRecord.year ,aRTCInfoRecord.month ,aRTCInfoRecord.date) ;	
 		aRTCInfoRecord.epoch=TimeUtils::getEpochTime( aRTCInfoRecord.year,  aRTCInfoRecord.month,  aRTCInfoRecord.date,  aRTCInfoRecord.hour,  aRTCInfoRecord.minute,   aRTCInfoRecord.second);
-		//aRTCInfoRecord.epochstring=TimeUtils::epochToString(aRTCInfoRecord.epoch,  timezoneinfo);
 		return aRTCInfoRecord;
 	}
 

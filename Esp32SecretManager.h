@@ -9,6 +9,7 @@
 #define LIBRARIES_DIGITALSTABLES_ESP32SECRETMANAGER_H_
 #include <SecretManager.h>
 #include <TimeManager.h>
+#include "Arduino.h"
 
 class Esp32SecretManager   : public SecretManager{
 
@@ -18,7 +19,10 @@ public:
 	Esp32SecretManager(TimeManager & t) ;
 	void saveSecret(String secret, int numberDigits, int periodSeconds );
 	String readSecret();
-	
+	void getDeviceSensorConfig(char* devicename, char* deviceshortname, char* sensor1name, char* sensor2name, String& timezone,  double& latitude, double& longitude);
+	void saveDeviceSensorConfig(String devicename,String deviceshortname, String sensor1name, String sensor2name, String tz, double latitude, double longitude);
+	void saveWifiParameters(String ssid, String password, String softAPSSID, String softAPPASS,  String hostName, bool stationmode);
+
 	void saveConfigData(float fieldId, String stationName );
 	void saveOperatingStatus(float operatingStatus );
 	float getOperatingStatus();
@@ -26,8 +30,6 @@ public:
     String getStationName();  
 	void saveSleepPingMinutes(float pingMinutes );
 	float getSleepPingMinutes();
-	void saveWifiParameters(String ssid, String password, String softAPSSID, String softAPPASS,  String hostName, bool stationmode);
-	void saveDeviceSensorConfig(String devicename,String deviceshortname, String sensor1name, String sensor2name, String tz);
 	void setTimeZone(String s);
 	String readTimeZone( );
 	String readDeviceName();

@@ -37,7 +37,8 @@ class SolarInfo
 
     protected:
 		HardwareSerial& _HardSerial;
-
+    boolean debug=false;
+    
 public:
     
     SolarInfo( HardwareSerial& serial,double latitude,double longitude, double altitude);

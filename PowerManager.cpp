@@ -2,8 +2,7 @@
 #include <PowerManager.h>
 RTC_DATA_ATTR int PowerManager::historyIndex = 0;
 
-PowerManager::PowerManager(HardwareSerial &serial, ADS1115 &a, SolarInfo& s,double la, double lo, float c, float cu) :
- _HardSerial(serial), ads(a), solarInfo(s),latitude(la), longitude(lo), capacitorValue(c), currentPerLed(cu) {}
+PowerManager::PowerManager(HardwareSerial &serial, ADS1115 &a, SolarInfo& s,double la, double lo, float c, float cu) : _HardSerial(serial), ads(a), solarInfo(s),latitude(la), longitude(lo), capacitorValue(c), currentPerLed(cu) {}
 
 void PowerManager::begin()
 {
@@ -164,24 +163,24 @@ PowerManager::PowerThresholds PowerManager::calculateSafeThresholds(uint8_t numL
     powerThresholds.minLedVoltage = minLedVoltage;
     powerThresholds.voltageDropDuringTx = calculateVoltageDrop(minLoraTxVoltage, LORA_TX_CURRENT, TX_DURATION);
 
-    // _HardSerial.println("Safe Operating Thresholds:");
-    // _HardSerial.print("Minimum voltage for LoRa TX: ");
-    // _HardSerial.print(minLoraTxVoltage, 2);
-    // _HardSerial.println("V");
-    // _HardSerial.print("Voltage drop during TX: ");
-    // _HardSerial.print(calculateVoltageDrop(minLoraTxVoltage, LORA_TX_CURRENT, TX_DURATION), 2);
-    // _HardSerial.println("V");
-    // _HardSerial.print("Minimum voltage for LED: ");
-    // _HardSerial.print(minLedVoltage, 2);
-    // _HardSerial.println("V");
+    // if(debug) _HardSerial.print.println("Safe Operating Thresholds:");
+    // if(debug) _HardSerial.print.print("Minimum voltage for LoRa TX: ");
+    // if(debug) _HardSerial.print.print(minLoraTxVoltage, 2);
+    // if(debug) _HardSerial.print.println("V");
+    // if(debug) _HardSerial.print.print("Voltage drop during TX: ");
+    // if(debug) _HardSerial.print.print(calculateVoltageDrop(minLoraTxVoltage, LORA_TX_CURRENT, TX_DURATION), 2);
+    // if(debug) _HardSerial.print.println("V");
+    // if(debug) _HardSerial.print.print("Minimum voltage for LED: ");
+    // if(debug) _HardSerial.print.print(minLedVoltage, 2);
+    // if(debug) _HardSerial.print.println("V");
     return powerThresholds;
 }
 
 // Calculate voltage drop for a given current draw
 float PowerManager::calculateVoltageDrop(float startVoltage, float current, float duration)
 {
-    // _HardSerial.print("current=");
-    // _HardSerial.println(current);
+    // if(debug) _HardSerial.print.print("current=");
+    // if(debug) _HardSerial.print.println(current);
 
     // // Using capacitor discharge equation: V = V0 * e^(-t/RC)
     // // Where R = V/I
@@ -193,8 +192,8 @@ float PowerManager::calculateVoltageDrop(float startVoltage, float current, floa
     float R = startVoltage / current;
     float RC = R * CAP_CAPACITANCE;
     float dropVoltage = startVoltage * (1 - exp(-duration / RC));
-     _HardSerial.print(" line 196 dropVoltage=");
-       _HardSerial.println(dropVoltage);
+     if(debug) _HardSerial.print(" line 196 dropVoltage=");
+       if(debug) _HardSerial.println(dropVoltage);
     return dropVoltage;
 }
 
@@ -237,12 +236,12 @@ uint8_t PowerManager::calculateSafeLEDBrightness(float startingVoltage, uint8_t 
     float duration=5.0;
     float ledCurrent=numLeds*currentPerLed*LED_FULL_BRIGHTNESS/255;
     float afterLedDrop = startingVoltage-predictVoltageDrop(startingVoltage,ledCurrent, duration);;
-    // _HardSerial.print("line 239, ledCurrent=");
-    // _HardSerial.print(ledCurrent);
-    //  _HardSerial.print(" startingVoltage");
-    // _HardSerial.print(startingVoltage);
-    // _HardSerial.print(" afterLedDrop=");
-    // _HardSerial.println(afterLedDrop);
+    // if(debug) _HardSerial.print.print("line 239, ledCurrent=");
+    // if(debug) _HardSerial.print.print(ledCurrent);
+    //  if(debug) _HardSerial.print.print(" startingVoltage");
+    // if(debug) _HardSerial.print.print(startingVoltage);
+    // if(debug) _HardSerial.print.print(" afterLedDrop=");
+    // if(debug) _HardSerial.print.println(afterLedDrop);
     
     if(afterLedDrop >= MIN_OPERATING_VOLTAGE){
         return LED_FULL_BRIGHTNESS;
@@ -276,8 +275,8 @@ float PowerManager::predictVoltageDrop(float startingVoltage, float current, flo
     float R = startingVoltage / current;
     float RC = R * CAP_CAPACITANCE;
     float dropVoltage = startingVoltage * (1 - exp(-duration / RC));
-   // _HardSerial.print(" line 277 dropVoltage=");
-   //    _HardSerial.println(dropVoltage);
+   // if(debug) _HardSerial.print.print(" line 277 dropVoltage=");
+   //    if(debug) _HardSerial.print.println(dropVoltage);
 
     return dropVoltage;
 }

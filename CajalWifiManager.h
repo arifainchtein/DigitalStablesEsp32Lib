@@ -15,14 +15,11 @@ class CajalWifiManager : public WifiManager{
 public:
     DataManager& dataManager;
 	CajalData& cajalData;
-   
+	boolean debug=false;
 	CajalWifiManager(HardwareSerial& serial ,DataManager& d,PCF8563TimeManager& t, Esp32SecretManager& e, CajalData& tf) ;
 	void start( );
 	void generateWebData(DynamicJsonDocument& json, String s);
-	int uploadDataToDigitalStables();
-		
-	int uploadRosieDataToDigitalStables(RosieData& r);
-	int uploadDaffodilDataToDigitalStables(DaffodilData& r);
+	int uploadDataToDigitalStables();	
 	int uploadDigitalStablesDataToDigitalStables(DigitalStablesData& r);
 
     virtual ~CajalWifiManager();

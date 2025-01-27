@@ -42,21 +42,21 @@ bool WeatherForecastManager::isWeatherDataStale(RTCInfoRecord& currentTimerRecor
         return (timeInfo.tm_isdst > 0) ? 3600 : 0; // 1 hour if DST is in effect
     }
 
-bool WeatherForecastManager::downloadWeatherData(SolarInfo* solarInfo, HardwareSerial& serial) {
+bool WeatherForecastManager::downloadWeatherData(SolarInfo* solarInfo) {
     // Create an HTTP client
     HTTPClient http;
     
     // Construct the API URL using latitude and longitude
    
     String url = "http://api.openweathermap.org/data/2.5/forecast?lat=" + String(lat) + "&lon=" + String(lon) + "&appid=" + apiKey + "&units=metric";
-    serial.print("line 70, wfm, url=");
-    serial.println(url);
+   // serial.print("line 70, wfm, url=");
+  //  serial.println(url);
     
     http.begin(url);
-    serial.println("line 77=");
+    //serial.println("line 77=");
     int httpCode = http.GET();
-    serial.print("line 75, wfm, httpCode=");
-    serial.println(httpCode);
+  //  serial.print("line 75, wfm, httpCode=");
+ //   serial.println(httpCode);
     if (httpCode > 0) {
         // Parse the JSON response
         String payload = http.getString();
@@ -67,15 +67,15 @@ bool WeatherForecastManager::downloadWeatherData(SolarInfo* solarInfo, HardwareS
         // Parse the JSON response
         DynamicJsonDocument doc(size); // Adjust size based on expected JSON response
         DeserializationError error = deserializeJson(doc, payload);
-        serial.println(error.c_str()); 
-        serial.print("line 103,  Error=");
-        serial.println(error.c_str()); 
+        // serial.println(error.c_str()); 
+        // serial.print("line 103,  Error=");
+        // serial.println(error.c_str()); 
         String jsonString; 
         if (!error) {
             JsonArray list = doc["list"].as<JsonArray>();
             size = list.size();
-            serial.print("line 106, No Error, list size=");
-            serial.println(size);
+            // serial.print("line 106, No Error, list size=");
+            // serial.println(size);
             for (int i = 0; i < size && i < 8; i++) {
                 JsonObject forecast = list[i].as<JsonObject>();
                 forecasts[i].secondsTime = forecast["dt"].as<long>(); // Assuming dt is the timestamp
@@ -83,17 +83,17 @@ bool WeatherForecastManager::downloadWeatherData(SolarInfo* solarInfo, HardwareS
                 forecasts[i].cloudiness = forecast["clouds"][0]["all"]; // Weather description
                 forecasts[i].pressure = forecast["main"]["pressure"].as<float>(); // Assuming you have a temperature field
                 serializeJsonPretty(forecast, jsonString); 
-                serial.println(jsonString);
+             //   serial.println(jsonString);
             }
             solarInfo->setWeatherForecast(forecasts, size);
-             saveForecasts(forecasts, serial);
+             saveForecasts(forecasts);
             return true; // Indicate success
         } else {
-            serial.printf("Failed to parse JSON: %s\n", error.c_str());
+           // serial.printf("Failed to parse JSON: %s\n", error.c_str());
         }
     } else {
         // Handle error
-        Serial.printf("Error on HTTP request: %s\n", http.errorToString(httpCode).c_str());
+       // Serial.printf("Error on HTTP request: %s\n", http.errorToString(httpCode).c_str());
     }
 
     // Invalidate the weather forecast in SolarInfo
@@ -102,21 +102,21 @@ bool WeatherForecastManager::downloadWeatherData(SolarInfo* solarInfo, HardwareS
 }
 
 
-void WeatherForecastManager::saveForecasts(const WeatherForecast newForecasts[8], HardwareSerial& serial) { 
-   serial.println("First forecast before saving:");
-    serial.println(newForecasts[0].temperature);
-    serial.println(newForecasts[0].secondsTime);
+void WeatherForecastManager::saveForecasts(const WeatherForecast newForecasts[8]) { 
+//    serial.println("First forecast before saving:");
+//     serial.println(newForecasts[0].temperature);
+//     serial.println(newForecasts[0].secondsTime);
     
     size_t forecastSize = sizeof(WeatherForecast) * 8;
-    serial.print("Saving forecast size: ");
-    serial.println(forecastSize);
+    // serial.print("Saving forecast size: ");
+    // serial.println(forecastSize);
 
   
     memcpy(forecasts, newForecasts, forecastSize);
     preferences.begin(PREF_NAMESPACE, false); 
     size_t written = preferences.putBytes(FORECAST_KEY, newForecasts, forecastSize); 
-    serial.print("Bytes written: "); 
-    serial.println(written); 
+    // serial.print("Bytes written: "); 
+    // serial.println(written); 
     preferences.end(); 
 }
 

@@ -1,6 +1,7 @@
 #ifndef TimeUtils_h
 #define TimeUtils_h
 #include <Arduino.h>
+#include <TimeLib.h>
 struct DSTRule { 
     int month; // Month (1-12) 
     int week; // Week (1-5, 5=last week) 
@@ -23,6 +24,7 @@ class TimeUtils {
 public: 
     static void parseTimezone(const String& tz); 
     static String epochToString(unsigned long epoch);
+    static int epochToNumericTime(unsigned long epoch, String t);
 
     static bool isDST(int year, int month, int day, int hour); 
     static unsigned long getEpochTime(int year, int month, int day, int hour, int minute, int second); 

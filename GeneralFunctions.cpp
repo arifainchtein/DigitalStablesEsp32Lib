@@ -52,6 +52,15 @@ float GeneralFunctions::stringToFloat(String s){
 	return result;
 }
 
+double GeneralFunctions::stringToDouble(String str) {
+  // Convert String to char array  
+  char charBuf[50];
+  str.toCharArray(charBuf, 50);
+  
+  // Use strtod for double precision conversion  
+  return strtod(charBuf, NULL);
+}
+
 String GeneralFunctions::getValue(String data, char separator, int index)
 {
 	int found = 0;

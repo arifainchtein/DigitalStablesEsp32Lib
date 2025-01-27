@@ -6,6 +6,123 @@ DSTRule TimeUtils::startDST = {0, 0, 0, 0};
 DSTRule TimeUtils::endDST = {0, 0, 0, 0};
 
 
+
+ // Method to convert epoch time to numeric time
+    int TimeUtils::epochToNumericTime(unsigned long epoch, String timezone) {
+        // Parse the timezone string
+     // Parse the timezone string
+        parseTimezone(timezone);
+
+        // Convert epoch to local time considering the base offset
+        time_t localTime = epoch + baseOffset * 3600;
+
+        // Create a tm structure to break down the local time
+        tmElements_t tmElements;
+        breakTime(localTime, tmElements); // This breaks the time into components
+
+        // Check if the current time is under DST
+        bool dstActive = isDST(tmElements.Year + 1970, tmElements.Month, tmElements.Day, tmElements.Hour);
+
+        // Adjust for DST if applicable
+        if (dstActive) {
+            localTime += dstOffset * 3600;
+        }
+
+        // Update tmElements after DST adjustment
+        breakTime(localTime, tmElements);
+
+        // Create a numerical representation of the time (HHMM)
+        return tmElements.Hour * 100 + tmElements.Minute;
+    }
+
+/*
+
+int TimeUtils::epochToNumericTime(unsigned long epoch) {
+    // First convert epoch to UTC
+    unsigned long seconds = epoch;
+    uint8_t second = seconds % 60;
+    seconds /= 60;
+    uint8_t minute = seconds % 60;
+    seconds /= 60;
+    uint8_t hour = seconds % 24;
+    unsigned long days = seconds / 24;
+
+    // Convert days to year/month/day
+    int year = 1970;
+    while (true) {
+        unsigned long daysInYear = 365;
+        if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {
+            daysInYear = 366;
+        }
+        if (days < daysInYear) {
+            break;
+        }
+        days -= daysInYear;
+        year++;
+    }
+
+    // Create a modifiable copy of the days in month array
+    uint8_t monthDays[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+    uint8_t month = 1;
+    
+    // Adjust February for leap year
+    if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {
+        monthDays[1] = 29;
+    }
+
+    while (days >= monthDays[month-1]) {
+        days -= monthDays[month-1];
+        month++;
+    }
+    uint8_t day = days + 1;
+
+    // Now we have UTC time, convert to local time
+    int totalOffset = baseOffset;
+    if (isDST(year, month, day, hour)) {
+        totalOffset += dstOffset;
+    }
+
+    // Add the offset hours
+    hour += totalOffset;
+
+    // Handle day rollover
+    if (hour >= 24) {
+        hour -= 24;
+        day++;
+        if (day > monthDays[month-1]) {
+            day = 1;
+            month++;
+            if (month > 12) {
+                month = 1;
+                year++;
+            }
+        }
+    }
+    else if (hour < 0) {
+        hour += 24;
+        day--;
+        if (day < 1) {
+            month--;
+            if (month < 1) {
+                month = 12;
+                year--;
+                // Adjust February for leap year if we went back to previous year
+                if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {
+                    monthDays[1] = 29;
+                } else {
+                    monthDays[1] = 28;
+                }
+            }
+            day = monthDays[month-1];
+        }
+    }
+
+    
+    return hour*100+minute;
+}
+
+*/
+
 String TimeUtils::epochToString(unsigned long epoch) {
     // First convert epoch to UTC
     unsigned long seconds = epoch;

@@ -23,7 +23,7 @@ public:
     const uint8_t LED_DIM_BRIGHTNESS =  50;
     const uint8_t LED_OFF_BRIGHTNESS =  1;
     const uint8_t LORA_TX_NOT_ALLOWED =  0;
-    
+    boolean debug=false;
     struct PowerThresholds
     {
         float minLoraTxVoltage;

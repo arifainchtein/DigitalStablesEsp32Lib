@@ -30,7 +30,7 @@ String Esp32SecretManager::readSecret(){
 	return ret;
 }
 
-void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String deviceshortname, String sensor1name, String sensor2name, String timezone){
+void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String deviceshortname, String sensor1name, String sensor2name, String timezone, double latitude, double longitude){
 
 	preferences.begin("DeviceSenInf", false);
 	preferences.putString("devicename", devicename);
@@ -38,6 +38,9 @@ void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String devices
 	preferences.putString("sensor1name", sensor1name);
 	preferences.putString("sensor2name", sensor2name);
 	preferences.putString("timezone", timezone);
+	preferences.putDouble("latitude", latitude);
+    preferences.putDouble("longitude", longitude);
+    
 	preferences.end();
 }	
 
@@ -54,6 +57,36 @@ String Esp32SecretManager::readTimeZone(){
 	String ret = preferences.getString("timezone");
 	preferences.end();
 	return ret;
+}
+
+
+
+void Esp32SecretManager::getDeviceSensorConfig(char* devicename, char* deviceshortname, char* sensor1name, char* sensor2name, String& timezone, double& latitude, double& longitude) {
+    preferences.begin("DeviceSenInf", true);
+    String tempString = preferences.getString("devicename", "NoData");
+    strcpy(devicename, tempString.c_str());
+    tempString = preferences.getString("deviceshortname", "NoData");
+    strcpy(deviceshortname, tempString.c_str());
+    tempString = preferences.getString("sensor1name", "NoData");
+    strcpy(sensor1name, tempString.c_str());
+    tempString = preferences.getString("sensor2name", "NoData");
+    strcpy(sensor2name, tempString.c_str());
+    timezone = preferences.getString("timezone", "NoData");
+    
+    // Check if latitude and longitude are available, if not set default values  
+    if (!preferences.isKey("latitude")) {
+        latitude = -37.13305556;
+    } else {
+        latitude = preferences.getDouble("latitude", -37.13305556);
+    }
+    
+    if (!preferences.isKey("longitude")) {
+        longitude = 144.47472222;
+    } else {
+        longitude = preferences.getDouble("longitude", 144.47472222);
+    }
+    
+    preferences.end();
 }
 
 String Esp32SecretManager::readDeviceName(){
