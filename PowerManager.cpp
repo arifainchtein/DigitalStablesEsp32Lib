@@ -200,15 +200,16 @@ float PowerManager::calculateVoltageDrop(float startVoltage, float current, floa
 // Read and update voltage with smoothing
 float PowerManager::getCapacitorVoltage()
 {
+    ads.setGain(0);
     int16_t val_3 = ads.readADC(3);
     float f = ads.toVoltage(1); //  voltage factor
-    float rawVoltage = val_3 * f;
-    if (voltageEMA == 0)
-        voltageEMA = rawVoltage;
+    float currentVoltage = val_3 * f;
+    // if (voltageEMA == 0)
+    //     voltageEMA = rawVoltage;
 
-    voltageEMA = (EMA_ALPHA * rawVoltage) + ((1.0 - EMA_ALPHA) * voltageEMA);
-    currentVoltage = voltageEMA;
-    lastVoltageCheck = millis();
+    // voltageEMA = (EMA_ALPHA * rawVoltage) + ((1.0 - EMA_ALPHA) * voltageEMA);
+    // currentVoltage = voltageEMA;
+    // lastVoltageCheck = millis();
 
     return currentVoltage;
 }
@@ -288,6 +289,12 @@ uint8_t PowerManager::isLoraTxSafe(uint8_t numLeds)
     double currentVoltage = getCapacitorVoltage();
     float loraDrop = predictVoltageDrop(currentVoltage,LORA_TX_CURRENT, 0.100);
     float afterLoraDrop = currentVoltage-loraDrop;
+    _HardSerial.print(" currentVoltage =");
+    _HardSerial.print(currentVoltage);
+    _HardSerial.print("  loraDrop =");
+    _HardSerial.print(loraDrop);
+    
+    
     if(MIN_OPERATING_VOLTAGE>afterLoraDrop){
         return LORA_TX_NOT_ALLOWED;
     }
