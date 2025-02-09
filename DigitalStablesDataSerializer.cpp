@@ -149,6 +149,12 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     serial.print(digitalStablesData.sleepTime);
     serial.print(F("#"));
     serial.print(digitalStablesData.ledBrightness);
+    serial.print(F("#"));
+    serial.print(digitalStablesData.altitude);
+    serial.print(F("#"));
+    serial.print(digitalStablesData.minimumEfficiencyForLed);
+    serial.print(F("#"));
+    serial.print(digitalStablesData.minimumEfficiencyForWifi);
     serial.println(F("#"));
 }
 

@@ -91,6 +91,7 @@ struct DigitalStablesData{
 	long dsLastUpload;
 	float latitude;
 	float longitude;
+	float altitude;
 	float solarVoltage=0.0;
 	float capacitorVoltage=0.0;
 	long totpcode;
@@ -101,5 +102,8 @@ struct DigitalStablesData{
 	float scepticAvailablePercentage=0.0;
 	float lux=0;
 	long sleepTime;
+	uint8_t minimumEfficiencyForLed;
+	uint8_t minimumEfficiencyForWifi;
+	
 };
 #endif

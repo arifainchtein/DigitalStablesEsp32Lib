@@ -30,7 +30,7 @@ String Esp32SecretManager::readSecret(){
 	return ret;
 }
 
-void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String deviceshortname, String sensor1name, String sensor2name, String timezone, double latitude, double longitude){
+void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String deviceshortname, String sensor1name, String sensor2name, String timezone, double latitude, double longitude, double altitude,uint8_t minimumEfficiencyForLed, uint8_t minimumEfficiencyForWifi){
 
 	preferences.begin("DeviceSenInf", false);
 	preferences.putString("devicename", devicename);
@@ -40,7 +40,9 @@ void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String devices
 	preferences.putString("timezone", timezone);
 	preferences.putDouble("latitude", latitude);
     preferences.putDouble("longitude", longitude);
-    
+    preferences.putDouble("altitude", altitude);
+    preferences.putInt("minimumEfficiencyForLed",minimumEfficiencyForLed);
+	preferences.putInt("minimumEfficiencyForWifi", minimumEfficiencyForWifi);
 	preferences.end();
 }	
 
@@ -61,7 +63,7 @@ String Esp32SecretManager::readTimeZone(){
 
 
 
-void Esp32SecretManager::getDeviceSensorConfig(char* devicename, char* deviceshortname, char* sensor1name, char* sensor2name, String& timezone, double& latitude, double& longitude) {
+void Esp32SecretManager::getDeviceSensorConfig(char* devicename, char* deviceshortname, char* sensor1name, char* sensor2name, String& timezone, double& latitude, double& longitude, double& altitude,uint8_t& minimumEfficiencyForLed, uint8_t& minimumEfficiencyForWifi) {
     preferences.begin("DeviceSenInf", true);
     String tempString = preferences.getString("devicename", "NoData");
     strcpy(devicename, tempString.c_str());
@@ -86,6 +88,23 @@ void Esp32SecretManager::getDeviceSensorConfig(char* devicename, char* devicesho
         longitude = preferences.getDouble("longitude", 144.47472222);
     }
     
+	if (!preferences.isKey("altitude")) {
+        altitude = 410;
+    } else {
+        altitude = preferences.getDouble("altitude", 410);
+    }
+
+	if (!preferences.isKey("minimumEfficiencyForLed")) {
+        minimumEfficiencyForLed = 40;
+    } else {
+        minimumEfficiencyForLed = preferences.getInt("minimumEfficiencyForWifi", 40);
+    }
+	if (!preferences.isKey("minimumEfficiencyForWifi")) {
+        minimumEfficiencyForWifi = 50;
+    } else {
+        minimumEfficiencyForWifi = preferences.getInt("minimumEfficiencyForWifi", 50);
+    }
+
     preferences.end();
 }
 

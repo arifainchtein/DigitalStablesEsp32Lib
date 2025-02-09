@@ -87,7 +87,7 @@ struct PowerProfile {
     //     ledBrightness(0),
     //     voltageEMA(0) {}
     void begin();
-    float calculateVoltageDrop(float startVoltage, float current, float duration);
+    //float calculateVoltageDrop(float startVoltage, float current, float duration);
     PowerThresholds calculateSafeThresholds(uint8_t numLeds);
 
     float getCapacitorVoltage();
@@ -95,7 +95,7 @@ struct PowerProfile {
     uint8_t calculateSafeLEDBrightness(float startingVoltage,uint8_t numberleds);
     
     float predictVoltageDrop(float startingVoltage, float current, float duration);
-    uint8_t isLoraTxSafe(uint8_t numberleds);
+    uint8_t isLoraTxSafe(uint8_t numberleds,RTCInfoRecord& currentTimerRecord);
     void disableBluetooth();
     void enableBluetooth();
     void enableModemSleep();
@@ -114,12 +114,12 @@ private:
 
     // Voltage Thresholds
     const float LORA_TX_THRESHOLD = 3.8;
-    const float MIN_OPERATING_VOLTAGE = 3.0;
+    const float MIN_OPERATING_VOLTAGE = 3.6;
     
     const double CAPACITOR_MAX_VOLTAGE = 5.0;      // V
     const double POWER_CONSUMPTION_SLEEP = 0.0001; // W in sleep mode
     const double POWER_CONSUMPTION_LORA = 0.12;     // W during LoRa transmission
-    const int LORA_TRANSMISSION_TIME_MS = 100;     // ms per transmission
+    const int LORA_TRANSMISSION_TIME_MS = .100;     // ms per transmission
     const int TRANSMISSIONS_PER_HOUR = 1;
 
     // Power Consumption Parameters
