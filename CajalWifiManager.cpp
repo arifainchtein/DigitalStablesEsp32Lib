@@ -6,7 +6,7 @@
 //#define SPIFFS LittleFS
 
 
-CajalWifiManager::CajalWifiManager(HardwareSerial &serial, DataManager &d, PCF8563TimeManager &t, Esp32SecretManager &e, CajalData &tf) : WifiManager(serial, t, e), dataManager(d), cajalData(tf) {}
+CajalWifiManager::CajalWifiManager(HardwareSerial &serial, FS &fs,DataManager &d, PCF8563TimeManager &t, Esp32SecretManager &e, CajalData &tf) : WifiManager(serial, fs,t, e), dataManager(d), cajalData(tf) {}
 
 
 

@@ -9,8 +9,8 @@
 #define FUN_2_TANK 5
 
 
-PanchoVisualizerWifiManager::PanchoVisualizerWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  CajalData& tf,PanchoConfigData& p) :
-WifiManager(serial ,  t, e) , cajalData(tf),panchoConfigData(p){
+PanchoVisualizerWifiManager::PanchoVisualizerWifiManager(HardwareSerial &serial,FS &fs, PCF8563TimeManager &t, Esp32SecretManager &e,  CajalData& tf,PanchoConfigData& p) :
+WifiManager(serial , fs, t, e) , cajalData(tf),panchoConfigData(p){
 }
 
  

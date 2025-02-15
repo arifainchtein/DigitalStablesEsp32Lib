@@ -32,56 +32,74 @@ unsigned long PowerManager::calculateOptimalSleepTime(RTCInfoRecord& currentTime
 {
     // Get sunrise/sunset times based on location and day of year
     DailySolarData dailySolarData = solarInfo.getDailySolarData(currentTimerRecord);
-    double sunriseHour = dailySolarData.sunrise;
+    // dailySolarData.sunrise is minutes since midnight so if the value is 410 then
+    // the sunrise time is 6:50 am  6*60=360 + 50
+    uint8_t sunriseHour = (int)(dailySolarData.sunrise/60);
+    uint8_t minutesinsunrisehour = dailySolarData.sunrise-sunriseHour*60;
     int minutesToSunrise;
+    if(debug)_HardSerial.print(" sunriseHour:");
+    if(debug)_HardSerial.print(sunriseHour);
 
+    if(debug)_HardSerial.print(" currentTimerRecord.hour:");
+    if(debug)_HardSerial.print(currentTimerRecord.hour);
+    
     if (currentTimerRecord.hour >= sunriseHour)
     {
         // Calculate for next day's sunrise
-        minutesToSunrise = (24 - currentTimerRecord.hour + sunriseHour) * 60 - currentTimerRecord.minute;
+        minutesToSunrise = ((24 - currentTimerRecord.hour + sunriseHour) * 60) - currentTimerRecord.minute + minutesinsunrisehour;
     }
     else
     {
         minutesToSunrise = (sunriseHour - currentTimerRecord.hour) * 60 - currentTimerRecord.minute;
     }
-
+     if(debug)_HardSerial.print("minutesToSunrise:");
+     if(debug)_HardSerial.print(minutesToSunrise);
+     
     // Calculate available energy
     double currentVoltage = getCapacitorVoltage();
     double availableEnergy = 0.5 * capacitorValue * (currentVoltage * currentVoltage - MIN_OPERATING_VOLTAGE * MIN_OPERATING_VOLTAGE);
-
+    if(debug)_HardSerial.print(" availableEnergy:");
+    if(debug)_HardSerial.print(availableEnergy);
+    
     // Calculate energy per transmission
     double energyPerTransmission = POWER_CONSUMPTION_LORA * (LORA_TRANSMISSION_TIME_MS / 1000.0);
-
+    if(debug)_HardSerial.print(" energyPerTransmission:");
+    if(debug)_HardSerial.print(energyPerTransmission);
+ 
     // Calculate energy needed for sleep per second
     double sleepEnergyPerSecond = POWER_CONSUMPTION_SLEEP;
     
     // Calculate total sleep energy needed until sunrise
     double totalSleepEnergy = sleepEnergyPerSecond * (minutesToSunrise * 60);
+    if(debug)_HardSerial.print(" totalSleepEnergy:");
+    if(debug)_HardSerial.print(totalSleepEnergy);
 
     // Calculate remaining energy for transmissions
     double energyForTransmissions = availableEnergy - totalSleepEnergy;
-
+    if(debug)_HardSerial.print(" energyForTransmissions:");
+    if(debug)_HardSerial.print(energyForTransmissions);
     if (energyForTransmissions <= 0)
     {
-        // Not enough energy even for sleep, wake up in 1 minute to check conditions
-        return 3660 * 1000000UL;
+        // Not enough energy even for sleep, wake up in 10 minute to check conditions
+        return 600UL;
     }
 
     // Calculate maximum possible transmissions until sunrise
     int maxPossibleTransmissions = floor(energyForTransmissions / energyPerTransmission);
-
+     if(debug)_HardSerial.print(" maxPossibleTransmissions:");
+          if(debug)_HardSerial.print(maxPossibleTransmissions);
     if (maxPossibleTransmissions <= 0)
     {
-        // Not enough energy for any transmissions, wake up in 1 minute to check conditions
-        return 60 * 1000000UL;
+        // Not enough energy for any transmissions, wake up in 10 minutes to check conditions
+        return 600UL;
     }
 
     // Calculate optimal time between transmissions in microseconds
-    unsigned long sleepTimeUs = 
-        (unsigned long)((minutesToSunrise * 60.0 * 1000000.0) / maxPossibleTransmissions);
-
+    unsigned long sleepTimeSec = (unsigned long)((minutesToSunrise * 60.0 ) / maxPossibleTransmissions);
+    if(debug)_HardSerial.print(" sleepTimeUs:");
+    if(debug)_HardSerial.println(sleepTimeSec);
     // Minimum sleep time of 10 minute to prevent too frequent transmissions
-    return max(sleepTimeUs, 600UL * 1000000UL);
+    return max(sleepTimeSec, 600UL);
 }
 
 /*
@@ -199,24 +217,24 @@ PowerManager::PowerThresholds PowerManager::calculateSafeThresholds(uint8_t numL
     powerThresholds.minLedVoltage = minLedVoltage;
     powerThresholds.voltageDropDuringTx = predictVoltageDrop(minLoraTxVoltage, LORA_TX_CURRENT, TX_DURATION);
 
-    // if(debug) _HardSerial.print.println("Safe Operating Thresholds:");
-    // if(debug) _HardSerial.print.print("Minimum voltage for LoRa TX: ");
-    // if(debug) _HardSerial.print.print(minLoraTxVoltage, 2);
-    // if(debug) _HardSerial.print.println("V");
-    // if(debug) _HardSerial.print.print("Voltage drop during TX: ");
-    // if(debug) _HardSerial.print.print(predictVoltageDrop(minLoraTxVoltage, LORA_TX_CURRENT, TX_DURATION), 2);
-    // if(debug) _HardSerial.print.println("V");
-    // if(debug) _HardSerial.print.print("Minimum voltage for LED: ");
-    // if(debug) _HardSerial.print.print(minLedVoltage, 2);
-    // if(debug) _HardSerial.print.println("V");
+    // if(debug) _HardSerial.print.ln("Safe Operating Thresholds:");
+    // if(debug) _HardSerial.print("Minimum voltage for LoRa TX: ");
+    // if(debug) _HardSerial.print(minLoraTxVoltage, 2);
+    // if(debug) _HardSerial.print.ln("V");
+    // if(debug) _HardSerial.print("Voltage drop during TX: ");
+    // if(debug) _HardSerial.print(predictVoltageDrop(minLoraTxVoltage, LORA_TX_CURRENT, TX_DURATION), 2);
+    // if(debug) _HardSerial.print.ln("V");
+    // if(debug) _HardSerial.print("Minimum voltage for LED: ");
+    // if(debug) _HardSerial.print(minLedVoltage, 2);
+    // if(debug) _HardSerial.print.ln("V");
     return powerThresholds;
 }
 
 // Calculate voltage drop for a given current draw
 // float PowerManager::calculateVoltageDrop(float startVoltage, float current, float duration)
 // {
-//     // if(debug) _HardSerial.print.print("current=");
-//     // if(debug) _HardSerial.print.println(current);
+//     // if(debug) _HardSerial.print("current=");
+//     // if(debug) _HardSerial.print.ln(current);
 
 //     // // Using capacitor discharge equation: V = V0 * e^(-t/RC)
 //     // // Where R = V/I
@@ -312,7 +330,7 @@ float PowerManager::predictVoltageDrop(float startingVoltage, float current, flo
 {
     float R = startingVoltage / current;
     float RC = R * CAP_CAPACITANCE;
-    float dropVoltage = startingVoltage * (1 - exp(-duration / RC));
+    float dropVoltage = startingVoltage * (1 - exp(-duration/1000 / RC));
 
      if(debug) _HardSerial.print(" line 277 duration=");
    if(debug) _HardSerial.print(duration);
@@ -338,9 +356,9 @@ uint8_t PowerManager::isLoraTxSafe(uint8_t numLeds, RTCInfoRecord& currentTimerR
     float loraDrop = predictVoltageDrop(currentVoltage,LORA_TX_CURRENT, LORA_TRANSMISSION_TIME_MS);
     float afterLoraDrop = currentVoltage-loraDrop;
     if(debug)_HardSerial.print(" currentVoltage =");
-    if(debug)_HardSerial.print(currentVoltage);
-    if(debug)_HardSerial.print("  loraDrop =");
-   if(debug) _HardSerial.print(loraDrop);
+   if(debug)_HardSerial.print(currentVoltage);
+   if(debug)_HardSerial.print("  loraDrop =");
+   if(debug)_HardSerial.print(loraDrop);
     
     
     if(MIN_OPERATING_VOLTAGE>afterLoraDrop){

@@ -119,7 +119,7 @@ private:
     const double CAPACITOR_MAX_VOLTAGE = 5.0;      // V
     const double POWER_CONSUMPTION_SLEEP = 0.0001; // W in sleep mode
     const double POWER_CONSUMPTION_LORA = 0.12;     // W during LoRa transmission
-    const int LORA_TRANSMISSION_TIME_MS = .100;     // ms per transmission
+    const int LORA_TRANSMISSION_TIME_MS = 1000;     // ms per transmission
     const int TRANSMISSIONS_PER_HOUR = 1;
 
     // Power Consumption Parameters

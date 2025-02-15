@@ -15,7 +15,7 @@ public:
 	CajalData& cajalData;
     PanchoConfigData& panchoConfigData;
 	
-	PanchoVisualizerWifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, CajalData& tf, PanchoConfigData& p) ;
+	PanchoVisualizerWifiManager(HardwareSerial& serial , FS &fs,PCF8563TimeManager& t, Esp32SecretManager& e, CajalData& tf, PanchoConfigData& p) ;
 	void start( );
 	void generateWebData(DynamicJsonDocument& json, String s);
 	void generateRosieWebData(RosieData& r,DynamicJsonDocument& json, String s);

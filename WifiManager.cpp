@@ -17,7 +17,7 @@ bool pingComplete = false;
 
 static const int TASK_STACK_SIZE = 8192;
 
-WifiManager::WifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e) : _HardSerial(serial), timeManager(t), secretManager(e), asyncWebServer(80) {}
+WifiManager::WifiManager(HardwareSerial &serial,FS &fs, PCF8563TimeManager &t, Esp32SecretManager &e) : _HardSerial(serial), _fs(fs),timeManager(t), secretManager(e), asyncWebServer(80) {}
 
 bool WifiManager::getInternetAvailable()
 {

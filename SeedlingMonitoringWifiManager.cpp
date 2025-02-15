@@ -3,8 +3,8 @@
 
  
 
-SeedlingMonitoringWifiManager::SeedlingMonitoringWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e, SeedlingMonitorData &s) :
-WifiManager(serial ,  t, e), seedlingMonitorData(s){}
+SeedlingMonitoringWifiManager::SeedlingMonitoringWifiManager(HardwareSerial &serial,FS &fs, PCF8563TimeManager &t, Esp32SecretManager &e, SeedlingMonitorData &s) :
+WifiManager(serial ,fs,  t, e), seedlingMonitorData(s){}
 
 void SeedlingMonitoringWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
     json["soilTemperature"] = seedlingMonitorData.soilTemperature;

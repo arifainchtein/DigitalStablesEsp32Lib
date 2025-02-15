@@ -13,14 +13,17 @@
 
 #include <ArduinoJson.h>
 #include <DigitalStablesData.h>
+
+#include <FS.h>
+
 class DataManager
 {
 
 public:
-  DataManager(HardwareSerial &serial);
+  DataManager(HardwareSerial& serial, FS& fs);
   StaticJsonDocument<60000> completeObject;
   void start();
-  uint16_t getTotalDataSize();
+  //uint16_t getTotalDataSize();
   void storeGloria(GloriaTankFlowPumpData &p);
   void storeDigitalStablesData(DigitalStablesData &p);
   void generateGloriaTankFlowPumpWebData(GloriaTankFlowPumpData &r, DynamicJsonDocument &json);
@@ -28,6 +31,14 @@ public:
   void processGloriaQueue();
   void processDigitalStablesDataQueue();
 
+  int getDSDStoredCount();
+  bool readAllDSDData(DigitalStablesData* dataArray, int maxSize, int& actualSize);
+  void updateDSDStoredCount(int count) ;
+  void storeDSDData(DigitalStablesData& data);
+  void printAllDSDData();
+  void clearAllDSDData() ;
+  void printDigitalStablesData(const DigitalStablesData& data);
+  void exportDSDCSV() ;
   // uint8_t readKeys();
   // void getDeviceData(JsonArray &array);
   // void storePancho(PanchoTankFlowData &p);
@@ -40,9 +51,15 @@ public:
   // void generateRosieWebData(RosieData &r, JsonObject &json);
 
 protected:
-  HardwareSerial &_HardSerial;
+
 
 private:
+  HardwareSerial& _HardSerial; 
+  FS& _fs; 
+  bool _initialized;
+  const char* DSD_DATA_FILE = "/digitalstables.dat";
+  const char* DSD_COUNT_FILE = "/dscount.txt";
+
   boolean debug = false;
   #define MAX_QUEUE_SIZE 20
   GloriaTankFlowPumpSerializer gloriaTankFlowPumpSerializer;

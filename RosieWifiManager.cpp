@@ -9,8 +9,8 @@
 
 
 
-RosieWifiManager::RosieWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  RosieData& tf,RosieConfigData& p) :
-WifiManager(serial ,  t,e) , rosieData(tf),rosieConfigData(p){}
+RosieWifiManager::RosieWifiManager(HardwareSerial &serial,FS &fs, PCF8563TimeManager &t, Esp32SecretManager &e,  RosieData& tf,RosieConfigData& p) :
+WifiManager(serial ,fs,  t,e) , rosieData(tf),rosieConfigData(p){}
 
  void RosieWifiManager::setWifiActiveSwitchStatus(bool b){
     wifiActiveSwitchStatus=b;

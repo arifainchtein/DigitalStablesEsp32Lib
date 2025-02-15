@@ -14,7 +14,7 @@
 #include <Esp32SecretManager.h>
 #include <PanchoTankFlowData.h>
 #include <WiFi.h>
-
+#include <FS.h>
 #include <time.h>
 
 #include <ESPmDNS.h>
@@ -28,6 +28,7 @@ class WifiManager{
 
 protected:
 	HardwareSerial& _HardSerial;
+    FS _fs;
     RTCInfoRecord currentTimerRecord, lastReceptionRTCInfoRecord;
     PCF8563TimeManager& timeManager;
     Esp32SecretManager& secretManager;
@@ -74,7 +75,7 @@ protected:
    
 
 public:
-	WifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e) ;
+	WifiManager(HardwareSerial& serial , FS &fs, PCF8563TimeManager& t, Esp32SecretManager& e) ;
 	virtual void start( )=0;
     void stop( );
      bool setTimeFromInternet();

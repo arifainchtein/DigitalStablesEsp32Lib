@@ -15,7 +15,7 @@ public:
 	GloriaTankFlowPumpData& gloriaTankFlowPumpData;
     GloriaConfigData& gloriaConfigData;
 	
-	GloriaTankFlowPumpWifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, GloriaTankFlowPumpData& tf, GloriaConfigData& p) ;
+	GloriaTankFlowPumpWifiManager(HardwareSerial& serial ,FS &fs, PCF8563TimeManager& t, Esp32SecretManager& e, GloriaTankFlowPumpData& tf, GloriaConfigData& p) ;
 	void start( );
 	void generateWebData(DynamicJsonDocument& json, String s);
 	int uploadDataToDigitalStables();

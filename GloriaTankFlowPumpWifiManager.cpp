@@ -8,8 +8,8 @@
 #define FUN_2_TANK 5
 
  
-GloriaTankFlowPumpWifiManager::GloriaTankFlowPumpWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  GloriaTankFlowPumpData& tf,GloriaConfigData& p) :
-WifiManager(serial ,  t, e) , gloriaTankFlowPumpData(tf),gloriaConfigData(p){}
+GloriaTankFlowPumpWifiManager::GloriaTankFlowPumpWifiManager(HardwareSerial &serial,FS &fs, PCF8563TimeManager &t, Esp32SecretManager &e,  GloriaTankFlowPumpData& tf,GloriaConfigData& p) :
+WifiManager(serial , fs, t, e) , gloriaTankFlowPumpData(tf),gloriaConfigData(p){}
 
  
 

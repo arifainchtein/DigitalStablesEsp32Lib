@@ -14,10 +14,32 @@ Preferences preferences;
 Esp32SecretManager::Esp32SecretManager(TimeManager& t):SecretManager(t){}
 
 
+// void Esp32SecretManager::storeDigitalStablesDataSleepSample( DigitalStablesData& dsd ){
+// 	preferences.begin("DeviceSenInf", false);
+
+// 	unsigned int dataCount = preferences.getUInt("count", 0);  
+// 	char key[15];
+//   	sprintf(key, "data_%d", dataCount);
+//   	preferences.putBytes(key, &dsd, sizeof(dsd));
+// 	preferences.putUInt("count", dataCount + 1);
+// 	preferences.end();
+// }
+
+// void Esp32SecretManager::clearDigitalStablesDataSleepSample( DigitalStablesData& dsd ){
+// 	preferences.begin("DeviceSenInf", false);
+// 	preferences.clear(); 
+// 	preferences.end();
+// }
+
+// void Esp32SecretManager::readDigitalStablesDataSleepSample( DigitalStablesData& dsd ){
+// 	preferences.begin("DeviceSenInf", false);
+// 	preferences.clear(); 
+// 	preferences.end();
+// }
 
 void Esp32SecretManager::saveSecret(String secret, int numberDigits, int periodSeconds ){
 
-	preferences.begin("SecretManager", false);
+	preferences.begin("SleepData", false);
 	preferences.putString("Secret", secret);
 	preferences.putUInt("NumberDigits", numberDigits);
 	preferences.putUInt("PeriodSeconds", periodSeconds);

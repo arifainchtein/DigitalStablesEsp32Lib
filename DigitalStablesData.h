@@ -39,6 +39,7 @@ struct DigitalStablesConfigData{
 };
 #endif
 
+
 #ifndef DIGITALSTABLESDATA_H
 #define DIGITALSTABLESDATA_H
 struct DigitalStablesData{
@@ -101,7 +102,7 @@ struct DigitalStablesData{
     float measuredHeight=0.0;
 	float scepticAvailablePercentage=0.0;
 	float lux=0;
-	long sleepTime;
+	long sleepTime=600; // in seconds
 	uint8_t minimumEfficiencyForLed;
 	uint8_t minimumEfficiencyForWifi;
 	

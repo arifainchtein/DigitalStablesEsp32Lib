@@ -14,7 +14,7 @@ public:
 	PanchoTankFlowData& panchoTankFlowData;
     PanchoConfigData& panchoConfigData;
 	
-	PanchoTankFlowWifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, PanchoTankFlowData& tf, PanchoConfigData& p) ;
+	PanchoTankFlowWifiManager(HardwareSerial& serial ,FS &fs, PCF8563TimeManager& t, Esp32SecretManager& e, PanchoTankFlowData& tf, PanchoConfigData& p) ;
 	void start( );
 	void generateWebData(DynamicJsonDocument& json, String s);
 	int uploadDataToDigitalStables();

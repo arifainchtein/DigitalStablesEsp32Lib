@@ -16,7 +16,7 @@ public:
     DataManager& dataManager;
 	CajalData& cajalData;
 	boolean debug=false;
-	CajalWifiManager(HardwareSerial& serial ,DataManager& d,PCF8563TimeManager& t, Esp32SecretManager& e, CajalData& tf) ;
+	CajalWifiManager(HardwareSerial& serial ,FS &fs,DataManager& d,PCF8563TimeManager& t, Esp32SecretManager& e, CajalData& tf) ;
 	void start( );
 	void generateWebData(DynamicJsonDocument& json, String s);
 	int uploadDataToDigitalStables();	

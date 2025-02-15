@@ -8,8 +8,8 @@
 #define FUN_2_TANK 5
 
 
-PanchoTankFlowWifiManager::PanchoTankFlowWifiManager(HardwareSerial &serial, PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
-WifiManager(serial ,  t, e) , panchoTankFlowData(tf),panchoConfigData(p){}
+PanchoTankFlowWifiManager::PanchoTankFlowWifiManager(HardwareSerial &serial, FS &fs,PCF8563TimeManager &t, Esp32SecretManager &e,  PanchoTankFlowData& tf,PanchoConfigData& p) :
+WifiManager(serial , fs, t, e) , panchoTankFlowData(tf),panchoConfigData(p){}
 
  
 

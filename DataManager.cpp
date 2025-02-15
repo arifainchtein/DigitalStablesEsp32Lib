@@ -3,7 +3,7 @@
 #include "PanchoTankFlowData.h"
 #include "DaffodilData.h"
 #include "DigitalStablesData.h"
-
+#include "SPIFFS.h"
 #include "DataManager.h"
 
 //JsonObject obj;
@@ -13,10 +13,241 @@
 // String keys[126];
 
 String sn = "";
-DataManager::DataManager(HardwareSerial &serial) : _HardSerial(serial) {}
+ DataManager::DataManager(HardwareSerial& serial, FS& fs) : _HardSerial(serial) , _fs(fs) , _initialized(false) { }
 
-void DataManager::start()
-{
+
+void DataManager::start() { 
+}
+
+int DataManager::getDSDStoredCount() {
+       if (!_initialized) return 0;
+    
+    if (_fs.exists(DSD_COUNT_FILE)) {
+        File file = _fs.open(DSD_COUNT_FILE, "r");
+        String countStr = file.readString();
+        file.close();
+        return countStr.toInt();
+    }
+    return 0;
+}
+
+void DataManager::updateDSDStoredCount(int count) {
+      if (!_initialized) return;
+    
+    File file = _fs.open(DSD_COUNT_FILE, "w");
+    file.println(count);
+    file.close();
+}
+
+void DataManager::storeDSDData(DigitalStablesData& data) {
+   if (!_initialized) return;
+    
+    int count = getDSDStoredCount();
+    
+    // Open file in append mode
+    File file = _fs.open(DSD_DATA_FILE, "a");
+    if(!file) {
+        _HardSerial.println("Failed to open file for writing");
+        return;
+    }
+  // Write the struct data
+    file.write((uint8_t*)&data, sizeof(DigitalStablesData));
+    file.close();
+    
+    // Update count
+    updateDSDStoredCount(count + 1);
+    
+    _HardSerial.printf("Stored entry %d\n", count);
+}
+
+
+bool DataManager::readAllDSDData(DigitalStablesData* dataArray, int maxSize, int& actualSize) {
+    if (!_initialized) return false;
+    
+    if (dataArray == nullptr) {
+        _HardSerial.println("Invalid array pointer");
+        return false;
+    }
+    
+    // Get actual number of stored entries
+    actualSize = getDSDStoredCount();
+    if (actualSize == 0) {
+        _HardSerial.println("No data stored");
+        return false;
+    }
+    
+    if (actualSize > maxSize) {
+        _HardSerial.printf("Warning: Only reading %d entries out of %d\n", maxSize, actualSize);
+        actualSize = maxSize;
+    }
+    
+    File file = _fs.open(DSD_DATA_FILE, "r");
+    if(!file) {
+        _HardSerial.println("Failed to open file for reading");
+        return false;
+    }
+    
+    // Read entries into the array
+    int entriesRead = 0;
+    while(entriesRead < actualSize && 
+          file.read((uint8_t*)&dataArray[entriesRead], sizeof(DigitalStablesData))) {
+        entriesRead++;
+    }
+    
+    file.close();
+    
+    if (entriesRead != actualSize) {
+        _HardSerial.printf("Warning: Expected %d entries but read %d\n", actualSize, entriesRead);
+        actualSize = entriesRead;
+    }
+    
+    return true;
+}
+
+void DataManager::printAllDSDData() {
+       if (!_initialized) return;
+    
+    int count = getDSDStoredCount();
+    
+    if (count == 0) {
+        _HardSerial.println("No data stored");
+        return;
+    }
+    
+    File file = _fs.open(DSD_DATA_FILE, "r");
+    if(!file) {
+        _HardSerial.println("Failed to open file for reading");
+        return;
+    }
+    
+    _HardSerial.println("\n=== Stored Digital Stables Data ===");
+    _HardSerial.printf("Total entries: %d\n", count);
+    
+    DigitalStablesData readData;
+    int entry = 0;
+    
+    while(file.read((uint8_t*)&readData, sizeof(DigitalStablesData))) {
+        _HardSerial.printf("\nEntry %d:\n", entry++);
+        printDigitalStablesData(readData);
+    }
+    
+    file.close();
+    _HardSerial.println("=== End of Data ===\n");
+}
+
+void DataManager::clearAllDSDData() {
+     if (!_initialized) return;
+    
+    if(_fs.remove(DSD_DATA_FILE)) {
+        updateDSDStoredCount(0);
+        _HardSerial.println("All data cleared");
+    } else {
+        _HardSerial.println("Error clearing data");
+    }
+}
+
+
+
+void DataManager::exportDSDCSV() {
+     if (!_initialized) return;
+    
+    File file = _fs.open(DSD_DATA_FILE, "r");
+    if(!file) {
+        _HardSerial.println("Failed to open file for reading");
+        return;
+    }
+    // Print CSV header
+    Serial.println("devicename,deviceshortname,groupidentifier,sensor1name,sensor2name,"
+                  "deviceTypeId,secondsTime,temperature,flowRate,flowRate2,"
+                  "tank1PressurePsi,tank2PressurePsi,latitude,longitude,altitude,"
+                  "solarVoltage,capacitorVoltage,outdoortemperature,outdoorhumidity,lux");
+    
+    DigitalStablesData readData;
+    while(file.read((uint8_t*)&readData, sizeof(DigitalStablesData))) {
+        Serial.printf("%s,%s,%s,%s,%s,%s,%ld,%.2f,%.2f,%.2f,%.2f,%.2f,%.6f,%.6f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%ld,%d,%d\n",
+            readData.devicename,
+            readData.deviceshortname,
+            readData.groupidentifier,
+            readData.sensor1name,
+            readData.sensor2name,
+            readData.deviceTypeId,
+            readData.secondsTime,
+            readData.temperature,
+            readData.flowRate,
+            readData.flowRate2,
+            readData.tank1PressurePsi,
+            readData.tank2PressurePsi,
+            readData.latitude,
+            readData.longitude,
+            readData.altitude,
+            readData.solarVoltage,
+            readData.capacitorVoltage,
+            readData.outdoortemperature,
+            readData.outdoorhumidity,
+            readData.lux,
+            readData.sleepTime,
+	          readData.minimumEfficiencyForLed,
+	          readData.minimumEfficiencyForWifi
+        );
+    }
+    
+    file.close();
+}
+
+
+void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
+    Serial.println("Device Name: " + String(data.devicename));
+    Serial.println("Device Short Name: " + String(data.deviceshortname));
+    Serial.println("Group Identifier: " + String(data.groupidentifier));
+    Serial.println("Sensor 1 Name: " + String(data.sensor1name));
+    Serial.println("Sensor 2 Name: " + String(data.sensor2name));
+    
+    Serial.print("Serial Number: ");
+    for(int i = 0; i < 8; i++) {
+        Serial.print(data.serialnumberarray[i], HEX);
+        Serial.print(" ");
+    }
+    Serial.println();
+    
+    Serial.println("Device Type ID: " + String(data.deviceTypeId));
+    Serial.println("Seconds Time: " + String(data.secondsTime));
+    Serial.println("Data Sampling Sec: " + String(data.dataSamplingSec));
+    Serial.println("Temperature: " + String(data.temperature));
+    Serial.println("RTC Battery Voltage: " + String(data.rtcBatVolt));
+    Serial.println("Operating Mode: " + String(data.opMode));
+    Serial.println("RSSI: " + String(data.rssi));
+    Serial.println("SNR: " + String(data.snr));
+    
+    // Flow data
+    Serial.println("Flow Rate 1: " + String(data.flowRate));
+    Serial.println("Total Millilitres 1: " + String(data.totalMilliLitres));
+    Serial.println("Flow Rate 2: " + String(data.flowRate2));
+    Serial.println("Total Millilitres 2: " + String(data.totalMilliLitres2));
+    
+    // Tank data
+    Serial.println("Tank 1 Pressure (PSI): " + String(data.tank1PressurePsi));
+    Serial.println("Tank 1 Height (m): " + String(data.tank1HeightMeters));
+    Serial.println("Tank 1 Max Volume (L): " + String(data.tank1maxvollit));
+    
+    Serial.println("Tank 2 Pressure (PSI): " + String(data.tank2PressurePsi));
+    Serial.println("Tank 2 Height (m): " + String(data.tank2HeightMeters));
+    Serial.println("Tank 2 Max Volume (L): " + String(data.tank2maxvollit));
+    
+    // Location data
+    Serial.println("Location: " + String(data.latitude) + ", " + String(data.longitude));
+    Serial.println("Altitude: " + String(data.altitude));
+    
+    // Environmental data
+    Serial.println("Solar Voltage: " + String(data.solarVoltage));
+    Serial.println("Capacitor Voltage: " + String(data.capacitorVoltage));
+    Serial.println("Outdoor Temperature: " + String(data.outdoortemperature));
+    Serial.println("Outdoor Humidity: " + String(data.outdoorhumidity));
+    Serial.println("Lux: " + String(data.lux));
+    
+    // System settings
+    Serial.println("Sleep Time (s): " + String(data.sleepTime));
+    Serial.println("Min Efficiency LED: " + String(data.minimumEfficiencyForLed));
+    Serial.println("Min Efficiency WiFi: " + String(data.minimumEfficiencyForWifi));
 }
 
 void DataManager::processGloriaQueue()

@@ -18,7 +18,7 @@ public:
 	DigitalStablesData& digitalStablesData;
     DigitalStablesConfigData& digitalStablesConfigData;
 	
-	DaffodilWifiManager(HardwareSerial& serial , PCF8563TimeManager& t, Esp32SecretManager& e, DigitalStablesData& tf, DigitalStablesConfigData& p) ;
+	DaffodilWifiManager(HardwareSerial& serial , FS &fs, PCF8563TimeManager& t, Esp32SecretManager& e, DigitalStablesData& tf, DigitalStablesConfigData& p) ;
 	void start( );
 	void setWifiActiveSwitchStatus(bool b);
 	void generateWebData(DynamicJsonDocument& json, String s);
