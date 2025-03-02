@@ -6,10 +6,9 @@
 #include <GloriaTankFlowPumpSerializer.h>
 #include <DigitalStablesDataSerializer.h>
 #include <GloriaTankFlowPumpData.h>
-#include <PanchoTankFlowData.h>
 #include <LangleyData.h>
-#include <RosieData.h>
 #include <DaffodilData.h>
+#include <TimeUtils.h>
 
 #include <ArduinoJson.h>
 #include <DigitalStablesData.h>
@@ -34,7 +33,7 @@ public:
   int getDSDStoredCount();
   bool readAllDSDData(DigitalStablesData* dataArray, int maxSize, int& actualSize);
   void updateDSDStoredCount(int count) ;
-  void storeDSDData(DigitalStablesData& data);
+  int storeDSDData(DigitalStablesData& data);
   void printAllDSDData();
   void clearAllDSDData() ;
   void printDigitalStablesData(const DigitalStablesData& data);

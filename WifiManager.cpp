@@ -7,7 +7,7 @@
  */
 
 #include <WifiManager.h>
-#define WATCHDOG_WDI 18
+
 
 const char *ntpServer = "oceania.pool.ntp.org";
 const long gmtOffset_sec = 10 * 3600;
@@ -224,21 +224,13 @@ String WifiManager::getTeleonomeData(String url, bool debug)
 String WifiManager::scanNetworks()
 {
 
-    digitalWrite(WATCHDOG_WDI, HIGH);
-    delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
-
-    this->_HardSerial.println("startscan poiomnt 1");
+      this->_HardSerial.println("startscan poiomnt 1");
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
-    digitalWrite(WATCHDOG_WDI, HIGH);
-    delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
+   
     this->_HardSerial.println("startscan poiomnt 2");
     delay(5);
-    digitalWrite(WATCHDOG_WDI, HIGH);
-    // delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
+    
     int n = WiFi.scanNetworks(true);
 
     uint8_t counter = 0;
@@ -246,15 +238,11 @@ String WifiManager::scanNetworks()
 
     while (keepGoing)
     {
-        digitalWrite(WATCHDOG_WDI, HIGH);
-        // delay(2);
-        digitalWrite(WATCHDOG_WDI, LOW);
+       
         int16_t WiFiScanStatus = WiFi.scanComplete();
         if (WiFiScanStatus < 0)
         {
-            digitalWrite(WATCHDOG_WDI, HIGH);
-            // delay(2);
-            digitalWrite(WATCHDOG_WDI, LOW);
+          
             delay(500);
             counter++;
             if (counter > 60)
@@ -270,16 +258,11 @@ String WifiManager::scanNetworks()
         }
     }
 
-    // delay(5);
-    //  digitalWrite(WATCHDOG_WDI, HIGH);
-    // delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
+   
     this->_HardSerial.println("startscan poiomnt 3");
     String json = "[";
     n = WiFi.scanComplete();
-    digitalWrite(WATCHDOG_WDI, HIGH);
-    delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
+   
     this->_HardSerial.println("scan 4 complete");
     if (n)
     {
@@ -300,13 +283,9 @@ String WifiManager::scanNetworks()
         }
     }
     json += "]";
-    digitalWrite(WATCHDOG_WDI, HIGH);
-    delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
+   
     WiFi.scanDelete();
-    digitalWrite(WATCHDOG_WDI, HIGH);
-    delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
+    
     return json;
 }
 
@@ -417,9 +396,7 @@ bool WifiManager::connectSTA()
     WiFi.disconnect();
     WiFi.mode(WIFI_STA);
     WiFi.setHostname(hname);
-    digitalWrite(WATCHDOG_WDI, HIGH);
-    delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
+   
     WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
 
     _HardSerial.print("in connectSTA ssid=");
@@ -458,9 +435,7 @@ bool WifiManager::connectSTA()
         _HardSerial.print(" Connected with ip=");
         _HardSerial.println(ipAddress);
 
-        // digitalWrite(WATCHDOG_WDI, HIGH);
-        // delay(2);
-        // digitalWrite(WATCHDOG_WDI, LOW);
+      
 
         xTaskCreate(
             [](void *parameter)
@@ -480,36 +455,25 @@ bool WifiManager::connectSTA()
         while (keepGoing)
         {
 
-            // digitalWrite(WATCHDOG_WDI, HIGH);
-            // delay(2);
-            // digitalWrite(WATCHDOG_WDI, LOW);
+           
             delay(500);
             if (timeConfigured)
                 keepGoing = false;
-            // digitalWrite(WATCHDOG_WDI, HIGH);
-            // delay(2);
-            // digitalWrite(WATCHDOG_WDI, LOW);
+           
             counter++;
             if (counter > 10)
             {
                 keepGoing = false;
             }
         }
-        // digitalWrite(WATCHDOG_WDI, HIGH);
-        // delay(2);
-        // digitalWrite(WATCHDOG_WDI, LOW);
-
+       
         // configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
         _HardSerial.print(" after config time");
         _HardSerial.println(ipAddress);
-        // digitalWrite(WATCHDOG_WDI, HIGH);
-        // delay(2);
-        // digitalWrite(WATCHDOG_WDI, LOW);
+        
         checkInternetConnectionAvailable();
-        // digitalWrite(WATCHDOG_WDI, HIGH);
-        // delay(2);
-        // digitalWrite(WATCHDOG_WDI, LOW);
+        
         _HardSerial.print(" after checkInternetConnectionAvailable");
     }
     else
@@ -565,19 +529,12 @@ bool WifiManager::connectAP()
 
 void WifiManager::checkInternetConnectionAvailable()
 {
-    digitalWrite(WATCHDOG_WDI, HIGH);
-    delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
+  
      internetPingTime = 0;
-      digitalWrite(WATCHDOG_WDI, HIGH);
-        delay(2);
-        digitalWrite(WATCHDOG_WDI, LOW);
-        delay(500);
+     
+      
     ping();
-        digitalWrite(WATCHDOG_WDI, HIGH);
-        delay(2);
-        digitalWrite(WATCHDOG_WDI, LOW);
-        delay(500);
+        
     
     _HardSerial.print("called ping, speed=");
     _HardSerial.println(internetPingTime);
@@ -655,30 +612,21 @@ bool WifiManager::setTimeFromInternet(){
 }
 
 void WifiManager::ping(){
-     digitalWrite(WATCHDOG_WDI, HIGH);
-        delay(2);
-        digitalWrite(WATCHDOG_WDI, LOW);
-       
+   
     HTTPClient http;
     http.setTimeout(950);
     String url = "http://devices.digitalstables.com/DevicePingServlet?"; // Specify the URL with the Ping parameter
     //String url = "http://www.google.com"; // Specify the URL with the Ping parameter
     _HardSerial.println(" startmg http");
-     digitalWrite(WATCHDOG_WDI, HIGH);
-        delay(2);
-        digitalWrite(WATCHDOG_WDI, LOW);
+ 
     http.begin(url); // Start the request
-         digitalWrite(WATCHDOG_WDI, HIGH);
-        delay(2);
-        digitalWrite(WATCHDOG_WDI, LOW);
+       
     unsigned long startTime = millis(); // Start time
     int httpResponseCode = http.GET(); // Send the request
     internetPingTime = millis() - startTime; // Calculate elapsed time
     _HardSerial.print(" end http,httpResponseCode=");
     _HardSerial.println(httpResponseCode);
-    digitalWrite(WATCHDOG_WDI, HIGH);
-    delay(2);
-    digitalWrite(WATCHDOG_WDI, LOW);
+    
     // Check for the response code
     if (httpResponseCode >0) {
       String payload = http.getString(); // Get the response payload
@@ -695,12 +643,8 @@ void WifiManager::ping(){
     }
       _HardSerial.print(" finished ping internetAvailable=");
     _HardSerial.println(internetAvailable);
-         digitalWrite(WATCHDOG_WDI, HIGH);
-        delay(2);
-        digitalWrite(WATCHDOG_WDI, LOW);
+         
     http.end(); // Free resources
-         digitalWrite(WATCHDOG_WDI, HIGH);
-        delay(2);
-        digitalWrite(WATCHDOG_WDI, LOW);
+        
 }
 WifiManager::~WifiManager() {}

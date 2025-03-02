@@ -17,6 +17,7 @@ String sn = "";
 
 
 void DataManager::start() { 
+  _initialized=true;
 }
 
 int DataManager::getDSDStoredCount() {
@@ -39,8 +40,11 @@ void DataManager::updateDSDStoredCount(int count) {
     file.close();
 }
 
-void DataManager::storeDSDData(DigitalStablesData& data) {
-   if (!_initialized) return;
+int DataManager::storeDSDData(DigitalStablesData& data) {
+   if (!_initialized){
+    _HardSerial.printf("Data Manager Not initialized");
+    return -1;
+   } 
     
     int count = getDSDStoredCount();
     
@@ -48,7 +52,7 @@ void DataManager::storeDSDData(DigitalStablesData& data) {
     File file = _fs.open(DSD_DATA_FILE, "a");
     if(!file) {
         _HardSerial.println("Failed to open file for writing");
-        return;
+        return -2;
     }
   // Write the struct data
     file.write((uint8_t*)&data, sizeof(DigitalStablesData));
@@ -56,8 +60,9 @@ void DataManager::storeDSDData(DigitalStablesData& data) {
     
     // Update count
     updateDSDStoredCount(count + 1);
-    
+     count = getDSDStoredCount();
     _HardSerial.printf("Stored entry %d\n", count);
+    return count;
 }
 
 
@@ -157,43 +162,97 @@ void DataManager::exportDSDCSV() {
         return;
     }
     // Print CSV header
-    Serial.println("devicename,deviceshortname,groupidentifier,sensor1name,sensor2name,"
-                  "deviceTypeId,secondsTime,temperature,flowRate,flowRate2,"
+       Serial.println(F("devicename,deviceshortname,groupidentifier,sensor1name,sensor2name,"
+                  "serialnumber,devicetype,secondsTime,secondstimestring,dataSamplingSec,"
+                  " temperature,rtcBatVolt,opMode, rssi, snr,flowRate,totalMilliLitres,flowRate2,totalMilliLitres2,"
                   "tank1PressurePsi,tank2PressurePsi,latitude,longitude,altitude,"
-                  "solarVoltage,capacitorVoltage,outdoortemperature,outdoorhumidity,lux");
+                  "solarVoltage,capacitorVoltage,outdoortemperature,outdoorhumidity,lux, sleeptime,minimumEfficiencyForLed,minimumEfficiencyForWifi"));
+
+    DigitalStablesData data;
+    while(file.read((uint8_t*)&data, sizeof(DigitalStablesData))) {
+        // Serial.printf("%s,%s,%s,%s,%s,%s,%ld,%.2f,%.2f,%.2f,%.2f,%.2f,%.6f,%.6f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%ld,%d,%d\n",
+        //     readData.devicename,
+        //     readData.deviceshortname,
+        //     readData.groupidentifier,
+        //     readData.sensor1name,
+        //     readData.sensor2name,
+        //     readData.deviceTypeId,
+        //     readData.secondsTime,
+        //     readData.temperature,
+        //     readData.flowRate,
+        //     readData.flowRate2,
+        //     readData.tank1PressurePsi,
+        //     readData.tank2PressurePsi,
+        //     readData.latitude,
+        //     readData.longitude,
+        //     readData.altitude,
+        //     readData.solarVoltage,
+        //     readData.capacitorVoltage,
+        //     readData.outdoortemperature,
+        //     readData.outdoorhumidity,
+        //     readData.lux,
+        //     readData.sleepTime,
+	      //     readData.minimumEfficiencyForLed,
+	      //     readData.minimumEfficiencyForWifi
+        // );
+
+    Serial.print( String(data.devicename));
+    Serial.print("," + String(data.deviceshortname));
+    Serial.print(", " + String(data.groupidentifier));
+    Serial.print(", " + String(data.sensor1name));
+    Serial.print("," + String(data.sensor2name));
+    Serial.print(", " );
+    for(int i = 0; i < 8; i++) {
+        Serial.print(data.serialnumberarray[i], HEX);
+    }
     
-    DigitalStablesData readData;
-    while(file.read((uint8_t*)&readData, sizeof(DigitalStablesData))) {
-        Serial.printf("%s,%s,%s,%s,%s,%s,%ld,%.2f,%.2f,%.2f,%.2f,%.2f,%.6f,%.6f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%ld,%d,%d\n",
-            readData.devicename,
-            readData.deviceshortname,
-            readData.groupidentifier,
-            readData.sensor1name,
-            readData.sensor2name,
-            readData.deviceTypeId,
-            readData.secondsTime,
-            readData.temperature,
-            readData.flowRate,
-            readData.flowRate2,
-            readData.tank1PressurePsi,
-            readData.tank2PressurePsi,
-            readData.latitude,
-            readData.longitude,
-            readData.altitude,
-            readData.solarVoltage,
-            readData.capacitorVoltage,
-            readData.outdoortemperature,
-            readData.outdoorhumidity,
-            readData.lux,
-            readData.sleepTime,
-	          readData.minimumEfficiencyForLed,
-	          readData.minimumEfficiencyForWifi
-        );
+    Serial.print(", " + String(data.deviceTypeId));
+    Serial.print("," + String(data.secondsTime));
+    Serial.print("," +  TimeUtils::epochToString(data.secondsTime));
+    
+    Serial.print("," + String(data.dataSamplingSec));
+    Serial.print(", " + String(data.temperature));
+    Serial.print(", " + String(data.rtcBatVolt));
+    Serial.print(", " + String(data.opMode));
+    Serial.print(", " + String(data.rssi));
+    Serial.print("," + String(data.snr));
+    
+    // Flow data
+    Serial.print("," + String(data.flowRate));
+    Serial.print("," + String(data.totalMilliLitres));
+    Serial.print("," + String(data.flowRate2));
+    Serial.print("," + String(data.totalMilliLitres2));
+    
+    // Tank data
+    Serial.print(", " + String(data.tank1PressurePsi));
+ //   Serial.print("," + String(data.tank1HeightMeters));
+ //   Serial.print(", " + String(data.tank1maxvollit));
+    
+    Serial.print("," + String(data.tank2PressurePsi));
+   // Serial.print("," + String(data.tank2HeightMeters));
+  //  Serial.print(", " + String(data.tank2maxvollit));
+    
+    // Location data
+    Serial.print("," + String(data.latitude) + ", " + String(data.longitude));
+    Serial.print(", " + String(data.altitude));
+    
+    // Environmental data
+    Serial.print("," + String(data.solarVoltage));
+    Serial.print(", " + String(data.capacitorVoltage));
+    Serial.print("," + String(data.outdoortemperature));
+    Serial.print("," + String(data.outdoorhumidity));
+    Serial.print("," + String(data.lux));
+    
+    // System settings
+    Serial.print(", " + String(data.sleepTime));
+    Serial.print("," + String(data.minimumEfficiencyForLed));
+    Serial.println(", " + String(data.minimumEfficiencyForWifi));
     }
     
     file.close();
 }
 
+ 
 
 void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     Serial.println("Device Name: " + String(data.devicename));
