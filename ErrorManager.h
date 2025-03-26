@@ -9,11 +9,16 @@ struct ErrorFlags {
     byte loraErrors;  // Each bit represents a different LoRa error from enum
 };
 
+struct DigitalTablesData {
+    // Your digital tables data structure here
+    int someData;
+    // ... other members
+};
 
 class ErrorManager {
     private:
         ErrorFlags errors;
-       
+        DigitalTablesData tablesData;
 
     public:
         ErrorManager();  // Constructor

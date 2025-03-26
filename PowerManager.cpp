@@ -99,7 +99,7 @@ unsigned long PowerManager::calculateOptimalSleepTime(RTCInfoRecord& currentTime
     if(debug)_HardSerial.print(" sleepTimeUs:");
     if(debug)_HardSerial.println(sleepTimeSec);
     // Minimum sleep time of 10 minute to prevent too frequent transmissions
-    return max(sleepTimeSec, 600UL);
+    return max(sleepTimeSec, 600UL); 
 }
 
 /*

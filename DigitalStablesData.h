@@ -105,6 +105,7 @@ struct DigitalStablesData{
 	long sleepTime=600; // in seconds
 	uint8_t minimumEfficiencyForLed;
 	uint8_t minimumEfficiencyForWifi;
+	float capacitorCurrent=-99;
 	
 };
 #endif

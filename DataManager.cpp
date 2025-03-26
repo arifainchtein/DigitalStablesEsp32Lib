@@ -239,6 +239,8 @@ void DataManager::exportDSDCSV() {
     // Environmental data
     Serial.print("," + String(data.solarVoltage));
     Serial.print(", " + String(data.capacitorVoltage));
+    Serial.print(", " + String(data.capacitorCurrent));
+    
     Serial.print("," + String(data.outdoortemperature));
     Serial.print("," + String(data.outdoorhumidity));
     Serial.print("," + String(data.lux));
@@ -299,6 +301,7 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     // Environmental data
     Serial.println("Solar Voltage: " + String(data.solarVoltage));
     Serial.println("Capacitor Voltage: " + String(data.capacitorVoltage));
+    Serial.println("Capacitor Current: " + String(data.capacitorCurrent));
     Serial.println("Outdoor Temperature: " + String(data.outdoortemperature));
     Serial.println("Outdoor Humidity: " + String(data.outdoorhumidity));
     Serial.println("Lux: " + String(data.lux));
