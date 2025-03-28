@@ -166,7 +166,7 @@ void DataManager::exportDSDCSV() {
                   "serialnumber,devicetype,secondsTime,secondstimestring,dataSamplingSec,"
                   " temperature,rtcBatVolt,opMode, rssi, snr,flowRate,totalMilliLitres,flowRate2,totalMilliLitres2,"
                   "tank1PressurePsi,tank2PressurePsi,latitude,longitude,altitude,"
-                  "solarVoltage,capacitorVoltage,outdoortemperature,outdoorhumidity,lux, sleeptime,minimumEfficiencyForLed,minimumEfficiencyForWifi"));
+                  "solarVoltage,capacitorVoltage,capacitorCurrent,outdoortemperature,outdoorhumidity,lux, sleeptime,minimumEfficiencyForLed,minimumEfficiencyForWifi"));
 
     DigitalStablesData data;
     while(file.read((uint8_t*)&data, sizeof(DigitalStablesData))) {
