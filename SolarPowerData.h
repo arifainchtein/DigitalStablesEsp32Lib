@@ -17,7 +17,7 @@
 
     struct WeatherForecastUpdate{
         long totpcode=0;
-        WeatherForecast forecasts[8];
+        WeatherForecast forecasts[4];
     };
 
     struct DailySolarData
