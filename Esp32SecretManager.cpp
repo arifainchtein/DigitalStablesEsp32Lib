@@ -39,7 +39,7 @@ Esp32SecretManager::Esp32SecretManager(TimeManager& t):SecretManager(t){}
 
 void Esp32SecretManager::saveSecret(String secret, int numberDigits, int periodSeconds ){
 
-	preferences.begin("SleepData", false);
+	preferences.begin("SecretManager", false);
 	preferences.putString("Secret", secret);
 	preferences.putUInt("NumberDigits", numberDigits);
 	preferences.putUInt("PeriodSeconds", periodSeconds);
