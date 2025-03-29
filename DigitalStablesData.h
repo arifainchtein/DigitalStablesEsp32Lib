@@ -33,7 +33,8 @@ const uint8_t templabel[] = {
 #define RECEIVED_OK 2
 #define CLEARED_OK 3
 #define NO_DATA 4
-Struct RequestCommand{
+
+struct RequestCommand{
 	long totpcode=0;
 	uint8_t commandcode;
 };
