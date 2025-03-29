@@ -25,6 +25,7 @@ public:
     bool hasValidForecasts();
     void loadForecasts(HardwareSerial& serial);
     bool isWeatherDataStale(RTCInfoRecord& currentTimerRecord);
+    void saveForecasts(const WeatherForecast newForecasts[8]);
 
 private:
 HardwareSerial& _HardSerial;
@@ -40,7 +41,7 @@ HardwareSerial& _HardSerial;
     const char* ntpServer = "pool.ntp.org";
     String apiKey; // Store the API key
     long getDaylightOffset(RTCInfoRecord& timerRecord) ;
-    void saveForecasts(const WeatherForecast newForecasts[8]);
+   
 };
 
 #endif // WEATHERFORECASTMANAGER_H
