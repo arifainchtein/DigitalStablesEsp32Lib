@@ -2,6 +2,8 @@
 #ifndef SOLARPOWERDATA_H
 #define SOLARPOWERDATA_H
     
+
+
     #pragma pack(push, 1)
     struct WeatherForecast
     {
@@ -15,6 +17,11 @@
     #pragma pack(pop)
 
 
+    struct WeatherForecastUpdate{
+        long totpcode=0;
+        WeatherForecast forecasts[8];
+    };
+    
     struct DailySolarData
     {
         double sunrise;

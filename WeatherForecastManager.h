@@ -16,8 +16,10 @@
 
 class WeatherForecastManager {
 public:
-    WeatherForecastManager(RTCInfoRecord& currentTimerRecord, double latitude, double longitude,const char* apiKey);
-    boolean downloadWeatherData(SolarInfo* solarInfo); // Method to fetch weather data and update SolarInfo
+    WeatherForecastManager( double latitude, double longitude,const char* apiKey);
+    void initialize(RTCInfoRecord& currentTimerRecord);
+    boolean downloadWeatherData(SolarInfo* solarInfo); // For Solar Devices 
+    boolean downloadWeatherData(); // For Non Solar Devices
     WeatherForecast* getForecasts();
     WeatherForecast getForecast(int index);
     bool hasValidForecasts();

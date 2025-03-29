@@ -1,14 +1,17 @@
 // WeatherForecastManager.cpp
 #include "WeatherForecastManager.h"
 
-WeatherForecastManager::WeatherForecastManager(RTCInfoRecord& currentTimerRecord, double latitude, double longitude, const char* apiKey) 
+WeatherForecastManager::WeatherForecastManager( double latitude, double longitude, const char* apiKey) 
     : lat(latitude), lon(longitude), apiKey(apiKey) { // Initialize the API key
-    long  gmtOffset_sec = currentTimerRecord.timezoneOffset;  // Melbourne is UTC+10
-     int daylightOffset_sec = getDaylightOffset(currentTimerRecord); // 1 hour during daylight savings
-
    //configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
 
+void WeatherForecastManager::initialize(RTCInfoRecord& currentTimerRecord) {
+    long gmtOffset_sec = currentTimerRecord.timezoneOffset;  // Get timezone offset  
+    int daylightOffset_sec = getDaylightOffset(currentTimerRecord); // Get daylight savings offset
+
+    // configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+}
 
 bool WeatherForecastManager::isWeatherDataStale(RTCInfoRecord& currentTimerRecord) {
    if(!hasForecastData)return true;
@@ -101,6 +104,62 @@ bool WeatherForecastManager::downloadWeatherData(SolarInfo* solarInfo) {
     return false; // Indicate failure
 }
 
+bool WeatherForecastManager::downloadWeatherData() {
+    // Create an HTTP client
+    HTTPClient http;
+    
+    // Construct the API URL using latitude and longitude
+   
+    String url = "http://api.openweathermap.org/data/2.5/forecast?lat=" + String(lat) + "&lon=" + String(lon) + "&appid=" + apiKey + "&units=metric";
+   // serial.print("line 70, wfm, url=");
+  //  serial.println(url);
+    
+    http.begin(url);
+    //serial.println("line 77=");
+    int httpCode = http.GET();
+  //  serial.print("line 75, wfm, httpCode=");
+ //   serial.println(httpCode);
+    if (httpCode > 0) {
+        // Parse the JSON response
+        String payload = http.getString();
+        // Create an array to hold the forecasts
+        WeatherForecast forecasts[8]; // 8 forecasts per day 
+        int size =  2*payload.length();;
+
+        // Parse the JSON response
+        DynamicJsonDocument doc(size); // Adjust size based on expected JSON response
+        DeserializationError error = deserializeJson(doc, payload);
+        // serial.println(error.c_str()); 
+        // serial.print("line 103,  Error=");
+        // serial.println(error.c_str()); 
+        String jsonString; 
+        if (!error) {
+            JsonArray list = doc["list"].as<JsonArray>();
+            size = list.size();
+            // serial.print("line 106, No Error, list size=");
+            // serial.println(size);
+            for (int i = 0; i < size && i < 8; i++) {
+                JsonObject forecast = list[i].as<JsonObject>();
+                forecasts[i].secondsTime = forecast["dt"].as<long>(); // Assuming dt is the timestamp
+                forecasts[i].temperature = forecast["main"]["temp"].as<float>(); // Assuming you have a temperature field
+                forecasts[i].cloudiness = forecast["clouds"][0]["all"]; // Weather description
+                forecasts[i].pressure = forecast["main"]["pressure"].as<float>(); // Assuming you have a temperature field
+                serializeJsonPretty(forecast, jsonString); 
+             //   serial.println(jsonString);
+            }
+             saveForecasts(forecasts);
+            return true; // Indicate success
+        } else {
+           // serial.printf("Failed to parse JSON: %s\n", error.c_str());
+        }
+    } else {
+        // Handle error
+       // Serial.printf("Error on HTTP request: %s\n", http.errorToString(httpCode).c_str());
+    }
+
+    // Invalidate the weather forecast in SolarInfo
+    return false; // Indicate failure
+}
 
 void WeatherForecastManager::saveForecasts(const WeatherForecast newForecasts[8]) { 
 //    serial.println("First forecast before saving:");
