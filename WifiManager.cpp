@@ -391,17 +391,51 @@ bool WifiManager::connectSTA()
     int hnl = hostname.length();
     int hnlt = hnl + 1;
     char hname[hnlt];
-    
+    bool gotConnection = false;
     snprintf(hname, hnlt, hnchar, 32);
-    WiFi.disconnect();
+    WiFi.disconnect(true);
+    delay(1000);
     WiFi.mode(WIFI_STA);
-    WiFi.setHostname(hname);
-   
-    WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
-
+    WiFi.setHostname(hostname.c_str());
     _HardSerial.print("in connectSTA ssid=");
     _HardSerial.println(ssid);
 
+    WiFi.begin(ssid.c_str(), password.c_str());
+
+    int timeout = 0;
+    while (WiFi.status() != WL_CONNECTED && timeout < 20) {
+        delay(1000);
+        _HardSerial.print(".");
+        timeout++;
+    }
+
+    if (WiFi.status() == WL_CONNECTED) {
+        _HardSerial.println();
+        _HardSerial.print("Connected! IP address: ");
+        _HardSerial.println(WiFi.localIP());
+        
+         gotConnection = true;
+    } else {
+        _HardSerial.println();
+        _HardSerial.println("Failed to connect to WiFi");
+        _HardSerial.print("WiFi status: ");
+        _HardSerial.println(WiFi.status());
+    
+    }
+    if (!MDNS.begin(hostname.c_str()))
+    {
+        _HardSerial.println("Error setting up MDNS responder!");
+    }
+    else
+    {
+        _HardSerial.println("MDNS setup ok");
+    }
+    return gotConnection;
+}
+/*
+   // WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
+
+    
     _HardSerial.println(WiFi.localIP());
     WiFi.begin(const_cast<char *>(ssid.c_str()), const_cast<char *>(password.c_str()));
     
@@ -492,7 +526,7 @@ bool WifiManager::connectSTA()
 
     return gotConnection;
 }
-
+*/
 bool WifiManager::connectAP()
 {
     // WiFi.mode(WIFI_MODE_AP);

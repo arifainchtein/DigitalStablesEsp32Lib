@@ -16,7 +16,7 @@
 
 class WeatherForecastManager {
 public:
-    WeatherForecastManager( double latitude, double longitude,const char* apiKey);
+    WeatherForecastManager(HardwareSerial& serial, double latitude, double longitude,const char* apiKey);
     void initialize(RTCInfoRecord& currentTimerRecord);
     boolean downloadWeatherData(SolarInfo* solarInfo); // For Solar Devices 
     boolean downloadWeatherData(); // For Non Solar Devices
@@ -27,6 +27,7 @@ public:
     bool isWeatherDataStale(RTCInfoRecord& currentTimerRecord);
 
 private:
+HardwareSerial& _HardSerial;
     WeatherForecast forecasts[8];
      bool hasForecastData = false;  // New flag to track valid data
      

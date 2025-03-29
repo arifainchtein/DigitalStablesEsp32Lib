@@ -29,6 +29,14 @@ const uint8_t templabel[] = {
   SEG_A | SEG_D | SEG_E | SEG_F | SEG_G  // e
 };
 
+#define SEND_ASYNC_DATA 1
+#define RECEIVED_OK 2
+#define CLEARED_OK 3
+#define NO_DATA 4
+Struct RequestCommand{
+	long totpcode=0;
+	uint8_t commandcode;
+};
 
 struct DigitalStablesConfigData{
 	float fieldId=0;
@@ -39,10 +47,7 @@ struct DigitalStablesConfigData{
 };
 #endif
 
-#define SEND_ASYNC_DATA 1
-#define RECEIVED_OK 2
-#define CLEARED_OK 3
-#define NO_DATA 4
+
 
 
 

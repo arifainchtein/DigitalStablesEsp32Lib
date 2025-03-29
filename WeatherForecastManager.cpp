@@ -1,8 +1,8 @@
 // WeatherForecastManager.cpp
 #include "WeatherForecastManager.h"
 
-WeatherForecastManager::WeatherForecastManager( double latitude, double longitude, const char* apiKey) 
-    : lat(latitude), lon(longitude), apiKey(apiKey) { // Initialize the API key
+WeatherForecastManager::WeatherForecastManager(HardwareSerial& serial, double latitude, double longitude, const char* apiKey) 
+    : _HardSerial(serial), lat(latitude), lon(longitude), apiKey(apiKey) { // Initialize the API key
    //configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
 
@@ -92,11 +92,11 @@ bool WeatherForecastManager::downloadWeatherData(SolarInfo* solarInfo) {
              saveForecasts(forecasts);
             return true; // Indicate success
         } else {
-           // serial.printf("Failed to parse JSON: %s\n", error.c_str());
+            _HardSerial.printf("Failed to parse JSON: %s\n", error.c_str());
         }
     } else {
         // Handle error
-       // Serial.printf("Error on HTTP request: %s\n", http.errorToString(httpCode).c_str());
+        _HardSerial.printf("Error on HTTP request: %s\n", http.errorToString(httpCode).c_str());
     }
 
     // Invalidate the weather forecast in SolarInfo
@@ -111,8 +111,8 @@ bool WeatherForecastManager::downloadWeatherData() {
     // Construct the API URL using latitude and longitude
    
     String url = "http://api.openweathermap.org/data/2.5/forecast?lat=" + String(lat) + "&lon=" + String(lon) + "&appid=" + apiKey + "&units=metric";
-   // serial.print("line 70, wfm, url=");
-  //  serial.println(url);
+   _HardSerial.print("line 70, wfm, url=");
+   _HardSerial.println(url);
     
     http.begin(url);
     //serial.println("line 77=");
@@ -123,7 +123,7 @@ bool WeatherForecastManager::downloadWeatherData() {
         // Parse the JSON response
         String payload = http.getString();
         // Create an array to hold the forecasts
-        WeatherForecast forecasts[8]; // 8 forecasts per day 
+       
         int size =  2*payload.length();;
 
         // Parse the JSON response
@@ -136,8 +136,8 @@ bool WeatherForecastManager::downloadWeatherData() {
         if (!error) {
             JsonArray list = doc["list"].as<JsonArray>();
             size = list.size();
-            // serial.print("line 106, No Error, list size=");
-            // serial.println(size);
+            _HardSerial.print("line 106, No Error, list size=");
+            _HardSerial.println(size);
             for (int i = 0; i < size && i < 8; i++) {
                 JsonObject forecast = list[i].as<JsonObject>();
                 forecasts[i].secondsTime = forecast["dt"].as<long>(); // Assuming dt is the timestamp
@@ -145,16 +145,17 @@ bool WeatherForecastManager::downloadWeatherData() {
                 forecasts[i].cloudiness = forecast["clouds"][0]["all"]; // Weather description
                 forecasts[i].pressure = forecast["main"]["pressure"].as<float>(); // Assuming you have a temperature field
                 serializeJsonPretty(forecast, jsonString); 
-             //   serial.println(jsonString);
+                _HardSerial.println(jsonString);
             }
              saveForecasts(forecasts);
+             hasForecastData=true;
             return true; // Indicate success
         } else {
-           // serial.printf("Failed to parse JSON: %s\n", error.c_str());
+            _HardSerial.printf("Failed to parse JSON: %s\n", error.c_str());
         }
     } else {
         // Handle error
-       // Serial.printf("Error on HTTP request: %s\n", http.errorToString(httpCode).c_str());
+        _HardSerial.printf("Error on HTTP request: %s\n", http.errorToString(httpCode).c_str());
     }
 
     // Invalidate the weather forecast in SolarInfo
