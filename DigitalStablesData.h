@@ -29,15 +29,29 @@ const uint8_t templabel[] = {
   SEG_A | SEG_D | SEG_E | SEG_F | SEG_G  // e
 };
 
-#define SEND_ASYNC_DATA 1
-#define RECEIVED_OK 2
-#define CLEARED_OK 3
-#define NO_DATA 4
+// #define SEND_ASYNC_DATA 1
+// #define RECEIVED_OK 2
+// #define CLEARED_OK 3
+// #define NO_DATA 4
 
-struct RequestCommand{
-	long totpcode=0;
-	uint8_t commandcode;
+struct RequestCommand {
+    long totpcode = 0;
+    char commandString[32]; // 
+
+    RequestCommand() {
+        commandString[0] = '\0'; 
+    }
+    void setCommand(const String& command) {
+        // Ensure we don't exceed the buffer size (leaving room for null terminator)
+        size_t maxLen = sizeof(commandString) - 1;
+        size_t copyLen = command.length() < maxLen ? command.length() : maxLen;
+        
+        // Copy the string data
+        memcpy(commandString, command.c_str(), copyLen);
+        commandString[copyLen] = '\0'; // Ensure null termination
+    }
 };
+
 
 struct DigitalStablesConfigData{
 	float fieldId=0;
