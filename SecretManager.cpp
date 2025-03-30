@@ -52,6 +52,11 @@ long SecretManager::generateCode(){
 	return code;
 }
 
+
+long* SecretManager::getCommandCodeHistory() {
+	return commandCodeHistory;
+  }
+
 bool SecretManager::checkCode(long userCode){
 	boolean codeOk=false;
 	long code = generateCode();

@@ -206,9 +206,9 @@ void WeatherForecastManager::saveForecasts(const WeatherForecast newForecasts[8]
         serial.println(readBytes);
 
         // Print first forecast after loading 
-        Serial.println("First forecast after loading:"); 
-        Serial.println(forecasts[0].temperature); 
-        Serial.println(forecasts[0].secondsTime);
+        serial.println("First forecast after loading:"); 
+        serial.println(forecasts[0].temperature); 
+        serial.println(forecasts[0].secondsTime);
 
         preferences.end(); hasForecastData = (readBytes > 0); 
     }

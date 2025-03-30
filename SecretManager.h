@@ -22,7 +22,7 @@ class SecretManager{
 		long generateCode();
 		boolean checkCode(long userCode);
 		static constexpr int SHARED_SECRET_LENGTH=27;
-
+		long* getCommandCodeHistory() ;
 	private:
 
 };
