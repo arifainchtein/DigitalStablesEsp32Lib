@@ -32,6 +32,14 @@ unsigned long PowerManager::calculateOptimalSleepTime(RTCInfoRecord& currentTime
 {
     // Get sunrise/sunset times based on location and day of year
     DailySolarData dailySolarData = solarInfo.getDailySolarData(currentTimerRecord);
+    HourlySolarPowerData hourlySolarPowerData = solarInfo.calculateActualPower(currentTimerRecord);
+    //
+    // if the current efficiemcy is greater than .3 sleep only for 3 minutes
+    if(hourlySolarPowerData.efficiency>.3){
+        return  180UL;
+    }
+
+    // .3
     // dailySolarData.sunrise is minutes since midnight so if the value is 410 then
     // the sunrise time is 6:50 am  6*60=360 + 50
     uint8_t sunriseHour = (int)(dailySolarData.sunrise/60);

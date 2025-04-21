@@ -396,7 +396,7 @@ bool WifiManager::connectSTA()
     WiFi.disconnect(true);
     delay(1000);
     WiFi.mode(WIFI_STA);
-    WiFi.setHostname(hostname.c_str());
+    WiFi.setHostname(hname);
     _HardSerial.print("in connectSTA ssid=");
     _HardSerial.println(ssid);
 

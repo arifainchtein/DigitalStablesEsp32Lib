@@ -31,7 +31,7 @@ private:
 HardwareSerial& _HardSerial;
     WeatherForecast forecasts[8];
      bool hasForecastData = false;  // New flag to track valid data
-     
+     bool debug=false;
     Preferences preferences;
     const char* PREF_NAMESPACE = "weather";
     const char* FORECAST_KEY = "forecasts";

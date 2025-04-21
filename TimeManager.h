@@ -21,7 +21,7 @@ class TimeManager{
 	
 		#define LEAP_YEAR(_year) ((_year%4)==0)
 
-		int timeZoneHours=11;
+		int timeZoneHours=10;
 		int SECONDOFFSET=10;
 
 		TimeManager( HardwareSerial& serial);

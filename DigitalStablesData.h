@@ -37,7 +37,7 @@ const uint8_t templabel[] = {
 struct RequestCommand {
     long totpcode = 0;
     char commandString[32]; // 
-
+	uint8_t checksum;
     RequestCommand() {
         commandString[0] = '\0'; 
     }
@@ -132,6 +132,6 @@ struct DigitalStablesData{
 	uint8_t minimumEfficiencyForLed;
 	uint8_t minimumEfficiencyForWifi;
 	float capacitorCurrent=-99;
-	
+	uint8_t asyncdata=0;
 };
 #endif

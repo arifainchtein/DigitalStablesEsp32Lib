@@ -132,7 +132,8 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     serial.print(F("#"));
     serial.print(digitalStablesData.capacitorVoltage);
     serial.print(F("#"));
-
+    serial.print(digitalStablesData.capacitorCurrent);
+    serial.print(F("#"));
     serial.print(digitalStablesData.totpcode);
     serial.print(F("#"));
     serial.print(digitalStablesData.outdoortemperature);
