@@ -336,7 +336,7 @@ bool WifiManager::configWifiSTA(String s, String p, String h)
 bool WifiManager::getWifiStatus()
 {
     if (WiFi.status() == WL_CONNECTED) {
-     //   _HardSerial.println("In WIfiManager WiFi connected as station");
+       _HardSerial.println("In WIfiManager WiFi connected as station");
         return true;
       }
       
@@ -344,7 +344,7 @@ bool WifiManager::getWifiStatus()
       if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
         // Additional verification that AP is actually running
         if (WiFi.softAPgetStationNum() >= 0) {  // This should be valid if AP is running
-           // _HardSerial.println("I nWifi Manager WiFi operating as access point");
+            _HardSerial.println("I nWifi Manager WiFi operating as access point");
           return true;
         }
     }

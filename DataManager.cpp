@@ -164,7 +164,7 @@ void DataManager::exportDSDCSV() {
     // Print CSV header
        Serial.println(F("devicename,deviceshortname,groupidentifier,sensor1name,sensor2name,"
                   "serialnumber,devicetype,secondsTime,secondstimestring,dataSamplingSec,"
-                  " temperature,rtcBatVolt,opMode, rssi, snr,flowRate,totalMilliLitres,flowRate2,totalMilliLitres2,"
+                  " temperature,rtcBatVolt,opMode,operatingstatus, rssi, snr,flowRate,totalMilliLitres,flowRate2,totalMilliLitres2,"
                   "tank1PressurePsi,tank2PressurePsi,latitude,longitude,altitude,"
                   "solarVoltage,capacitorVoltage,capacitorCurrent,outdoortemperature,outdoorhumidity,lux, sleeptime,minimumEfficiencyForLed,minimumEfficiencyForWifi"));
 
@@ -214,6 +214,7 @@ void DataManager::exportDSDCSV() {
     Serial.print(", " + String(data.temperature));
     Serial.print(", " + String(data.rtcBatVolt));
     Serial.print(", " + String(data.opMode));
+    Serial.print(", " + String(data.operatingStatus));
     Serial.print(", " + String(data.rssi));
     Serial.print("," + String(data.snr));
     
@@ -276,6 +277,8 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     Serial.println("Temperature: " + String(data.temperature));
     Serial.println("RTC Battery Voltage: " + String(data.rtcBatVolt));
     Serial.println("Operating Mode: " + String(data.opMode));
+    Serial.println("Operating Status: " + String(data.operatingStatus));
+    
     Serial.println("RSSI: " + String(data.rssi));
     Serial.println("SNR: " + String(data.snr));
     
