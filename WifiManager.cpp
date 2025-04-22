@@ -335,25 +335,48 @@ bool WifiManager::configWifiSTA(String s, String p, String h)
 }
 bool WifiManager::getWifiStatus()
 {
-
-    if (getAPStatus())
-    {
+    if (WiFi.status() == WL_CONNECTED) {
+     //   _HardSerial.println("In WIfiManager WiFi connected as station");
         return true;
+      }
+      
+      // Check if operating as an access point
+      if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
+        // Additional verification that AP is actually running
+        if (WiFi.softAPgetStationNum() >= 0) {  // This should be valid if AP is running
+           // _HardSerial.println("I nWifi Manager WiFi operating as access point");
+          return true;
+        }
     }
-    else
-    {
-        return (WiFi.status() == WL_CONNECTED);
-    }
+  
+    _HardSerial .println("WiFi not active");
+    return false;
 }
+
+const char *wiFiStatus() {
+    switch (WiFi.status()) {
+      case WL_IDLE_STATUS:
+        return "WL_IDLE_STATUS";
+      case WL_CONNECTED:
+        return "WL_CONNECTED";
+      case WL_DISCONNECTED:
+        return "WL_DISCONNECTED";
+      default:
+        return "Unhandled value";
+    }
+  }
 
 void WifiManager::stop()
 {
+    _HardSerial.print("about to stop wifi status=");
+    _HardSerial.println(wiFiStatus() );
     if (WiFi.status() == WL_CONNECTED)
     {
         _HardSerial.println("WifiManager stop, Voltage low, turning off Wi-Fi");
+        WiFi.disconnect();
         WiFi.mode(WIFI_OFF);
         apConnected = false;
-        WiFi.disconnect();
+        
     }
 }
 
