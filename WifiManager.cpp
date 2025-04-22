@@ -349,7 +349,7 @@ bool WifiManager::getWifiStatus()
         }
     }
   
-    _HardSerial .println("WiFi not active");
+   // _HardSerial .println("WiFi not active");
     return false;
 }
 
@@ -368,16 +368,16 @@ const char *wiFiStatus() {
 
 void WifiManager::stop()
 {
-    _HardSerial.print("about to stop wifi status=");
-    _HardSerial.println(wiFiStatus() );
-    if (WiFi.status() == WL_CONNECTED)
-    {
+  //  _HardSerial.print("about to stop wifi status=");
+  //  _HardSerial.println(wiFiStatus() );
+   // if (WiFi.status() == WL_CONNECTED)
+   // {
         _HardSerial.println("WifiManager stop, Voltage low, turning off Wi-Fi");
         WiFi.disconnect();
         WiFi.mode(WIFI_OFF);
         apConnected = false;
         
-    }
+  //  }
 }
 
 void WifiManager::restartWifi()
