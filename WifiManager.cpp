@@ -344,7 +344,7 @@ bool WifiManager::getWifiStatus()
       if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
         // Additional verification that AP is actually running
         if (WiFi.softAPgetStationNum() >= 0) {  // This should be valid if AP is running
-            _HardSerial.println("I nWifi Manager WiFi operating as access point");
+         //   _HardSerial.println("I nWifi Manager WiFi operating as access point");
           return true;
         }
     }
@@ -372,7 +372,7 @@ void WifiManager::stop()
   //  _HardSerial.println(wiFiStatus() );
    // if (WiFi.status() == WL_CONNECTED)
    // {
-        _HardSerial.println("WifiManager stop, Voltage low, turning off Wi-Fi");
+       // _HardSerial.println("in WifiManager stop");
         WiFi.disconnect();
         WiFi.mode(WIFI_OFF);
         apConnected = false;
