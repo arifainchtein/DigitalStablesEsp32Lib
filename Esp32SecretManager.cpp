@@ -52,23 +52,6 @@ String Esp32SecretManager::readSecret(){
 	return ret;
 }
 
-void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String deviceshortname, String sensor1name, String sensor2name, String timezone, double latitude, double longitude, double altitude,uint8_t minimumEfficiencyForLed, uint8_t minimumEfficiencyForWifi){
-
-	preferences.begin("DeviceSenInf", false);
-	preferences.putString("devicename", devicename);
-	preferences.putString("deviceshortname", deviceshortname);
-	preferences.putString("sensor1name", sensor1name);
-	preferences.putString("sensor2name", sensor2name);
-	preferences.putString("timezone", timezone);
-	preferences.putDouble("latitude", latitude);
-    preferences.putDouble("longitude", longitude);
-    preferences.putDouble("altitude", altitude);
-    preferences.putInt("minimumEfficiencyForLed",minimumEfficiencyForLed);
-	preferences.putInt("minimumEfficiencyForWifi", minimumEfficiencyForWifi);
-	preferences.end();
-}	
-
-
 void Esp32SecretManager::setTimeZone( String timezone ){
 	preferences.begin("DeviceSenInf", false);
 	preferences.putString("timezone", timezone);
@@ -84,6 +67,20 @@ String Esp32SecretManager::readTimeZone(){
 }
 
 
+void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String deviceshortname, String sensor1name, String sensor2name, String timezone, double latitude, double longitude, double altitude,uint8_t minimumEfficiencyForLed, uint8_t minimumEfficiencyForWifi){
+	preferences.begin("DeviceSenInf", false);
+	preferences.putString("devicename", devicename);
+	preferences.putString("deviceshortname", deviceshortname);
+	preferences.putString("sensor1name", sensor1name);
+	preferences.putString("sensor2name", sensor2name);
+	preferences.putString("timezone", timezone);
+	preferences.putDouble("latitude", latitude);
+    preferences.putDouble("longitude", longitude);
+    preferences.putDouble("altitude", altitude);
+    preferences.putInt("mineffled",minimumEfficiencyForLed);
+	preferences.putInt("mineffeifi", minimumEfficiencyForWifi);
+	preferences.end();
+}	
 
 void Esp32SecretManager::getDeviceSensorConfig(char* devicename, char* deviceshortname, char* sensor1name, char* sensor2name, String& timezone, double& latitude, double& longitude, double& altitude,uint8_t& minimumEfficiencyForLed, uint8_t& minimumEfficiencyForWifi) {
     preferences.begin("DeviceSenInf", true);
@@ -116,15 +113,15 @@ void Esp32SecretManager::getDeviceSensorConfig(char* devicename, char* devicesho
         altitude = preferences.getDouble("altitude", 410);
     }
 
-	if (!preferences.isKey("minimumEfficiencyForLed")) {
+	if (!preferences.isKey("mineffled")) {
         minimumEfficiencyForLed = 40;
     } else {
-        minimumEfficiencyForLed = preferences.getInt("minimumEfficiencyForWifi", 40);
+        minimumEfficiencyForLed = preferences.getInt("mineffled", 30);
     }
-	if (!preferences.isKey("minimumEfficiencyForWifi")) {
+	if (!preferences.isKey("mineffeifi")) {
         minimumEfficiencyForWifi = 50;
     } else {
-        minimumEfficiencyForWifi = preferences.getInt("minimumEfficiencyForWifi", 50);
+        minimumEfficiencyForWifi = preferences.getInt("mineffeifi", 50);
     }
 
     preferences.end();
