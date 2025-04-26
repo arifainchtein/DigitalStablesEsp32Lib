@@ -14,7 +14,7 @@
 #define DAFFODIL_WATER_TROUGH 7
 #define DAFFODIL_TEMP_SOILMOISTURE 8
 #define DAFFODIL_LIGHT_DETECTOR 9
-
+#define VOLTAGE_MONITOR 10
 
 const uint8_t tank[] = {
   SEG_F | SEG_G | SEG_D | SEG_E,                  // t
