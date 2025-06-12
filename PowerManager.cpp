@@ -89,7 +89,7 @@ unsigned long PowerManager::calculateOptimalSleepTime(RTCInfoRecord& currentTime
     if (energyForTransmissions <= 0)
     {
         // Not enough energy even for sleep, wake up in 10 minute to check conditions
-        return 601UL;
+        return 1801UL;
     }
 
     // Calculate maximum possible transmissions until sunrise
@@ -99,16 +99,16 @@ unsigned long PowerManager::calculateOptimalSleepTime(RTCInfoRecord& currentTime
     if (maxPossibleTransmissions <= 0)
     {
         // Not enough energy for any transmissions, wake up in 10 minutes to check conditions
-        return 602UL;
+        return 1802UL;
     }
 
     // Calculate optimal time between transmissions in microseconds
-    unsigned long sleepTimeSec = (unsigned long)((minutesToSunrise * 60.0 ) / maxPossibleTransmissions);
+    unsigned long sleepTimeSec = (unsigned long)((minutesToSunrise * 180.0 ) / maxPossibleTransmissions);
     if(debug)_HardSerial.print(" sleepTimeUs:");
     if(debug)_HardSerial.println(sleepTimeSec);
     // Minimum sleep time of 10 minute to prevent too frequent transmissions
-    //return max(sleepTimeSec, 600UL); 
-    return min(sleepTimeSec, 603UL); 
+    //return max(sleepTimeSec, 1800UL); 
+    return min(sleepTimeSec, 1803UL); 
 }
 
 /*

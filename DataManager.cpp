@@ -45,23 +45,25 @@ int DataManager::storeDSDData(DigitalStablesData& data) {
     _HardSerial.printf("Data Manager Not initialized");
     return -1;
    } 
-    
+ 
     int count = getDSDStoredCount();
-    
+   
     // Open file in append mode
     File file = _fs.open(DSD_DATA_FILE, "a");
     if(!file) {
         _HardSerial.println("Failed to open file for writing");
         return -2;
     }
+  
   // Write the struct data
     file.write((uint8_t*)&data, sizeof(DigitalStablesData));
     file.close();
-    
+    if(debug)_HardSerial.printf("point 7");
     // Update count
     updateDSDStoredCount(count + 1);
      count = getDSDStoredCount();
-    _HardSerial.printf("Stored entry %d\n", count);
+
+    if(debug)_HardSerial.printf("Stored entry %d\n", count);
     return count;
 }
 
@@ -70,25 +72,25 @@ bool DataManager::readAllDSDData(DigitalStablesData* dataArray, int maxSize, int
     if (!_initialized) return false;
     
     if (dataArray == nullptr) {
-        _HardSerial.println("Invalid array pointer");
+        if(debug)_HardSerial.println("Invalid array pointer");
         return false;
     }
     
     // Get actual number of stored entries
     actualSize = getDSDStoredCount();
     if (actualSize == 0) {
-        _HardSerial.println("No data stored");
+        if(debug)_HardSerial.println("No data stored");
         return false;
     }
     
     if (actualSize > maxSize) {
-        _HardSerial.printf("Warning: Only reading %d entries out of %d\n", maxSize, actualSize);
+        if(debug)_HardSerial.printf("Warning: Only reading %d entries out of %d\n", maxSize, actualSize);
         actualSize = maxSize;
     }
     
     File file = _fs.open(DSD_DATA_FILE, "r");
     if(!file) {
-        _HardSerial.println("Failed to open file for reading");
+        if(debug)_HardSerial.println("Failed to open file for reading");
         return false;
     }
     
@@ -102,7 +104,7 @@ bool DataManager::readAllDSDData(DigitalStablesData* dataArray, int maxSize, int
     file.close();
     
     if (entriesRead != actualSize) {
-        _HardSerial.printf("Warning: Expected %d entries but read %d\n", actualSize, entriesRead);
+        if(debug)_HardSerial.printf("Warning: Expected %d entries but read %d\n", actualSize, entriesRead);
         actualSize = entriesRead;
     }
     
@@ -115,29 +117,29 @@ void DataManager::printAllDSDData() {
     int count = getDSDStoredCount();
     
     if (count == 0) {
-        _HardSerial.println("No data stored");
+        if(debug)_HardSerial.println("No data stored");
         return;
     }
     
     File file = _fs.open(DSD_DATA_FILE, "r");
     if(!file) {
-        _HardSerial.println("Failed to open file for reading");
+        if(debug)_HardSerial.println("Failed to open file for reading");
         return;
     }
     
-    _HardSerial.println("\n=== Stored Digital Stables Data ===");
-    _HardSerial.printf("Total entries: %d\n", count);
+    if(debug)_HardSerial.println("\n=== Stored Digital Stables Data ===");
+    if(debug)_HardSerial.printf("Total entries: %d\n", count);
     
     DigitalStablesData readData;
     int entry = 0;
     
     while(file.read((uint8_t*)&readData, sizeof(DigitalStablesData))) {
-        _HardSerial.printf("\nEntry %d:\n", entry++);
+        if(debug)_HardSerial.printf("\nEntry %d:\n", entry++);
         printDigitalStablesData(readData);
     }
     
     file.close();
-    _HardSerial.println("=== End of Data ===\n");
+    if(debug)_HardSerial.println("=== End of Data ===\n");
 }
 
 void DataManager::clearAllDSDData() {
@@ -145,9 +147,9 @@ void DataManager::clearAllDSDData() {
     
     if(_fs.remove(DSD_DATA_FILE)) {
         updateDSDStoredCount(0);
-        _HardSerial.println("All data cleared");
+        if(debug)_HardSerial.println("All data cleared");
     } else {
-        _HardSerial.println("Error clearing data");
+        if(debug)_HardSerial.println("Error clearing data");
     }
 }
 
@@ -158,19 +160,19 @@ void DataManager::exportDSDCSV() {
     
     File file = _fs.open(DSD_DATA_FILE, "r");
     if(!file) {
-        _HardSerial.println("Failed to open file for reading");
+        if(debug)_HardSerial.println("Failed to open file for reading");
         return;
     }
     // Print CSV header
        Serial.println(F("devicename,deviceshortname,groupidentifier,sensor1name,sensor2name,"
                   "serialnumber,devicetype,secondsTime,secondstimestring,dataSamplingSec,"
-                  " temperature,rtcBatVolt,opMode,operatingstatus, rssi, snr,flowRate,totalMilliLitres,flowRate2,totalMilliLitres2,"
+                  " temperature,rtcBatVolt,opMode,operatingstatus,ledBrightness, rssi, snr,flowRate,totalMilliLitres,flowRate2,totalMilliLitres2,"
                   "tank1PressurePsi,tank2PressurePsi,latitude,longitude,altitude,"
-                  "solarVoltage,capacitorVoltage,capacitorCurrent,outdoortemperature,outdoorhumidity,lux, sleeptime,minimumEfficiencyForLed,minimumEfficiencyForWifi"));
+                  "solarVoltage,capacitorVoltage,capacitorCurrent,outdoortemperature,outdoorhumidity,lux, sleeptime,asyncdata,minimumEfficiencyForLed,minimumEfficiencyForWifi"));
 
     DigitalStablesData data;
     while(file.read((uint8_t*)&data, sizeof(DigitalStablesData))) {
-        // Serial.printf("%s,%s,%s,%s,%s,%s,%ld,%.2f,%.2f,%.2f,%.2f,%.2f,%.6f,%.6f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%ld,%d,%d\n",
+        // Serial.printf("%s,%s,%s,%s,%s,%s,%ld,%.2f,%.2f,%.2f,%.2f,%.2f,%.6f,%.6f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%ld,%ld,%d,%d\n",
         //     readData.devicename,
         //     readData.deviceshortname,
         //     readData.groupidentifier,
@@ -192,6 +194,7 @@ void DataManager::exportDSDCSV() {
         //     readData.outdoorhumidity,
         //     readData.lux,
         //     readData.sleepTime,
+        //     readData.asyncdata,
 	      //     readData.minimumEfficiencyForLed,
 	      //     readData.minimumEfficiencyForWifi
         // );
@@ -215,6 +218,7 @@ void DataManager::exportDSDCSV() {
     Serial.print(", " + String(data.rtcBatVolt));
     Serial.print(", " + String(data.opMode));
     Serial.print(", " + String(data.operatingStatus));
+    Serial.print(", " + String(data.ledBrightness));
     Serial.print(", " + String(data.rssi));
     Serial.print("," + String(data.snr));
     
@@ -248,6 +252,7 @@ void DataManager::exportDSDCSV() {
     
     // System settings
     Serial.print(", " + String(data.sleepTime));
+     Serial.print(", " + String(data.asyncdata));
     Serial.print("," + String(data.minimumEfficiencyForLed));
     Serial.println(", " + String(data.minimumEfficiencyForWifi));
     }
@@ -344,8 +349,8 @@ void DataManager::enqueueDSData(DigitalStablesData data)
     dsCounters.itemCount++;
   }
     if (debug){
-    _HardSerial.print("after storing  digitalStablesData  dsCounters.itemCount=");
-    _HardSerial.println(dsCounters.itemCount);
+    if(debug)_HardSerial.print("after storing  digitalStablesData  dsCounters.itemCount=");
+    if(debug)_HardSerial.println(dsCounters.itemCount);
 
     }
 }
@@ -371,14 +376,14 @@ void DataManager::storeDigitalStablesData(DigitalStablesData &digitalStablesData
   }
   checksum &= 0xFF;
   if (debug){
-    _HardSerial.print("adding a digitalStablesData  serialNumber=");
-    _HardSerial.print(sn);
-    _HardSerial.print(" l=");
-    _HardSerial.print(sn.length());
-    _HardSerial.print(" checksum=");
-    _HardSerial.println(checksum);
-    _HardSerial.print(" digitalStablesData.checksum=");
-    _HardSerial.println(digitalStablesData.checksum);
+    if(debug)_HardSerial.print("adding a digitalStablesData  serialNumber=");
+    if(debug)_HardSerial.print(sn);
+    if(debug)_HardSerial.print(" l=");
+    if(debug)_HardSerial.print(sn.length());
+    if(debug)_HardSerial.print(" checksum=");
+    if(debug)_HardSerial.println(checksum);
+    if(debug)_HardSerial.print(" digitalStablesData.checksum=");
+    if(debug)_HardSerial.println(digitalStablesData.checksum);
   }
   enqueueDSData(digitalStablesData);
   if (digitalStablesData.checksum == checksum && (sn.length() == 15 || sn.length() == 14))
@@ -391,16 +396,16 @@ void DataManager::storeDigitalStablesData(DigitalStablesData &digitalStablesData
       DynamicJsonDocument json(1800);
       generateDigitalStablesData(digitalStablesData, json);
       serializeJsonPretty(json, _HardSerial);
-      _HardSerial.print(" number of devices=");
-      _HardSerial.println(completeObject.size());
+      if(debug)_HardSerial.print(" number of devices=");
+      if(debug)_HardSerial.println(completeObject.size());
     }
   }
   else
   {
     if (debug)
-      _HardSerial.println(" daffodilData rejected pulse serialnumne=");
+      if(debug)_HardSerial.println(" daffodilData rejected pulse serialnumne=");
     if (debug)
-      _HardSerial.println(sn);
+      if(debug)_HardSerial.println(sn);
   }
 }
 
@@ -469,8 +474,8 @@ void DataManager::storeGloria(GloriaTankFlowPumpData &gloriaTankFlowPumpData)
       DynamicJsonDocument json(1800);
       generateGloriaTankFlowPumpWebData(gloriaTankFlowPumpData, json);
       serializeJsonPretty(json, _HardSerial);
-      _HardSerial.print(" number of devices=");
-      _HardSerial.println(completeObject.size());
+      if(debug)_HardSerial.print(" number of devices=");
+      if(debug)_HardSerial.println(completeObject.size());
     }
   }
   else

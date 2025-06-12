@@ -74,7 +74,7 @@ void PanchoTankFlowWifiManager::start(){
 
     asyncWebServer.on("/SetQFactor1", HTTP_GET, [this](AsyncWebServerRequest *request){
         int numberOfParameters = request->params();
-        AsyncWebParameter* p = request->getParam(0);
+        const AsyncWebParameter* p = request->getParam(0);
         panchoTankFlowData.qfactor1 = p->value().toFloat();
        
         request->send_P(200, "text/plain", okString.c_str()); 
@@ -203,7 +203,7 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_POST, [this](AsyncWebServerR
      
     //this->_HardSerial.println(paramsNr);
    
-    AsyncWebParameter* p = request->getParam(0);
+    const AsyncWebParameter* p = request->getParam(0);
     //String formName =p->name;
     String formName =p->value();    
     //this->_HardSerial.print("in post, formName=");
@@ -388,7 +388,7 @@ asyncWebServer.on("/PanchoTankAndFlowServlet", HTTP_GET, [this](AsyncWebServerRe
     int paramsNr = request->params();
     //this->_HardSerial.println(paramsNr);
    
-    AsyncWebParameter* p = request->getParam(0);
+   const  AsyncWebParameter* p = request->getParam(0);
     //String formName =p->name;
     String formName =p->value();    
     //this->_HardSerial.print("in servet2, formName=");

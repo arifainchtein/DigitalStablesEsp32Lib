@@ -219,7 +219,7 @@ this-> _HardSerial.println("request  slideswitch/=");
     int paramsNr = request->params();
     this-> _HardSerial.println(paramsNr);
    
-    AsyncWebParameter* p = request->getParam(0);
+    const AsyncWebParameter* p = request->getParam(1);
     //String formName =p->name;
     String formName =p->value();    
     this-> _HardSerial.print("in post, formName=");
@@ -313,7 +313,7 @@ this-> _HardSerial.println("request  slideswitch/=");
         int paramsNr = request->params();
         this-> _HardSerial.println(paramsNr);
 
-        AsyncWebParameter *p = request->getParam(0);
+        const AsyncWebParameter *p = request->getParam(0);
         // String formName =p->name;
         String formName = p->value();
         this-> _HardSerial.print("in servet2, formName=");

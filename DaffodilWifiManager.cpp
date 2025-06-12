@@ -162,12 +162,12 @@ asyncWebServer.on("/DaffodilServlet", HTTP_POST, [this](AsyncWebServerRequest *r
     int paramsNr = request->params();
     this->_HardSerial.println(paramsNr);
    
-    AsyncWebParameter* p = request->getParam(0);
+    const AsyncWebParameter* p = request->getParam(1);
     //String formName =p->name;
     String formName =p->value();    
     this->_HardSerial.print("in post, formName=");
     this->_HardSerial.println(formName);
-    AsyncResponseStream *response = request->beginResponseStream("text/plain");
+     AsyncResponseStream *response = request->beginResponseStream("text/plain");
 
     if(formName=="ConfigSTA"){
 
@@ -243,8 +243,8 @@ asyncWebServer.on("/DaffodilServlet", HTTP_POST, [this](AsyncWebServerRequest *r
       p = request->getParam(1);
       float lat =p->value().toFloat();  
 
-      p = request->getParam(2);
-      float log =p->value().toFloat();  
+      const AsyncWebParameter* p2 = request->getParam(2);
+      float log =p2->value().toFloat();  
       digitalStablesData.latitude=lat;
       digitalStablesData.longitude=log;
     
@@ -260,8 +260,8 @@ asyncWebServer.on("/DaffodilServlet", HTTP_POST, [this](AsyncWebServerRequest *r
 asyncWebServer.on("/DaffodilServlet", HTTP_GET, [this](AsyncWebServerRequest *request) {
     int paramsNr = request->params();
     this->_HardSerial.println(paramsNr);
-   
-    AsyncWebParameter* p = request->getParam(0);
+    const AsyncWebParameter* p = request->getParam(1);
+  
     //String formName =p->name;
     String formName =p->value();    
     this->_HardSerial.print("in servet2, formName=");

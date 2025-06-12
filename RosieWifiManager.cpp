@@ -71,14 +71,16 @@ void RosieWifiManager::start(){
 
     asyncWebServer.on("/SetQFactor1", HTTP_GET, [this](AsyncWebServerRequest *request){
         int numberOfParameters = request->params();
-        AsyncWebParameter* p = request->getParam(0);
+        
+         const AsyncWebParameter* p = request->getParam(1);
+         
         rosieData.qfactor1 = p->value().toFloat();
         request->send_P(200, "text/plain", okString.c_str()); 
     });
 
     asyncWebServer.on("/SetQFactor2", HTTP_GET, [this](AsyncWebServerRequest *request){
         int numberOfParameters = request->params();
-        AsyncWebParameter* p = request->getParam(0);
+        const AsyncWebParameter* p = request->getParam(1);
         rosieData.qfactor2 = p->value().toFloat();
         request->send_P(200, "text/plain", okString.c_str()); 
     });
@@ -201,8 +203,8 @@ asyncWebServer.on("/assets/fonts/Roboto-Regular.woff", HTTP_GET, [this](AsyncWeb
 asyncWebServer.on("/RosieServlet", HTTP_POST, [this](AsyncWebServerRequest *request) {
     int paramsNr = request->params();
     this->_HardSerial.println(paramsNr);
-   
-    AsyncWebParameter* p = request->getParam(0);
+    const  AsyncWebParameter* p = request->getParam(0);
+     p = request->getParam(1);
     //String formName =p->name;
     String formName =p->value();    
     this->_HardSerial.print("in post, formName=");
@@ -365,7 +367,7 @@ asyncWebServer.on("/RosieServlet", HTTP_GET, [this](AsyncWebServerRequest *reque
     int paramsNr = request->params();
     this->_HardSerial.println(paramsNr);
    
-    AsyncWebParameter* p = request->getParam(0);
+    const AsyncWebParameter* p = request->getParam(1);
     //String formName =p->name;
     String formName =p->value();    
     this->_HardSerial.print("in servet2, formName=");
