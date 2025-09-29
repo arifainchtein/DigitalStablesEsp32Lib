@@ -3,7 +3,7 @@
 #include "PanchoTankFlowData.h"
 #include "DaffodilData.h"
 #include "DigitalStablesData.h"
-#include "SPIFFS.h"
+//#include "SPIFFS.h"
 #include "DataManager.h"
 
 //JsonObject obj;
@@ -17,7 +17,68 @@ String sn = "";
 
 
 void DataManager::start() { 
+  initializeDSDFile();
   _initialized=true;
+}
+
+void DataManager::initializeDSDFile() { 
+  if (_fs.exists(DSD_DATA_FILE)) {
+   _HardSerial.println("in initializeDSDFile,returning because file exists");
+    return;
+  }
+
+  File file = _fs.open(DSD_DATA_FILE, "w");
+  if (!file) {
+      _HardSerial.println("in init,Failed to initialize data file");
+      return;
+  }
+  // Pre-allocate space for MAXIMUM_STORED_RECORDS
+  DigitalStablesData dummy;
+  for (int i = 0; i < MAXIMUM_STORED_RECORDS; i++) {
+ //     file.write((uint8_t*)&dummy, sizeof(DigitalStablesData));
+  }
+  file.close();
+}
+
+bool DataManager::loadSeedlingIndex(SeedlingIndex& index) {
+    if (!_fs.exists(SEEDLING_INDEX_FILE)) {
+        index.head = 0;
+        index.tail = 0;
+        index.count = 0;
+        return true;
+    }
+
+    File file = _fs.open(SEEDLING_INDEX_FILE, "r");
+    if (!file) return false;
+
+    file.read((uint8_t*)&index, sizeof(SeedlingIndex));
+    file.close();
+    return true;
+}
+
+bool DataManager::loadDSDIndex(DSDIndex& index) {
+    if (!_fs.exists(DSD_INDEX_FILE)) {
+        index.head = 0;
+        index.tail = 0;
+        index.count = 0;
+        return true;
+    }
+
+    File file = _fs.open(DSD_INDEX_FILE, "r");
+    if (!file) return false;
+
+    file.read((uint8_t*)&index, sizeof(DSDIndex));
+    file.close();
+    return true;
+}
+
+bool DataManager::saveDSDIndex(const DSDIndex& index) {
+    File file = _fs.open(DSD_INDEX_FILE, "w");
+    if (!file) return false;
+
+    file.write((uint8_t*)&index, sizeof(DSDIndex));
+    file.close();
+    return true;
 }
 
 int DataManager::getDSDStoredCount() {
@@ -32,21 +93,62 @@ int DataManager::getDSDStoredCount() {
     return 0;
 }
 
+int DataManager::getSeedlingStoredCount() {
+    if (!_initialized) return 0;
+    if (_fs.exists(SEEDLING_COUNT_FILE)) {
+        File file = _fs.open(SEEDLING_COUNT_FILE, "r");
+        String countStr = file.readString();
+        file.close();
+        return countStr.toInt();
+    }
+    return 0;
+}
+void DataManager::updateSeedlingStoredCount(int count) {
+    if (!_initialized) return;
+    File file = _fs.open(SEEDLING_COUNT_FILE, "w");
+    file.println(count);
+    file.close();
+}
+
+int DataManager::storeSeedlingMonitorData(SeedlingMonitorData& data) {
+  if (!_initialized){
+    _HardSerial.printf("Data Manager Not initialized");
+    return -1;
+   } 
+   int count = getDSDStoredCount();
+   
+    // Open file in append mode
+    File file = _fs.open(SEEDLING_DATA_FILE, "a");
+    if(!file) {
+        _HardSerial.println("Failed to open file for writing");
+        return -2;
+    }
+  
+  // Write the struct data
+    file.write((uint8_t*)&data, sizeof(SeedlingMonitorData));
+    file.close();
+    if(debug)_HardSerial.printf("line 115");
+    // Update count
+    updateSeedlingStoredCount(count + 1);
+     count = getSeedlingStoredCount();
+
+    if(debug)_HardSerial.printf("Stored entry %d\n", count);
+    return count;
+}
+
 void DataManager::updateDSDStoredCount(int count) {
-      if (!_initialized) return;
-    
+    if (!_initialized) return;
     File file = _fs.open(DSD_COUNT_FILE, "w");
     file.println(count);
     file.close();
 }
 
 int DataManager::storeDSDData(DigitalStablesData& data) {
-   if (!_initialized){
+  if (!_initialized){
     _HardSerial.printf("Data Manager Not initialized");
     return -1;
    } 
- 
-    int count = getDSDStoredCount();
+   int count = getDSDStoredCount();
    
     // Open file in append mode
     File file = _fs.open(DSD_DATA_FILE, "a");
@@ -68,6 +170,57 @@ int DataManager::storeDSDData(DigitalStablesData& data) {
 }
 
 
+
+/*
+int DataManager::storeDSDData(DigitalStablesData& data) {
+    if (!_initialized) {
+        _HardSerial.println("Data Manager Not initialized");
+        return -1;
+    }
+
+    DSDIndex index;
+    if (!loadDSDIndex(index)) {
+        _HardSerial.println("Failed to load index");
+        return -2;
+    }
+
+    // Open file in read-write mode
+    File file = _fs.open(DSD_DATA_FILE, "r+");
+    if (!file) {
+        _HardSerial.println("in storedata Failed to open file for writing");
+        return -3;
+    }
+
+    // If buffer is full, overwrite the oldest record (head)
+    if (index.count >= MAXIMUM_STORED_RECORDS) {
+        // Move head forward (circular buffer)
+        index.head = (index.head + 1) % MAXIMUM_STORED_RECORDS;
+        index.count--; // Decrement count (will be incremented below)
+    }
+
+    // Write the new data at the tail position
+    int writePos = index.tail * sizeof(DigitalStablesData);
+    file.seek(writePos);
+    file.write((uint8_t*)&data, sizeof(DigitalStablesData));
+
+    // Update tail and count
+    index.tail = (index.tail + 1) % MAXIMUM_STORED_RECORDS;
+    index.count++;
+
+    file.close();
+
+    // Save the updated index
+    if (!saveDSDIndex(index)) {
+        _HardSerial.println("Failed to save index");
+        return -4;
+    }
+
+    if (debug) _HardSerial.printf("Stored entry. Count: %d\n", index.count);
+    return index.count;
+}
+    */
+
+/*
 bool DataManager::readAllDSDData(DigitalStablesData* dataArray, int maxSize, int& actualSize) {
     if (!_initialized) return false;
     
@@ -110,6 +263,53 @@ bool DataManager::readAllDSDData(DigitalStablesData* dataArray, int maxSize, int
     
     return true;
 }
+    */
+bool DataManager::readAllDSDData(DigitalStablesData* dataArray, int maxSize, int& actualSize) {
+    if (!_initialized || !dataArray) return false;
+
+    DSDIndex index;
+    if (!loadDSDIndex(index)) return false;
+
+    actualSize = (index.count < maxSize) ? index.count : maxSize;
+    if (actualSize == 0) return false;
+
+    File file = _fs.open(DSD_DATA_FILE, "r");
+    if (!file) return false;
+
+    for (int i = 0; i < actualSize; i++) {
+        int readPos = ((index.head + i) % MAXIMUM_STORED_RECORDS) * sizeof(DigitalStablesData);
+        file.seek(readPos);
+        file.read((uint8_t*)&dataArray[i], sizeof(DigitalStablesData));
+    }
+
+    file.close();
+    return true;
+}
+
+bool DataManager::readAllSeedlingMonitorData(SeedlingMonitorData* dataArray, int maxSize, int& actualSize) {
+    if (!_initialized || !dataArray) return false;
+
+    SeedlingIndex index;
+    if (!loadSeedlingIndex(index)) return false;
+
+    actualSize = (index.count < maxSize) ? index.count : maxSize;
+    if (actualSize == 0) return false;
+
+    File file = _fs.open(SEEDLING_DATA_FILE, "r");
+    if (!file) return false;
+
+    for (int i = 0; i < actualSize; i++) {
+        int readPos = ((index.head + i) % MAXIMUM_STORED_RECORDS) * sizeof(SeedlingMonitorData);
+        file.seek(readPos);
+        file.read((uint8_t*)&dataArray[i], sizeof(SeedlingMonitorData));
+    }
+
+    file.close();
+    return true;
+}
+  
+    
+
 
 void DataManager::printAllDSDData() {
        if (!_initialized) return;
@@ -260,7 +460,37 @@ void DataManager::exportDSDCSV() {
     file.close();
 }
 
- 
+ void DataManager::printSeedlingStoreData(const SeedlingMonitorData& data) {
+    Serial.println("Device Name: " + String(data.devicename));
+    Serial.println("Device Short Name: " + String(data.deviceshortname));
+    Serial.println("Group Identifier: " + String(data.groupidentifier));
+   
+    Serial.print("Serial Number: ");
+    for(int i = 0; i < 8; i++) {
+        Serial.print(data.serialnumberarray[i], HEX);
+        Serial.print(" ");
+    }
+    Serial.println();
+    
+    Serial.println("Device Type ID: " + String(data.deviceTypeId));
+    Serial.println("Seconds Time: " + String(data.secondsTime));
+    Serial.println("Data Sampling Sec: " + String(data.dataSamplingSec));
+    Serial.println("Temperature: " + String(data.temperature));
+    Serial.println("RTC Battery Voltage: " + String(data.rtcBatVolt));
+    Serial.println("Operating Status: " + String(data.operatingStatus));
+    
+    Serial.println("RSSI: " + String(data.rssi));
+    Serial.println("SNR: " + String(data.snr));
+    
+    
+    // Location data
+    Serial.println("Location: " + String(data.latitude) + ", " + String(data.longitude));
+   
+    // Environmental data
+    Serial.println("Outdoor Temperature: " + String(data.greenhouseTemp));
+    Serial.println("Outdoor Humidity: " + String(data.greenhouseHum));
+    
+   }
 
 void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     Serial.println("Device Name: " + String(data.devicename));
@@ -340,6 +570,32 @@ void DataManager::processDigitalStablesDataQueue()
   }
 }
 
+void DataManager::processSeedlingMonitorData()
+{
+  while (dsCounters.itemCount > 0)
+  {
+    digitalStablesDataSerializer.pushToSerial(_HardSerial, dsQueue[dsCounters.front].data);
+    dsCounters.front = (dsCounters.front + 1) % MAX_QUEUE_SIZE;
+    dsCounters.itemCount--;
+  }
+}
+
+
+void DataManager::enqueueSeedlingData(SeedlingMonitorData data)
+{
+  if (seedCounters.itemCount < MAX_QUEUE_SIZE)
+  {
+    seedCounters.rear = (seedCounters.rear + 1) % MAX_QUEUE_SIZE;
+    seedQueue[dsCounters.rear].data = data;
+    seedCounters.itemCount++;
+  }
+    if (debug){
+    if(debug)_HardSerial.print("after storing  SeedlingMonitorData  seedCounters.itemCount=");
+    if(debug)_HardSerial.println(seedCounters.itemCount);
+
+    }
+}
+
 void DataManager::enqueueDSData(DigitalStablesData data)
 {
   if (dsCounters.itemCount < MAX_QUEUE_SIZE)
@@ -408,6 +664,81 @@ void DataManager::storeDigitalStablesData(DigitalStablesData &digitalStablesData
       if(debug)_HardSerial.println(sn);
   }
 }
+
+/*
+void DataManager::storeSeedlingMonitorData(SeedlingMonitorData &seedlingMonitorData)
+{
+  sn = "";
+  uint8_t checksum = 0;
+  for (uint8_t i = 0; i < 8; i++)
+  {
+    sn += String(seedlingMonitorData.serialnumberarray[i], HEX);
+    checksum += static_cast<uint8_t>(seedlingMonitorData.serialnumberarray[i]);
+  }
+  checksum &= 0xFF;
+  if (debug){
+    if(debug)_HardSerial.print("adding a seedlingMonitorData  serialNumber=");
+    if(debug)_HardSerial.print(sn);
+    if(debug)_HardSerial.print(" l=");
+    if(debug)_HardSerial.print(sn.length());
+    if(debug)_HardSerial.print(" checksum=");
+    if(debug)_HardSerial.println(checksum);
+    if(debug)_HardSerial.print(" seedlingMonitorData.checksum=");
+    if(debug)_HardSerial.println(seedlingMonitorData.checksum);
+  }
+  enqueueSeedlingData(seedlingMonitorData);
+  if (seedlingMonitorData.checksum == checksum && (sn.length() == 15 || sn.length() == 14))
+  {
+
+    
+
+    if (debug)
+    {
+      DynamicJsonDocument json(1800);
+      generateSeedlingMonitorData(seedlingMonitorData, json);
+      serializeJsonPretty(json, _HardSerial);
+      if(debug)_HardSerial.print(" number of devices=");
+      if(debug)_HardSerial.println(completeObject.size());
+    }
+  }
+  else
+  {
+    if (debug)
+      if(debug)_HardSerial.println(" seedlingMonitorData rejected pulse serialnumne=");
+    if (debug)
+      if(debug)_HardSerial.println(sn);
+  }
+}
+*/
+
+void DataManager::generateSeedlingMonitorData(SeedlingMonitorData &seedlingMonitorData, DynamicJsonDocument &json)
+{
+
+  json["devicename"] = seedlingMonitorData.devicename;
+  json["deviceshortname"] = seedlingMonitorData.deviceshortname;
+  json["secondsTime"] = seedlingMonitorData.secondsTime;
+  json["dataSamplingSec"] = seedlingMonitorData.dataSamplingSec;
+  json["temperature"] = seedlingMonitorData.temperature;
+  json["rtcBatVolt"] = seedlingMonitorData.rtcBatVolt;
+  json["operatingStatus"] = seedlingMonitorData.operatingStatus;
+  json["digitalStablesUpload"] = seedlingMonitorData.digitalStablesUpload;
+  json["secondsSinceLastPulse"] = seedlingMonitorData.secondsSinceLastPulse;
+  json["currentFunctionValue"] = seedlingMonitorData.currentFunctionValue;
+  json["greenhouseTemp"] = seedlingMonitorData.greenhouseTemp;
+  json["outdoorTemperature"] = seedlingMonitorData.outdoorTemperature;
+  json["greenhouseHum"] = seedlingMonitorData.greenhouseHum;
+  //  json["soft_ap_ssid"] = sn;
+  json["serialnumber"] = sn;
+  json["sentBy"] = sn;
+  json["internetAvailable"] = seedlingMonitorData.internetAvailable;
+  json["ipAddress"] = seedlingMonitorData.ipAddress;
+  json["totp"] = seedlingMonitorData.totpcode;
+  json["deviceTypeId"] = seedlingMonitorData.deviceTypeId;
+  json["dsLastUpload"] = seedlingMonitorData.dsLastUpload;
+  json["latitude"] = seedlingMonitorData.latitude;
+  json["longitude"] = seedlingMonitorData.longitude;
+}
+
 
 void DataManager::generateDigitalStablesData(DigitalStablesData &digitalStablesData, DynamicJsonDocument &json)
 {

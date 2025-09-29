@@ -5,6 +5,8 @@
 #include "Arduino.h"
 #include <GloriaTankFlowPumpSerializer.h>
 #include <DigitalStablesDataSerializer.h>
+#include <SeedlingMonitorDataSerializer.h>
+
 #include <GloriaTankFlowPumpData.h>
 #include <LangleyData.h>
 #include <DaffodilData.h>
@@ -12,7 +14,7 @@
 
 #include <ArduinoJson.h>
 #include <DigitalStablesData.h>
-
+#include <SeedlingMonitoringData.h>
 #include <FS.h>
 
 class DataManager
@@ -25,30 +27,29 @@ public:
   //uint16_t getTotalDataSize();
   void storeGloria(GloriaTankFlowPumpData &p);
   void storeDigitalStablesData(DigitalStablesData &p);
+  int storeSeedlingMonitorData(SeedlingMonitorData &p);
+  
   void generateGloriaTankFlowPumpWebData(GloriaTankFlowPumpData &r, DynamicJsonDocument &json);
   void generateDigitalStablesData(DigitalStablesData &p, DynamicJsonDocument &json);
+  void generateSeedlingMonitorData(SeedlingMonitorData &p, DynamicJsonDocument &json);
   void processGloriaQueue();
   void processDigitalStablesDataQueue();
-
+  void processSeedlingMonitorData();
   int getDSDStoredCount();
+  int getSeedlingStoredCount();
   bool readAllDSDData(DigitalStablesData* dataArray, int maxSize, int& actualSize);
+  bool readAllSeedlingMonitorData(SeedlingMonitorData* dataArray, int maxSize, int& actualSize);
   void updateDSDStoredCount(int count) ;
   int storeDSDData(DigitalStablesData& data);
+  void updateSeedlingStoredCount(int count) ;
+  
   void printAllDSDData();
   void clearAllDSDData() ;
   void printDigitalStablesData(const DigitalStablesData& data);
+  void printSeedlingStoreData(const SeedlingMonitorData& data);
+  
   void exportDSDCSV() ;
-  // uint8_t readKeys();
-  // void getDeviceData(JsonArray &array);
-  // void storePancho(PanchoTankFlowData &p);
-  // void storeRosie(RosieData &p);
-  // virtual ~DataManager();
-  // void storeDaffodil(DaffodilData &p);
-
-  // void generateDaffodilWebData(DaffodilData &p, DynamicJsonDocument &json);
-  // void generatePanchoTankFlowDataWebData(PanchoTankFlowData &p, JsonObject &json);
-  // void generateRosieWebData(RosieData &r, JsonObject &json);
-
+  
 protected:
 
 
@@ -58,11 +59,30 @@ private:
   bool _initialized;
   const char* DSD_DATA_FILE = "/digitalstables.dat";
   const char* DSD_COUNT_FILE = "/dscount.txt";
+  const char* SEEDLING_DATA_FILE = "/seedling.dat";
+  const char* SEEDLING_COUNT_FILE = "/seedlingcount.txt";
+ 
+  struct DSDIndex {
+    int head; // Index of the oldest record
+    int tail; // Index of the next available slot
+    int count; // Current number of records
+};
+
+struct SeedlingIndex {
+    int head; // Index of the oldest record
+    int tail; // Index of the next available slot
+    int count; // Current number of records
+};
+
+  #define MAXIMUM_STORED_RECORDS 2000
+  #define DSD_INDEX_FILE "/dsd_index.dat"
+  #define SEEDLING_INDEX_FILE "/seedling_index.dat"
 
   boolean debug = false;
   #define MAX_QUEUE_SIZE 20
   GloriaTankFlowPumpSerializer gloriaTankFlowPumpSerializer;
   DigitalStablesDataSerializer digitalStablesDataSerializer;
+  SeedlingMonitorDataSerializer seedlingMonitorDataSerializer;
   ;
   // Queue for DigitalStablesData
   struct DSQueueElement
@@ -70,6 +90,10 @@ private:
     DigitalStablesData data;
   };
 
+  struct SeedQueueElement
+  {
+    SeedlingMonitorData data;
+  };
   // Queue for GloriaTankAndFlowData
   struct GloriaQueueElement
   {
@@ -78,6 +102,7 @@ private:
 
   DSQueueElement dsQueue[MAX_QUEUE_SIZE];
   GloriaQueueElement gloriaQueue[MAX_QUEUE_SIZE];
+  SeedQueueElement seedQueue[MAX_QUEUE_SIZE];
 
   struct QueueCounters
   {
@@ -88,8 +113,17 @@ private:
 
   QueueCounters dsCounters;
   QueueCounters gloriaCounters;
+  QueueCounters seedCounters;
 
+
+
+  void enqueueSeedlingData(SeedlingMonitorData data);
   void enqueueDSData(DigitalStablesData data);
   void enqueueGloriaData(GloriaTankFlowPumpData data);
+  void initializeDSDFile();
+  bool saveDSDIndex(const DSDIndex& index) ;
+  bool loadDSDIndex(DSDIndex& index);
+  bool loadSeedlingIndex(SeedlingIndex& index);
+  
 };
 #endif /* LIBRARIES_DIGITALSTABLES_PANCHOVISUALIZEROWWIFIMANAGER */

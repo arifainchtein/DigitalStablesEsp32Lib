@@ -102,6 +102,7 @@ void WifiManager::setSoft_ap_ssid(String s)
 
 String WifiManager::getIpAddress()
 {
+    ipAddress = WiFi.localIP().toString();
     return ipAddress;
 }
 
@@ -436,7 +437,7 @@ bool WifiManager::connectSTA()
         _HardSerial.println();
         _HardSerial.print("Connected! IP address: ");
         _HardSerial.println(WiFi.localIP());
-        
+        ipAddress=WiFi.localIP().toString();
          gotConnection = true;
     } else {
         _HardSerial.println();

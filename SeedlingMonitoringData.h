@@ -2,34 +2,36 @@
 #define SEEDLINGMONITORDATA_H
 struct SeedlingMonitorData{
 	char devicename[16];
-	char flow1name[16];
-	char tank1name[16];
+	char deviceshortname[5];
+	uint8_t serialnumberarray[8];
 	char groupidentifier[16];
 	char deviceTypeId[30];
-	float qfactor1=.82;
-	float flowRate=0.0;
-	float totalMilliLitres=0.0;
+	char ipAddress[16];
 	long secondsTime=0L;
+	int8_t checksum;
 	uint8_t currentFunctionValue=0;
 	uint8_t dataSamplingSec=3;
-	uint8_t temperature=0;
+	float temperature=0;
 	float reg33Voltage=0.0;
 	float rtcBatVolt=0.0;
-	uint8_t opMode=0;
 	float rssi=0;
 	float snr=0;
     float heatIndex=0;
 	float dewPoint=0;
+	float outdoorTemperature=0.0;
     float greenhouseTemp=0.0;
     float greenhouseHum=0.0;
-    int soilMoisture;
-    float soilTemperature;
-	float roomTemperature;
 	float sleepPingMinutes=30;
 	long secondsSinceLastPulse;
 	bool digitalStablesUpload;
 	long dsLastUpload;
 	float operatingStatus=0;
+	bool humidifierstatus=false;
+	bool loraActive=false;
+	bool internetAvailable=false;
+	float latitude;
+	float longitude;
+	long totpcode;
 };
 #endif
 

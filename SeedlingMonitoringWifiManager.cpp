@@ -7,13 +7,11 @@ SeedlingMonitoringWifiManager::SeedlingMonitoringWifiManager(HardwareSerial &ser
 WifiManager(serial ,fs,  t, e), seedlingMonitorData(s){}
 
 void SeedlingMonitoringWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){
-    json["soilTemperature"] = seedlingMonitorData.soilTemperature;
-    json["greenhouseTemp"] = seedlingMonitorData.greenhouseTemp;
+   json["greenhouseTemp"] = seedlingMonitorData.greenhouseTemp;
     json["greenhouseHum"] = seedlingMonitorData.greenhouseHum;
     json["dewPoint"] = seedlingMonitorData.dewPoint;
     json["heatIndex"] = seedlingMonitorData.heatIndex;
     json["dataSamplingSec"] = seedlingMonitorData.dataSamplingSec;
-    json["soilMoisture"] = seedlingMonitorData.soilMoisture;
     json["temperature"] = seedlingMonitorData.temperature;
     json["rtcBatVolt"] = seedlingMonitorData.rtcBatVolt;
     json["rssi"] = seedlingMonitorData.rssi;
@@ -22,7 +20,7 @@ void SeedlingMonitoringWifiManager::generateWebData(DynamicJsonDocument& json, S
     json["soft_ap_ssid"] = soft_ap_ssid;
     json["serialNumber"] = serialNumber;
     json["secondsTime"] = seedlingMonitorData.secondsTime;
-    json["roomTemperature"] = seedlingMonitorData.roomTemperature;
+    json["outdoorTemperature"] = seedlingMonitorData.outdoorTemperature;
     json["apAddress"] =apAddress;
     json["hostname"] = hostname;
     json["stationmode"] = stationmode;
@@ -37,13 +35,6 @@ void SeedlingMonitoringWifiManager::generateWebData(DynamicJsonDocument& json, S
 }
 
 void SeedlingMonitoringWifiManager::start(){
-   	if (!SPIFFS.begin(true)) {
-		// SPIFFS will be configured on reboot
-		_HardSerial.println("ERROR: Cannot mount SPIFFS, Rebooting");
-		delay(1000);
-
-	}
-   
    //
    // get the parameters
    //
@@ -73,14 +64,7 @@ void SeedlingMonitoringWifiManager::start(){
     }
     
 
-asyncWebServer.on("/SetQFactor1", HTTP_GET, [this](AsyncWebServerRequest *request){
-        int numberOfParameters = request->params();
-        const  AsyncWebParameter* p = request->getParam(1);
-       
-        seedlingMonitorData.qfactor1 = p->value().toFloat();
-        String okString="Ok";
-        request->send_P(200, "text/plain", okString.c_str()); 
-    });
+
 
 
 
