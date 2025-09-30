@@ -27,14 +27,14 @@ public:
   //uint16_t getTotalDataSize();
   void storeGloria(GloriaTankFlowPumpData &p);
   void storeDigitalStablesData(DigitalStablesData &p);
-  int storeSeedlingMonitorData(SeedlingMonitorData &p);
+  void storeSeedlingMonitorData(SeedlingMonitorData &p);
   
   void generateGloriaTankFlowPumpWebData(GloriaTankFlowPumpData &r, DynamicJsonDocument &json);
   void generateDigitalStablesData(DigitalStablesData &p, DynamicJsonDocument &json);
   void generateSeedlingMonitorData(SeedlingMonitorData &p, DynamicJsonDocument &json);
   void processGloriaQueue();
   void processDigitalStablesDataQueue();
-  void processSeedlingMonitorData();
+  void processSeedlingMonitorDataQueue();
   int getDSDStoredCount();
   int getSeedlingStoredCount();
   bool readAllDSDData(DigitalStablesData* dataArray, int maxSize, int& actualSize);
@@ -121,6 +121,7 @@ struct SeedlingIndex {
   void enqueueDSData(DigitalStablesData data);
   void enqueueGloriaData(GloriaTankFlowPumpData data);
   void initializeDSDFile();
+  void initializeSeedlingMonitorFile();
   bool saveDSDIndex(const DSDIndex& index) ;
   bool loadDSDIndex(DSDIndex& index);
   bool loadSeedlingIndex(SeedlingIndex& index);

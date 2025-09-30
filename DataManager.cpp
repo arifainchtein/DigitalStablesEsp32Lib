@@ -18,8 +18,30 @@ String sn = "";
 
 void DataManager::start() { 
   initializeDSDFile();
+  initializeSeedlingMonitorFile();
   _initialized=true;
 }
+
+
+void DataManager::initializeSeedlingMonitorFile() { 
+  if (_fs.exists(SEEDLING_DATA_FILE)) {
+   _HardSerial.println("in initializeSeedlingMonitorFile,returning because file exists");
+    return;
+  }
+
+  File file = _fs.open(SEEDLING_DATA_FILE, "w");
+  if (!file) {
+      _HardSerial.println("in init initializeSeedlingMonitorFile,Failed to initialize data file");
+      return;
+  }
+  // Pre-allocate space for MAXIMUM_STORED_RECORDS
+  DigitalStablesData dummy;
+  for (int i = 0; i < MAXIMUM_STORED_RECORDS; i++) {
+ //     file.write((uint8_t*)&dummy, sizeof(DigitalStablesData));
+  }
+  file.close();
+}
+
 
 void DataManager::initializeDSDFile() { 
   if (_fs.exists(DSD_DATA_FILE)) {
@@ -110,31 +132,33 @@ void DataManager::updateSeedlingStoredCount(int count) {
     file.close();
 }
 
-int DataManager::storeSeedlingMonitorData(SeedlingMonitorData& data) {
-  if (!_initialized){
-    _HardSerial.printf("Data Manager Not initialized");
-    return -1;
-   } 
-   int count = getDSDStoredCount();
+// int DataManager::storeSeedlingMonitorData(SeedlingMonitorData& data) {
+//   if (!_initialized){
+//     _HardSerial.printf("Data Manager Not initialized in storesdeedling");
+//     return -1;
+//    } 
+//    int count = getSeedlingStoredCount();
    
-    // Open file in append mode
-    File file = _fs.open(SEEDLING_DATA_FILE, "a");
-    if(!file) {
-        _HardSerial.println("Failed to open file for writing");
-        return -2;
-    }
+//     // Open file in append mode
+//     File file = _fs.open(SEEDLING_DATA_FILE, "a");
+//     if(!file) {
+//         _HardSerial.println("Failed to open file for writing");
+//         return -2;
+//     }
   
-  // Write the struct data
-    file.write((uint8_t*)&data, sizeof(SeedlingMonitorData));
-    file.close();
-    if(debug)_HardSerial.printf("line 115");
-    // Update count
-    updateSeedlingStoredCount(count + 1);
-     count = getSeedlingStoredCount();
-
-    if(debug)_HardSerial.printf("Stored entry %d\n", count);
-    return count;
-}
+//   // Write the struct data
+//     file.write((uint8_t*)&data, sizeof(SeedlingMonitorData));
+//     file.close();
+//     if(debug)_HardSerial.println("line 152");
+//     // Update count
+//     updateSeedlingStoredCount(count + 1);
+//      count = getSeedlingStoredCount();
+//  if(debug)_HardSerial.print("line 156, count=");
+//  if(debug)_HardSerial.println(count);
+ 
+//     if(debug)_HardSerial.printf("Stored SeedlingMonitor entry %d\n", count);
+//     return count;
+// }
 
 void DataManager::updateDSDStoredCount(int count) {
     if (!_initialized) return;
@@ -570,13 +594,19 @@ void DataManager::processDigitalStablesDataQueue()
   }
 }
 
-void DataManager::processSeedlingMonitorData()
+void DataManager::processSeedlingMonitorDataQueue()
 {
-  while (dsCounters.itemCount > 0)
+   if (debug){
+    if(debug)_HardSerial.print("in processSeedlingMonitorDataQueue  seedCounters.itemCount=");
+    if(debug)_HardSerial.println(seedCounters.itemCount);
+
+    }
+  while (seedCounters.itemCount > 0)
   {
-    digitalStablesDataSerializer.pushToSerial(_HardSerial, dsQueue[dsCounters.front].data);
-    dsCounters.front = (dsCounters.front + 1) % MAX_QUEUE_SIZE;
-    dsCounters.itemCount--;
+     if(debug)_HardSerial.print("in processSeedlingMonitorDataQueue  pushing=");
+    seedlingMonitorDataSerializer.pushToSerial(_HardSerial, seedQueue[seedCounters.front].data);
+    seedCounters.front = (seedCounters.front + 1) % MAX_QUEUE_SIZE;
+    seedCounters.itemCount--;
   }
 }
 
@@ -586,7 +616,7 @@ void DataManager::enqueueSeedlingData(SeedlingMonitorData data)
   if (seedCounters.itemCount < MAX_QUEUE_SIZE)
   {
     seedCounters.rear = (seedCounters.rear + 1) % MAX_QUEUE_SIZE;
-    seedQueue[dsCounters.rear].data = data;
+    seedQueue[seedCounters.rear].data = data;
     seedCounters.itemCount++;
   }
     if (debug){
@@ -665,7 +695,7 @@ void DataManager::storeDigitalStablesData(DigitalStablesData &digitalStablesData
   }
 }
 
-/*
+
 void DataManager::storeSeedlingMonitorData(SeedlingMonitorData &seedlingMonitorData)
 {
   sn = "";
@@ -709,7 +739,7 @@ void DataManager::storeSeedlingMonitorData(SeedlingMonitorData &seedlingMonitorD
       if(debug)_HardSerial.println(sn);
   }
 }
-*/
+
 
 void DataManager::generateSeedlingMonitorData(SeedlingMonitorData &seedlingMonitorData, DynamicJsonDocument &json)
 {
