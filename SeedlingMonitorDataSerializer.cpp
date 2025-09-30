@@ -91,8 +91,9 @@ void SeedlingMonitorDataSerializer::pushToSerial(HardwareSerial &serial, Seedlin
     serial.print(seedlingMonitorData.dsLastUpload);
     serial.print(F("#"));
     serial.print(seedlingMonitorData.totpcode);
+     serial.print(F("#"));
+    serial.print("END");
     serial.println(F("#"));
-
 }
 
 SeedlingMonitorDataSerializer::~SeedlingMonitorDataSerializer() {}
