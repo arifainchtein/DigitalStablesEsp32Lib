@@ -97,15 +97,3 @@ void SeedlingMonitorDataSerializer::pushToSerial(HardwareSerial &serial, Seedlin
 }
 
 SeedlingMonitorDataSerializer::~SeedlingMonitorDataSerializer() {}
-
-SeedlingMonitorDataDeserializer#SeedlingMonitor##SEED##9slwJcM9#3#0.00#0.00#18.00#70.00#26.12#12.38#0#
--1664857306#2.71#-70.00#10.00#
-0.00#
-0#
-0
-#
-0
-#0
-#0
-#0
-#Ok-AsyncData
