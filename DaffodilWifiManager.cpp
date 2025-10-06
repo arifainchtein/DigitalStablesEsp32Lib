@@ -130,7 +130,7 @@ asyncWebServer.on("/js/index.js", HTTP_GET, [this](AsyncWebServerRequest *reques
 asyncWebServer.on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
     this->_HardSerial.println("requesting root =");
     request->send(_fs, "/index.html", String(), false);
-    delay(5);
+    
 });
 
 asyncWebServer.on("/index.html", HTTP_GET, [this](AsyncWebServerRequest *request){
@@ -283,9 +283,13 @@ asyncWebServer.on("/DaffodilServlet", HTTP_GET, [this](AsyncWebServerRequest *re
         this->_HardSerial.println(sensorString);
         request->send_P(200, "text/plain", sensorString.c_str()); 
     });
-
+//asyncWebServer.serveStatic("/", fs, "/");
+  asyncWebServer.onNotFound([](AsyncWebServerRequest *request){
+    Serial.println("File Not Found: " + request->url());
+    request->send(404, "text/plain", "Not found");
+  });
 asyncWebServer.begin();
-
+  Serial.println("HTTP server started");
 }
 
 void DaffodilWifiManager::generateWebData(DynamicJsonDocument& json, String sentBy){

@@ -337,7 +337,7 @@ bool WifiManager::configWifiSTA(String s, String p, String h)
 bool WifiManager::getWifiStatus()
 {
     if (WiFi.status() == WL_CONNECTED) {
-       _HardSerial.println("In WIfiManager WiFi connected as station");
+      // _HardSerial.println("In WIfiManager WiFi connected as station");
         return true;
       }
       

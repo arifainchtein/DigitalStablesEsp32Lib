@@ -17,16 +17,16 @@
 #define VOLTAGE_MONITOR 10
 
 const uint8_t tank[] = {
-  SEG_F | SEG_G | SEG_D | SEG_E,                  // t
-  SEG_C | SEG_D | SEG_E | SEG_B | SEG_A | SEG_G,  // a
-  SEG_C | SEG_E | SEG_G,                          // n
-  SEG_G | SEG_D | SEG_E                           // c
+  TSEG_F | TSEG_G | TSEG_D | TSEG_E,                  // t
+  TSEG_C | TSEG_D | TSEG_E | TSEG_B | TSEG_A | TSEG_G,  // a
+  TSEG_C | TSEG_E | TSEG_G,                          // n
+  TSEG_G | TSEG_D | TSEG_E                           // c
 };
 
 const uint8_t templabel[] = {
 
-  SEG_F | SEG_G | SEG_D | SEG_E,                  // t
-  SEG_A | SEG_D | SEG_E | SEG_F | SEG_G  // e
+  TSEG_F | TSEG_G | TSEG_D | TSEG_E,                  // t
+  TSEG_A | TSEG_D | TSEG_E | TSEG_F | TSEG_G  // e
 };
 
 // #define SEND_ASYNC_DATA 1

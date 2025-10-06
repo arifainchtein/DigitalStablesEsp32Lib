@@ -1,7 +1,7 @@
 #include <PanchoVisualizerWifiManager.h>
 #include <ArduinoJson.h>
 
-#include "SPIFFS.h"
+
  #define FUN_1_FLOW 1
 #define FUN_2_FLOW 2
 #define FUN_1_FLOW_1_TANK 3
@@ -17,12 +17,7 @@ WifiManager(serial , fs, t, e) , cajalData(tf),panchoConfigData(p){
 
 void PanchoVisualizerWifiManager::start(){
 
-	if (!SPIFFS.begin(true)) {
-		// SPIFFS will be configured on reboot
-		//_HardSerial.println("ERROR: Cannot mount SPIFFS, Rebooting");
-		delay(1000);
-
-	}
+	
    //
    // get the parameters
    //
@@ -63,27 +58,27 @@ void PanchoVisualizerWifiManager::start(){
 
 asyncWebServer.on("/assets/bootstrap/css/bootstrap.min.css", HTTP_GET, [this](AsyncWebServerRequest *request){
  // this->_HardSerial.println("request  /=");
-    request->send(SPIFFS, "/bootstrap.min.css", String(), false);
+    request->send(_fs, "/bootstrap.min.css", String(), false);
   });
 
 asyncWebServer.on("/assets/img/Pancho.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
  // this->_HardSerial.println("request  /=");
-    request->send(SPIFFS, "/Pancho.svg", String(), false);
+    request->send(_fs, "/Pancho.svg", String(), false);
   });
 
 asyncWebServer.on("/assets/js/TankAndFlowConstants.js", HTTP_GET, [this](AsyncWebServerRequest *request){
   //this->_HardSerial.println("request  /=");
-    request->send(SPIFFS, "/TankAndFlowConstants.js", String(), false);
+    request->send(_fs, "/TankAndFlowConstants.js", String(), false);
   });
 
 asyncWebServer.on("/assets/js/jquery.min.js", HTTP_GET, [this](AsyncWebServerRequest *request){
  // this->_HardSerial.println("request  /=");
-    request->send(SPIFFS, "/jquery.min.js", String(), false);
+    request->send(_fs, "/jquery.min.js", String(), false);
   });
 
 asyncWebServer.on("/assets/css/slideswitch.css", HTTP_GET, [this](AsyncWebServerRequest *request){
   this->_HardSerial.println("request  slideswitch/=");
-    request->send(SPIFFS, "/slideswitch.css", String(), false);
+    request->send(_fs, "/slideswitch.css", String(), false);
     delay(5);
   });
 
@@ -91,64 +86,64 @@ asyncWebServer.on("/assets/css/slideswitch.css", HTTP_GET, [this](AsyncWebServer
 
 asyncWebServer.on("/assets/css/styles.css", HTTP_GET, [this](AsyncWebServerRequest *request){
  // this->_HardSerial.println("request  /=");
-    request->send(SPIFFS, "/styles.css", String(), false);
+    request->send(_fs, "/styles.css", String(), false);
   });
 
 asyncWebServer.on("/assets/fonts/fa-solid-900.woff2", HTTP_GET, [this](AsyncWebServerRequest *request){
   //this->_HardSerial.println("request  /=");
-    request->send(SPIFFS, "/fa-solid-900.woff2", String(), false);
+    request->send(_fs, "/fa-solid-900.woff2", String(), false);
   });
 
 asyncWebServer.on("/assets/fonts/fa-solid-900.woff", HTTP_GET, [this](AsyncWebServerRequest *request){
   //this->_HardSerial.println("request  /=");
-    request->send(SPIFFS, "/fa-solid-900.woff", String(), false);
+    request->send(_fs, "/fa-solid-900.woff", String(), false);
   });
   
   asyncWebServer.on("/assets/fonts/fa-solid-900.ttf", HTTP_GET, [this](AsyncWebServerRequest *request){
   //this->_HardSerial.println("request  /=");
-    request->send(SPIFFS, "/fa-solid-900.ttf", String(), false);
+    request->send(_fs, "/fa-solid-900.ttf", String(), false);
   });
 
 
 asyncWebServer.on("/assets/fonts/fontawesome-all.min.css", HTTP_GET, [this](AsyncWebServerRequest *request){
   //this->_HardSerial.println("request  /=");
-    request->send(SPIFFS, "/fontawesome-all.min.css", String(), false);
+    request->send(_fs, "/fontawesome-all.min.css", String(), false);
   });
 
 asyncWebServer.on("/assets/bootstrap/js/bootstrap.min.js", HTTP_GET, [this](AsyncWebServerRequest *request){
  // this->_HardSerial.println("request  /=");
-    request->send(SPIFFS, "/bootstrap.min.js", String(), false);
+    request->send(_fs, "/bootstrap.min.js", String(), false);
   });
 
 asyncWebServer.on("/js/index.js", HTTP_GET, [this](AsyncWebServerRequest *request){
   //this->_HardSerial.println("request  /=");
-    request->send(SPIFFS, "/index.js", String(), false);
+    request->send(_fs, "/index.js", String(), false);
   });
   
 asyncWebServer.on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
 	//this->_HardSerial.println("reqestubg /=");
-    request->send(SPIFFS, "/index.html", String(), false);
+    request->send(_fs, "/index.html", String(), false);
   });
 
   asyncWebServer.on("/index.html", HTTP_GET, [this](AsyncWebServerRequest *request){
 	//this->_HardSerial.println("reqestubg index.html=");
-    request->send(SPIFFS, "/index.html", String(), false);
+    request->send(_fs, "/index.html", String(), false);
   });
 asyncWebServer.on("/assets/css/Roboto.css", HTTP_GET, [this](AsyncWebServerRequest *request){
 	//this->_HardSerial.println("reqestubg robottocss=");
-    request->send(SPIFFS, "/Roboto.css", String(), false);
+    request->send(_fs, "/Roboto.css", String(), false);
     delay(5);
   });
 
 asyncWebServer.on("/assets/fonts/Roboto-Regular.woff", HTTP_GET, [this](AsyncWebServerRequest *request){
   //this->_HardSerial.println("request solid woof900 /=");
-    request->send(SPIFFS, "/Roboto-Regular.woff", String(), false);
+    request->send(_fs, "/Roboto-Regular.woff", String(), false);
     delay(5);
   });
 
   asyncWebServer.on("/assets/fonts/Roboto-Regular.woff2", HTTP_GET, [this](AsyncWebServerRequest *request){
   //this->_HardSerial.println("request solid woof900 /=");
-    request->send(SPIFFS, "/Roboto-Regular.woff2", String(), false);
+    request->send(_fs, "/Roboto-Regular.woff2", String(), false);
     delay(5);
   });
 
