@@ -537,6 +537,30 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     Serial.println("Operating Mode: " + String(data.opMode));
     Serial.println("Operating Status: " + String(data.operatingStatus));
     
+    String functionname="";
+   if(data.currentFunctionValue== FUN_1_FLOW){
+    functionname="FUN_1_FLOW";
+   }else if(data.currentFunctionValue== FUN_2_FLOW){
+    functionname="FUN_2_FLOW";
+   }else if(data.currentFunctionValue== FUN_1_FLOW_1_TANK){
+    functionname="FUN_1_FLOW_1_TANK";
+   }else if(data.currentFunctionValue== FUN_1_TANK){
+    functionname="FUN_1_TANK";
+   }else if(data.currentFunctionValue== FUN_2_TANK){
+    functionname="FUN_2_TANK";
+   }else if(data.currentFunctionValue== DAFFODIL_SCEPTIC_TANK){
+    functionname="DAFFODIL_SCEPTIC_TANK";
+   }else if(data.currentFunctionValue== DAFFODIL_WATER_TROUGH){
+    functionname="DAFFODIL_WATER_TROUGH";
+   }else if(data.currentFunctionValue== DAFFODIL_TEMP_SOILMOISTURE){
+    functionname="DAFFODIL_TEMP_SOILMOISTURE";
+   }else if(data.currentFunctionValue== DAFFODIL_LIGHT_DETECTOR){
+    functionname="DAFFODIL_LIGHT_DETECTOR";
+   }else if(data.currentFunctionValue== VOLTAGE_MONITOR){
+    functionname="VOLTAGE_MONITOR";
+   }
+    Serial.println("Current Function Value: " + functionname);
+    
     Serial.println("RSSI: " + String(data.rssi));
     Serial.println("SNR: " + String(data.snr));
     
