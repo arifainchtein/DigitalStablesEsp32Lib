@@ -26,7 +26,8 @@ const uint8_t tank[] = {
 const uint8_t templabel[] = {
 
   TSEG_F | TSEG_G | TSEG_D | TSEG_E,                  // t
-  TSEG_A | TSEG_D | TSEG_E | TSEG_F | TSEG_G  // e
+  TSEG_A | TSEG_D | TSEG_E | TSEG_F | TSEG_G,
+   0x00, 0x00  // e
 };
 
 // #define SEND_ASYNC_DATA 1

@@ -23,6 +23,9 @@ public:
 	void saveDeviceSensorConfig(String devicename,String deviceshortname, String sensor1name, String sensor2name, String tz, double latitude, double longitude, double altitude,uint8_t minimumEfficiencyForLed, uint8_t minimumEfficiencyForWifi);
 	void saveWifiParameters(String ssid, String password, String softAPSSID, String softAPPASS,  String hostName, bool stationmode);
 
+	void getDeviceConfig(char* devicename, char* deviceshortname, String& timezone,  double& latitude, double& longitude);
+	void saveDeviceConfig(String devicename,String deviceshortname, String tz, double latitude, double longitude);
+	
 	void saveConfigData(float fieldId, String stationName );
 	void saveOperatingStatus(float operatingStatus );
 	float getOperatingStatus();

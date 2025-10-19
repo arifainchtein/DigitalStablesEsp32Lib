@@ -66,6 +66,41 @@ String Esp32SecretManager::readTimeZone(){
 	return ret;
 }
 
+void Esp32SecretManager::saveDeviceConfig(String devicename,String deviceshortname, String timezone, double latitude, double longitude){
+	preferences.begin("DeviceSenInf", false);
+	preferences.putString("devicename", devicename);
+	preferences.putString("deviceshortname", deviceshortname);
+	preferences.putString("timezone", timezone);
+	preferences.putDouble("latitude", latitude);
+    preferences.putDouble("longitude", longitude);
+	preferences.end();
+}	
+
+void Esp32SecretManager::getDeviceConfig(char* devicename, char* deviceshortname, String& timezone, double& latitude, double& longitude) {
+    preferences.begin("DeviceSenInf", true);
+    String tempString = preferences.getString("devicename", "NoData");
+    strcpy(devicename, tempString.c_str());
+    tempString = preferences.getString("deviceshortname", "NoData");
+    strcpy(deviceshortname, tempString.c_str());
+    timezone = preferences.getString("timezone", "NoData");
+    
+    // Check if latitude and longitude are available, if not set default values  
+    if (!preferences.isKey("latitude")) {
+        latitude = -37.13305556;
+    } else {
+        latitude = preferences.getDouble("latitude", -37.13305556);
+    }
+    
+    if (!preferences.isKey("longitude")) {
+        longitude = 144.47472222;
+    } else {
+        longitude = preferences.getDouble("longitude", 144.47472222);
+    }
+    
+
+    preferences.end();
+}
+
 
 void Esp32SecretManager::saveDeviceSensorConfig(String devicename,String deviceshortname, String sensor1name, String sensor2name, String timezone, double latitude, double longitude, double altitude,uint8_t minimumEfficiencyForLed, uint8_t minimumEfficiencyForWifi){
 	preferences.begin("DeviceSenInf", false);
