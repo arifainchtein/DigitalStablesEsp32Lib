@@ -453,13 +453,18 @@ void DataManager::exportDSDCSV() {
     
     // Tank data
     Serial.print(", " + String(data.tank1PressurePsi));
- //   Serial.print("," + String(data.tank1HeightMeters));
+  //  Serial.print("," + String(data.tank1HeightMeters));
  //   Serial.print(", " + String(data.tank1maxvollit));
     
     Serial.print("," + String(data.tank2PressurePsi));
-   // Serial.print("," + String(data.tank2HeightMeters));
+ //   Serial.print("," + String(data.tank2HeightMeters));
   //  Serial.print(", " + String(data.tank2maxvollit));
     
+    Serial.println("," + String(data.throughlevelminimumcm));
+    Serial.println("," + String(data.throughlevelmaximumcm));
+    Serial.println("," + String(data.scepticAvailablePercentage));
+    Serial.println("," + String(data.maximumScepticHeight));
+    Serial.println("," + String(data.measuredHeight));
     // Location data
     Serial.print("," + String(data.latitude) + ", " + String(data.longitude));
     Serial.print(", " + String(data.altitude));
@@ -564,6 +569,12 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     Serial.println("RSSI: " + String(data.rssi));
     Serial.println("SNR: " + String(data.snr));
     
+
+
+    Serial.println("Through Level Minimum (cm): " + String(data.throughlevelminimumcm));
+    Serial.println("Through Level Maximum (cm): " + String(data.throughlevelmaximumcm));
+    Serial.println("Measured Height (cm): " + String(data.measuredHeight));
+    Serial.println("Maximum Height Height (cm): " + String(data.maximumScepticHeight));
     // Flow data
     Serial.println("Flow Rate 1: " + String(data.flowRate));
     Serial.println("Total Millilitres 1: " + String(data.totalMilliLitres));
@@ -572,11 +583,11 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     
     // Tank data
     Serial.println("Tank 1 Pressure (PSI): " + String(data.tank1PressurePsi));
-    Serial.println("Tank 1 Height (m): " + String(data.tank1HeightMeters));
+    //Serial.println("Tank 1 Height (m): " + String(data.tank1HeightMeters));
     Serial.println("Tank 1 Max Volume (L): " + String(data.tank1maxvollit));
     
     Serial.println("Tank 2 Pressure (PSI): " + String(data.tank2PressurePsi));
-    Serial.println("Tank 2 Height (m): " + String(data.tank2HeightMeters));
+    //Serial.println("Tank 2 Height (m): " + String(data.tank2HeightMeters));
     Serial.println("Tank 2 Max Volume (L): " + String(data.tank2maxvollit));
     
     // Location data

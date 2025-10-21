@@ -25,7 +25,9 @@ public:
 
 	void getDeviceConfig(char* devicename, char* deviceshortname, String& timezone,  double& latitude, double& longitude);
 	void saveDeviceConfig(String devicename,String deviceshortname, String tz, double latitude, double longitude);
-	
+	void saveTroughParameters(double troughcolumnheight, double throughlevelminimumcm, double throughlevelmaximumcm);
+	void getTroughParameters( double& troughcolumnheight, double& throughlevelminimumcm, double& throughlevelmaximumcm) ;
+ 
 	void saveConfigData(float fieldId, String stationName );
 	void saveOperatingStatus(float operatingStatus );
 	float getOperatingStatus();

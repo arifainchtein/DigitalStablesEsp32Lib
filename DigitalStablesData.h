@@ -98,13 +98,19 @@ struct DigitalStablesData{
 	float flowRate2=0.0;
 	float totalMilliLitres2=0.0;
 
-	float tank1PressurePsi=0.0;
+	
 	float tank1HeightMeters=.3;
 	float tank1maxvollit;
-	
-	float tank2PressurePsi=0.0;
+	float tank1PressurePsi;
+	float tank2PressurePsi;
 	float tank2HeightMeters=.3;
 	float tank2maxvollit;
+
+	float throughlevelminimumcm=28.0;
+	float throughlevelmaximumcm=39.0;
+	float scepticAvailablePercentage=0.0;
+	float maximumScepticHeight=0.0;
+	float measuredHeight=0.0;
 	//
 	// from aliexpress
 	//  25mm flow meter qfactor =1.08   https://www.aliexpress.com/item/32792886446.html
@@ -125,9 +131,9 @@ struct DigitalStablesData{
 	long totpcode;
 	float outdoortemperature=0.0;
 	float outdoorhumidity=0.0;
-	float maximumScepticHeight=0.0;
-    float measuredHeight=0.0;
-	float scepticAvailablePercentage=0.0;
+	
+    
+	
 	float lux=0;
 	long sleepTime=600; // in seconds
 	uint8_t minimumEfficiencyForLed;

@@ -36,6 +36,39 @@ Esp32SecretManager::Esp32SecretManager(TimeManager& t):SecretManager(t){}
 // 	preferences.clear(); 
 // 	preferences.end();
 // }
+void Esp32SecretManager::saveTroughParameters(double troughcolumnheight, double throughlevelminimumcm, double throughlevelmaximumcm){
+	preferences.begin("TroughParameters", false);
+	preferences.putDouble("troughcolumnheight", troughcolumnheight);
+	preferences.putDouble("throughlevelminimumcm", throughlevelminimumcm);
+	preferences.putDouble("throughlevelmaximumcm", throughlevelmaximumcm);
+	preferences.end();
+}
+	
+void Esp32SecretManager::getTroughParameters( double& troughcolumnheight, double& throughlevelminimumcm, double& throughlevelmaximumcm) {
+    preferences.begin("TroughParameters", true);
+   
+    
+    // Check if latitude and longitude are available, if not set default values  
+    if (!preferences.isKey("troughcolumnheight")) {
+        troughcolumnheight = 69;
+    } else {
+        troughcolumnheight = preferences.getDouble("troughcolumnheight", 69);
+    }
+
+	 if (!preferences.isKey("throughlevelminimumcm")) {
+        throughlevelminimumcm = 29;
+    } else {
+        throughlevelminimumcm = preferences.getDouble("throughlevelminimumcm", 29);
+    }
+    if (!preferences.isKey("throughlevelmaximumcm")) {
+        throughlevelmaximumcm = 29;
+    } else {
+        throughlevelmaximumcm = preferences.getDouble("throughlevelmaximumcm", 39);
+    }
+   
+
+    preferences.end();
+}
 
 void Esp32SecretManager::saveSecret(String secret, int numberDigits, int periodSeconds ){
 
