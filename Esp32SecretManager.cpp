@@ -36,15 +36,15 @@ Esp32SecretManager::Esp32SecretManager(TimeManager& t):SecretManager(t){}
 // 	preferences.clear(); 
 // 	preferences.end();
 // }
-void Esp32SecretManager::saveTroughParameters(double troughcolumnheight, double throughlevelminimumcm, double throughlevelmaximumcm){
+void Esp32SecretManager::saveTroughParameters(double troughcolumnheight, double troughlevelminimumcm, double troughlevelmaximumcm){
 	preferences.begin("TroughParameters", false);
 	preferences.putDouble("troughcolumnheight", troughcolumnheight);
-	preferences.putDouble("throughlevelminimumcm", throughlevelminimumcm);
-	preferences.putDouble("throughlevelmaximumcm", throughlevelmaximumcm);
+	preferences.putDouble("troughlevelminimumcm", troughlevelminimumcm);
+	preferences.putDouble("troughlevelmaximumcm", troughlevelmaximumcm);
 	preferences.end();
 }
 	
-void Esp32SecretManager::getTroughParameters( double& troughcolumnheight, double& throughlevelminimumcm, double& throughlevelmaximumcm) {
+void Esp32SecretManager::getTroughParameters( double& troughcolumnheight, double& troughlevelminimumcm, double& troughlevelmaximumcm) {
     preferences.begin("TroughParameters", true);
    
     
@@ -55,15 +55,15 @@ void Esp32SecretManager::getTroughParameters( double& troughcolumnheight, double
         troughcolumnheight = preferences.getDouble("troughcolumnheight", 69);
     }
 
-	 if (!preferences.isKey("throughlevelminimumcm")) {
-        throughlevelminimumcm = 29;
+	 if (!preferences.isKey("troughlevelminimumcm")) {
+        troughlevelminimumcm = 29;
     } else {
-        throughlevelminimumcm = preferences.getDouble("throughlevelminimumcm", 29);
+        troughlevelminimumcm = preferences.getDouble("troughlevelminimumcm", 29);
     }
-    if (!preferences.isKey("throughlevelmaximumcm")) {
-        throughlevelmaximumcm = 29;
+    if (!preferences.isKey("troughlevelmaximumcm")) {
+        troughlevelmaximumcm = 39;
     } else {
-        throughlevelmaximumcm = preferences.getDouble("throughlevelmaximumcm", 39);
+        troughlevelmaximumcm = preferences.getDouble("troughlevelmaximumcm", 39);
     }
    
 

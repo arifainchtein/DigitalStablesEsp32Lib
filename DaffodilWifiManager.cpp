@@ -313,8 +313,8 @@ void DaffodilWifiManager::generateWebData(DynamicJsonDocument& json, String sent
     json["outdoorhumidity"] = digitalStablesData.outdoorhumidity;
  //  json["minimumSepticHeight"] = digitalStablesData.minimumSepticHeight;
     json["maximumScepticHeight"] = digitalStablesData.maximumScepticHeight;
-    json["throughlevelminimumcm"] = digitalStablesData.throughlevelminimumcm;
-    json["throughlevelmaximumcm"] = digitalStablesData.throughlevelmaximumcm;
+    json["troughlevelminimumcm"] = digitalStablesData.troughlevelminimumcm;
+    json["troughlevelmaximumcm"] = digitalStablesData.troughlevelmaximumcm;
     json["scepticAvailablePercentage"] = digitalStablesData.scepticAvailablePercentage;
     json["maximumScepticHeight"] = digitalStablesData.maximumScepticHeight;
     json["measuredHeight"] = digitalStablesData.measuredHeight;

@@ -106,8 +106,8 @@ struct DigitalStablesData{
 	float tank2HeightMeters=.3;
 	float tank2maxvollit;
 
-	float throughlevelminimumcm=28.0;
-	float throughlevelmaximumcm=39.0;
+	float troughlevelminimumcm=28.0;
+	float troughlevelmaximumcm=39.0;
 	float scepticAvailablePercentage=0.0;
 	float maximumScepticHeight=0.0;
 	float measuredHeight=0.0;

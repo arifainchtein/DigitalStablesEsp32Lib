@@ -460,8 +460,8 @@ void DataManager::exportDSDCSV() {
  //   Serial.print("," + String(data.tank2HeightMeters));
   //  Serial.print(", " + String(data.tank2maxvollit));
     
-    Serial.println("," + String(data.throughlevelminimumcm));
-    Serial.println("," + String(data.throughlevelmaximumcm));
+    Serial.println("," + String(data.troughlevelminimumcm));
+    Serial.println("," + String(data.troughlevelmaximumcm));
     Serial.println("," + String(data.scepticAvailablePercentage));
     Serial.println("," + String(data.maximumScepticHeight));
     Serial.println("," + String(data.measuredHeight));
@@ -571,8 +571,8 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     
 
 
-    Serial.println("Through Level Minimum (cm): " + String(data.throughlevelminimumcm));
-    Serial.println("Through Level Maximum (cm): " + String(data.throughlevelmaximumcm));
+    Serial.println("trough Level Minimum (cm): " + String(data.troughlevelminimumcm));
+    Serial.println("trough Level Maximum (cm): " + String(data.troughlevelmaximumcm));
     Serial.println("Measured Height (cm): " + String(data.measuredHeight));
     Serial.println("Maximum Height Height (cm): " + String(data.maximumScepticHeight));
     // Flow data
