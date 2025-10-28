@@ -37,33 +37,35 @@ Esp32SecretManager::Esp32SecretManager(TimeManager& t):SecretManager(t){}
 // 	preferences.end();
 // }
 void Esp32SecretManager::saveTroughParameters(double troughcolumnheight, double troughlevelminimumcm, double troughlevelmaximumcm){
-	preferences.begin("TroughParameters", false);
-	preferences.putDouble("troughcolumnheight", troughcolumnheight);
-	preferences.putDouble("troughlevelminimumcm", troughlevelminimumcm);
-	preferences.putDouble("troughlevelmaximumcm", troughlevelmaximumcm);
+	preferences.begin("TroughParams", false);
+	preferences.putDouble("columnheight", troughcolumnheight);
+	preferences.putDouble("minimumcm", troughlevelminimumcm);
+	preferences.putDouble("maximumcm", troughlevelmaximumcm);
+	//serial.println("line 44, troughcolumnheight=" + String(troughcolumnheight));
 	preferences.end();
 }
 	
 void Esp32SecretManager::getTroughParameters( double& troughcolumnheight, double& troughlevelminimumcm, double& troughlevelmaximumcm) {
-    preferences.begin("TroughParameters", true);
+    preferences.begin("TroughParams", true);
    
     
     // Check if latitude and longitude are available, if not set default values  
-    if (!preferences.isKey("troughcolumnheight")) {
-        troughcolumnheight = 69;
+    if (!preferences.isKey("columnheight")) {
+        troughcolumnheight = 65;
+	//	serial.println("line 55, columnheight");
     } else {
-        troughcolumnheight = preferences.getDouble("troughcolumnheight", 69);
+        troughcolumnheight = preferences.getDouble("columnheight", 68);
     }
 
-	 if (!preferences.isKey("troughlevelminimumcm")) {
-        troughlevelminimumcm = 29;
+	 if (!preferences.isKey("minimumcm")) {
+        troughlevelminimumcm = 25;
     } else {
-        troughlevelminimumcm = preferences.getDouble("troughlevelminimumcm", 29);
+        troughlevelminimumcm = preferences.getDouble("minimumcm", 28);
     }
-    if (!preferences.isKey("troughlevelmaximumcm")) {
-        troughlevelmaximumcm = 39;
+    if (!preferences.isKey("maximumcm")) {
+        troughlevelmaximumcm = 35;
     } else {
-        troughlevelmaximumcm = preferences.getDouble("troughlevelmaximumcm", 39);
+        troughlevelmaximumcm = preferences.getDouble("maximumcm", 38);
     }
    
 
