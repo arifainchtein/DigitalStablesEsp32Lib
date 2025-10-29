@@ -70,11 +70,11 @@ struct DigitalStablesConfigData{
 #ifndef DIGITALSTABLESDATA_H
 #define DIGITALSTABLESDATA_H
 struct DigitalStablesData{
-	char devicename[16];
+	char devicename[12];
 	char deviceshortname[5];
 	char groupidentifier[8];
-	char sensor1name[10];
-	char sensor2name[10];
+	char sensor1name[8];
+	char sensor2name[8];
 	uint8_t serialnumberarray[8];
 	uint8_t sentbyarray[8];
 	uint8_t checksum;
@@ -120,7 +120,6 @@ struct DigitalStablesData{
 
  	float qfactor1=.35;
 	float qfactor2=.82;
-	long secondsSinceLastPulse;
 	bool digitalStablesUpload;
 	long dsLastUpload;
 	float latitude;

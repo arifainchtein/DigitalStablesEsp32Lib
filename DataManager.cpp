@@ -820,7 +820,7 @@ void DataManager::generateDigitalStablesData(DigitalStablesData &digitalStablesD
   json["operatingStatus"] = digitalStablesData.operatingStatus;
   //  json["sleepPingMinutes"] = digitalStablesData.sleepPingMinutes;
   json["digitalStablesUpload"] = digitalStablesData.digitalStablesUpload;
-  json["secondsSinceLastPulse"] = digitalStablesData.secondsSinceLastPulse;
+ // json["secondsSinceLastPulse"] = digitalStablesData.secondsSinceLastPulse;
   json["currentFunctionValue"] = digitalStablesData.currentFunctionValue;
   json["outdoortemperature"] = digitalStablesData.outdoortemperature;
   json["outdoorhumidity"] = digitalStablesData.outdoorhumidity;

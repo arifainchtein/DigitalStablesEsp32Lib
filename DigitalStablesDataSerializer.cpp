@@ -119,9 +119,7 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     serial.print(F("#"));
     serial.print(digitalStablesData.digitalStablesUpload);
     serial.print(F("#"));
-    serial.print(digitalStablesData.secondsSinceLastPulse);
-    serial.print(F("#"));
-
+  
     serial.print(digitalStablesData.checksum);
     serial.print(F("#"));
     serial.print(digitalStablesData.loraActive);
