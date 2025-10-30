@@ -6,7 +6,7 @@
 #include <GloriaTankFlowPumpSerializer.h>
 #include <DigitalStablesDataSerializer.h>
 #include <SeedlingMonitorDataSerializer.h>
-
+#include "ChinampaData.h"
 #include <GloriaTankFlowPumpData.h>
 #include <LangleyData.h>
 #include <DaffodilData.h>
@@ -47,7 +47,8 @@ public:
   void clearAllDSDData() ;
   void printDigitalStablesData(const DigitalStablesData& data);
   void printSeedlingStoreData(const SeedlingMonitorData& data);
-  
+  void printChinampaData(const ChinampaData& data);
+
   void exportDSDCSV() ;
   
 protected:

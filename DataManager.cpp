@@ -1,7 +1,7 @@
 #include "GloriaTankFlowPumpData.h"
 #include "RosieData.h"
 #include "PanchoTankFlowData.h"
-#include "DaffodilData.h"
+#include "ChinampaData.h"
 #include "DigitalStablesData.h"
 #include "DataManager.h"
 
@@ -487,8 +487,34 @@ void DataManager::exportDSDCSV() {
     
     file.close();
 }
+ void DataManager::printChinampaData(const ChinampaData& data) {
 
- void DataManager::printSeedlingStoreData(const SeedlingMonitorData& data) {
+    Serial.println("pumprelaystatus: " + String(data.pumprelaystatus));
+    Serial.println("fishtankoutflowsolenoidrelaystatus: " + String(data.fishtankoutflowsolenoidrelaystatus));
+    
+    Serial.println("minimumFishTankLevel: " + String(data.minimumFishTankLevel));
+    Serial.println("maximumFishTankLevel: " + String(data.maximumFishTankLevel));
+    Serial.println("fishTankMeasuredHeight: " + String(data.fishTankMeasuredHeight));
+    Serial.println("fishTankHeight: " + String(data.fishTankHeight));
+    
+
+    Serial.println("minimumSumpTroughLevel: " + String(data.minimumSumpTroughLevel));
+    Serial.println("maximumSumpTroughLevel: " + String(data.maximumSumpTroughLevel));
+    Serial.println("sumpTroughMeasuredHeight: " + String(data.sumpTroughMeasuredHeight));
+    Serial.println("sumpTroughHeight: " + String(data.sumpTroughHeight));
+  
+    Serial.println("fishtankoutflowflowRate: " + String(data.fishtankoutflowflowRate));
+    Serial.println("pumpflowRate: " + String(data.pumpflowRate));
+  
+     Serial.println("Temperature: " + String(data.microtemperature));
+    Serial.println("RTC Battery Voltage: " + String(data.rtcBatVolt));
+   
+    Serial.println("RSSI: " + String(data.rssi));
+    Serial.println("SNR: " + String(data.snr));
+   }
+
+void DataManager::printSeedlingStoreData(const SeedlingMonitorData& data) {
+
     Serial.println("Device Name: " + String(data.devicename));
     Serial.println("Device Short Name: " + String(data.deviceshortname));
     Serial.println("Group Identifier: " + String(data.groupidentifier));
