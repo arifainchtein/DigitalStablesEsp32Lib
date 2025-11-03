@@ -80,7 +80,8 @@ struct ChinampaData{
 	// 0 initializing device
 	// 1 Fish Tank Data Stale
 	// 2 Sump Trough Stale
-	// 3 u Temp too high
+	// 3 Fish Tank and Sump Trough Data Stale
+	// 4 u Temp too high
 	//  99 value when no alert
 
 	uint8_t alertcode;
