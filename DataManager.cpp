@@ -498,10 +498,13 @@ void DataManager::exportDSDCSV() {
     Serial.println("fishTankHeight: " + String(data.fishTankHeight));
     
 
-    Serial.println("minimumSumpTroughLevel: " + String(data.minimumSumpTroughLevel));
+    Serial.println("alertstatus: " + String(data.alertstatus));
+    Serial.println("alertcode99: " + String(data.alertcode));
+    
     Serial.println("maximumSumpTroughLevel: " + String(data.maximumSumpTroughLevel));
     Serial.println("sumpTroughMeasuredHeight: " + String(data.sumpTroughMeasuredHeight));
     Serial.println("sumpTroughHeight: " + String(data.sumpTroughHeight));
+    Serial.println("Alarm Status: " + String(data.sumpTroughHeight));
   
     Serial.println("fishtankoutflowflowRate: " + String(data.fishtankoutflowflowRate));
     Serial.println("pumpflowRate: " + String(data.pumpflowRate));
@@ -654,6 +657,17 @@ void DataManager::processDigitalStablesDataQueue()
   }
 }
 
+void DataManager::processChinampaDataQueue()
+{
+  while (chinampaCounters.itemCount > 0)
+  {
+    chinampaDataSerializer.pushToSerial(_HardSerial, chinampaQueue[chinampaCounters.front].data);
+    chinampaCounters.front = (chinampaCounters.front + 1) % MAX_QUEUE_SIZE;
+    chinampaCounters.itemCount--;
+  }
+}
+
+
 void DataManager::processSeedlingMonitorDataQueue()
 {
    if (debug){
@@ -670,6 +684,19 @@ void DataManager::processSeedlingMonitorDataQueue()
   }
 }
 
+void DataManager::enqueueChinampaData(ChinampaData data){
+   if (chinampaCounters.itemCount < MAX_QUEUE_SIZE)
+  {
+    chinampaCounters.rear = (chinampaCounters.rear + 1) % MAX_QUEUE_SIZE;
+    chinampaQueue[chinampaCounters.rear].data = data;
+    chinampaCounters.itemCount++;
+  }
+    if (debug){
+    if(debug)_HardSerial.print("after storing  chinampadata  chinampaCounters.itemCount=");
+    if(debug)_HardSerial.println(chinampaCounters.itemCount);
+
+    }
+}
 
 void DataManager::enqueueSeedlingData(SeedlingMonitorData data)
 {
@@ -755,6 +782,43 @@ void DataManager::storeDigitalStablesData(DigitalStablesData &digitalStablesData
   }
 }
 
+ void DataManager::storeChinampaData(ChinampaData &chinampaData){
+   sn = "";
+  uint8_t checksum = 0;
+  for (uint8_t i = 0; i < 8; i++)
+  {
+    sn += String(chinampaData.serialnumberarray[i], HEX);
+    checksum += static_cast<uint8_t>(chinampaData.serialnumberarray[i]);
+  }
+  checksum &= 0xFF;
+  if (debug){
+    if(debug)_HardSerial.print("adding a chinampaData  serialNumber=");
+    if(debug)_HardSerial.print(sn);
+    if(debug)_HardSerial.print(" l=");
+    if(debug)_HardSerial.print(sn.length());
+    if(debug)_HardSerial.print(" checksum=");
+    if(debug)_HardSerial.println(checksum);
+    if(debug)_HardSerial.print(" chinampaData.checksum=");
+    if(debug)_HardSerial.println(chinampaData.checksum);
+  }
+  enqueueChinampaData(chinampaData);
+  if (chinampaData.checksum == checksum && (sn.length() == 15 || sn.length() == 14))
+  {
+    if (debug)
+    {
+      DynamicJsonDocument json(1800);
+      generateChinampaData(chinampaData, json);
+      serializeJsonPretty(json, _HardSerial);
+  }
+  else
+  {
+    if (debug)
+      if(debug)_HardSerial.println(" chinampaData rejected pulse serialnumne=");
+    if (debug)
+      if(debug)_HardSerial.println(sn);
+  }
+ }
+ }
 
 void DataManager::storeSeedlingMonitorData(SeedlingMonitorData &seedlingMonitorData)
 {
@@ -779,9 +843,6 @@ void DataManager::storeSeedlingMonitorData(SeedlingMonitorData &seedlingMonitorD
   enqueueSeedlingData(seedlingMonitorData);
   if (seedlingMonitorData.checksum == checksum && (sn.length() == 15 || sn.length() == 14))
   {
-
-    
-
     if (debug)
     {
       DynamicJsonDocument json(1800);
@@ -790,7 +851,6 @@ void DataManager::storeSeedlingMonitorData(SeedlingMonitorData &seedlingMonitorD
       if(debug)_HardSerial.print(" number of devices=");
       if(debug)_HardSerial.println(completeObject.size());
     }
-  }
   else
   {
     if (debug)
@@ -799,7 +859,48 @@ void DataManager::storeSeedlingMonitorData(SeedlingMonitorData &seedlingMonitorD
       if(debug)_HardSerial.println(sn);
   }
 }
+}
 
+void DataManager::generateChinampaData(ChinampaData &chinampaData, DynamicJsonDocument &json)
+{
+
+  json["devicename"] = chinampaData.devicename;
+  json["deviceshortname"] = chinampaData.deviceshortname;
+  json["secondsTime"] = chinampaData.secondsTime;
+  json["dataSamplingSec"] = chinampaData.dataSamplingSec;
+   json["rtcBatVolt"] = chinampaData.rtcBatVolt;
+  json["operatingStatus"] = chinampaData.operatingStatus;
+  json["digitalStablesUpload"] = chinampaData.digitalStablesUpload;
+  json["secondsSinceLastPulse"] = chinampaData.secondsSinceLastPulse;
+  
+  json["pumprelaystatus"]=chinampaData.pumprelaystatus;
+  
+    json["fishtankoutflowsolenoidrelaystatus"]=chinampaData.fishtankoutflowsolenoidrelaystatus;
+  
+    json["minimumFishTankLevel"]=chinampaData.minimumFishTankLevel;
+     json["maximumFishTankLevel"]=chinampaData.maximumFishTankLevel;
+    json["fishTankMeasuredHeight"]=chinampaData.fishTankMeasuredHeight;
+   json["fishTankHeight"]=chinampaData.fishTankHeight;
+    json["minimumSumpTroughLevel"]=chinampaData.minimumSumpTroughLevel;
+    json["sumpTroughMeasuredHeight"]=chinampaData.sumpTroughMeasuredHeight;
+    json["sumpTroughHeight"]=chinampaData.sumpTroughHeight;
+    json["sumpTroughStaleDataSeconds"]=chinampaData.sumpTroughStaleDataSeconds;
+    json["fishTankStaleDataSeconds"]=chinampaData.fishTankStaleDataSeconds;
+    json["alertstatus"]=chinampaData.alertstatus;
+    json["pumpflowRate"]=chinampaData.pumpflowRate;
+    json["microtemperature"]=chinampaData.microtemperature;
+  
+  //  json["soft_ap_ssid"] = sn;
+  json["serialnumber"] = sn;
+  json["sentBy"] = sn;
+  json["internetAvailable"] = chinampaData.internetAvailable;
+  json["ipAddress"] = chinampaData.ipAddress;
+  json["totp"] = chinampaData.totpcode;
+  json["deviceTypeId"] = chinampaData.deviceTypeId;
+  json["dsLastUpload"] = chinampaData.dsLastUpload;
+  json["latitude"] = chinampaData.latitude;
+  json["longitude"] = chinampaData.longitude;
+}
 
 void DataManager::generateSeedlingMonitorData(SeedlingMonitorData &seedlingMonitorData, DynamicJsonDocument &json)
 {

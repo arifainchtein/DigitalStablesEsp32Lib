@@ -8,7 +8,7 @@
 // #include <DaffodilData.h>
 //#include <RosieData.h>
 #include <DigitalStablesData.h>
-
+#include <atomic>
 
 class DaffodilWifiManager : public WifiManager{
 
@@ -28,6 +28,7 @@ public:
 
 private:
 	String okString="Ok";
+    std::atomic<bool> _isValid{true};
 
 };
 #endif /* LIBRARIES_DIGITALSTABLES_DAFFODILWIFIMANAGER_H_ */

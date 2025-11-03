@@ -17,7 +17,7 @@ WifiManager(serial ,fs,  t,e) , digitalStablesData(tf),digitalStablesConfigData(
  }
 
 void DaffodilWifiManager::start(){
-
+ _isValid = true;
    ssid = secretManager.getSSID();
     password = secretManager.getWifiPassword();;
     soft_ap_ssid = secretManager.getSoftAPSSID();
@@ -159,12 +159,21 @@ asyncWebServer.on("/assets/fonts/Roboto-Regular.woff2", HTTP_GET, [this](AsyncWe
   
 
 asyncWebServer.on("/DaffodilServlet", HTTP_POST, [this](AsyncWebServerRequest *request) {
-    int paramsNr = request->params();
-    this->_HardSerial.println(paramsNr);
-   
-    const AsyncWebParameter* p = request->getParam(1);
+    // int paramsNr = request->params();
+    // this->_HardSerial.println(paramsNr);
+ String formName="";
+     if (request->hasParam("formName", true)) {
+         formName = request->getParam("formName", true)->value();
+        this->_HardSerial.println("POST formName: " + formName);
+    } else {
+        request->send(400, "text/plain", "Missing formName in POST data");
+    }
+    
+  
+    
+      const AsyncWebParameter* p ;
     //String formName =p->name;
-    String formName =p->value();    
+        
     this->_HardSerial.print("in post, formName=");
     this->_HardSerial.println(formName);
      AsyncResponseStream *response = request->beginResponseStream("text/plain");
@@ -240,6 +249,8 @@ asyncWebServer.on("/DaffodilServlet", HTTP_POST, [this](AsyncWebServerRequest *r
        serializeJson(json, *response);
         request->send(response);
     }else if(formName=="SetGPS"){
+       String formName = request->getParam("formName")->value();
+
       p = request->getParam(1);
       float lat =p->value().toFloat();  
 
@@ -253,28 +264,70 @@ asyncWebServer.on("/DaffodilServlet", HTTP_POST, [this](AsyncWebServerRequest *r
         serializeJson(json, *response);
         request->send(response);
 
+    }else if(formName=="SetScepticRange"){
+         
+      float height =request->getParam("height",true)->value().toFloat();  
+      float max =request->getParam("max",true)->value().toFloat();  
+      float min =request->getParam("min",true)->value().toFloat();  
+            
+      digitalStablesData.troughlevelminimumcm=min;
+      digitalStablesData.troughlevelmaximumcm=max;
+      digitalStablesData.maximumScepticHeight=height;
+       secretManager.saveTroughParameters(digitalStablesData.maximumScepticHeight, digitalStablesData.troughlevelminimumcm, digitalStablesData.troughlevelmaximumcm);
+
+        DynamicJsonDocument json(1800);
+       this->generateWebData(json,serialNumber);
+        serializeJson(json, *response);
+        request->send(response);
     }
 });
 
 
 asyncWebServer.on("/DaffodilServlet", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    int paramsNr = request->params();
-    this->_HardSerial.println(paramsNr);
-    const AsyncWebParameter* p = request->getParam(1);
-  
-    //String formName =p->name;
-    String formName =p->value();    
-    this->_HardSerial.print("in servet2, formName=");
-    this->_HardSerial.println(formName);
+ if (!request->hasParam("formName")) {
+        request->send(400, "text/plain", "Missing formName parameter");
+        return;
+    }
+    
+    // Get the formName parameter by name (safer than by index)
+    String formName = request->getParam("formName")->value();
+    this->_HardSerial.println("formName: " + formName);
     AsyncResponseStream *response = request->beginResponseStream("text/plain");
     if(formName=="GetWebData"){
-       DynamicJsonDocument json(1800);
+      DynamicJsonDocument json(1800);
       this->generateWebData(json, serialNumber);
-        serializeJson(json, *response);
-        request->send(response);
+      serializeJson(json, *response);
+      request->send(response);
 	  }
+    //request->send(200, "text/html", formName);    
+});
+  
+// asyncWebServer.on("/DaffodilServlet", HTTP_GET, [this](AsyncWebServerRequest *request) {
+
+//      if (!_isValid) {
+//         request->send(500, "text/plain", "Server instance no longer valid");
+//         return;
+//     }
+
+//   this->_HardSerial.println("lin 261 numberof param=");
+//     int paramsNr = request->params();
+//     this->_HardSerial.println("lin 263 numberof param=");
+//    this->  _HardSerial.println( paramsNr);
+//     const AsyncWebParameter* p = request->getParam(1);
+  
+//     //String formName =p->name;
+//     String formName =p->value();    
+//    this-> _HardSerial.print("in servet2, formName=");
+//    this-> _HardSerial.println(formName);
+//     AsyncResponseStream *response = request->beginResponseStream("text/plain");
+//     if(formName=="GetWebData"){
+//        DynamicJsonDocument json(1800);
+//       this->generateWebData(json, serialNumber);
+//         serializeJson(json, *response);
+//         request->send(response);
+// 	  }
       
-  });
+//   });
 
 
 
@@ -398,4 +451,7 @@ int DaffodilWifiManager::uploadDataToDigitalStables(){
 }
 
 
-DaffodilWifiManager::~DaffodilWifiManager() {}
+DaffodilWifiManager::~DaffodilWifiManager() {
+    _isValid = false;
+    asyncWebServer.end();
+}

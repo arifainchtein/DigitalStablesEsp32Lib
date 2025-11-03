@@ -11,7 +11,7 @@
 #include <LangleyData.h>
 #include <DaffodilData.h>
 #include <TimeUtils.h>
-
+#include <ChinampaDataSerializer.h>
 #include <ArduinoJson.h>
 #include <DigitalStablesData.h>
 #include <SeedlingMonitoringData.h>
@@ -28,13 +28,17 @@ public:
   void storeGloria(GloriaTankFlowPumpData &p);
   void storeDigitalStablesData(DigitalStablesData &p);
   void storeSeedlingMonitorData(SeedlingMonitorData &p);
-  
+  void storeChinampaData(ChinampaData &p);
+
   void generateGloriaTankFlowPumpWebData(GloriaTankFlowPumpData &r, DynamicJsonDocument &json);
   void generateDigitalStablesData(DigitalStablesData &p, DynamicJsonDocument &json);
   void generateSeedlingMonitorData(SeedlingMonitorData &p, DynamicJsonDocument &json);
+  void generateChinampaData(ChinampaData &p, DynamicJsonDocument &json);
   void processGloriaQueue();
   void processDigitalStablesDataQueue();
   void processSeedlingMonitorDataQueue();
+  void processChinampaDataQueue();
+
   int getDSDStoredCount();
   int getSeedlingStoredCount();
   bool readAllDSDData(DigitalStablesData* dataArray, int maxSize, int& actualSize);
@@ -84,6 +88,8 @@ struct SeedlingIndex {
   GloriaTankFlowPumpSerializer gloriaTankFlowPumpSerializer;
   DigitalStablesDataSerializer digitalStablesDataSerializer;
   SeedlingMonitorDataSerializer seedlingMonitorDataSerializer;
+  ChinampaDataSerializer chinampaDataSerializer;
+  
   ;
   // Queue for DigitalStablesData
   struct DSQueueElement
@@ -101,9 +107,15 @@ struct SeedlingIndex {
     GloriaTankFlowPumpData data;
   };
 
+    struct ChinampaQueueElement
+  {
+    ChinampaData data;
+  };
+
   DSQueueElement dsQueue[MAX_QUEUE_SIZE];
   GloriaQueueElement gloriaQueue[MAX_QUEUE_SIZE];
   SeedQueueElement seedQueue[MAX_QUEUE_SIZE];
+  ChinampaQueueElement chinampaQueue[MAX_QUEUE_SIZE];
 
   struct QueueCounters
   {
@@ -115,10 +127,12 @@ struct SeedlingIndex {
   QueueCounters dsCounters;
   QueueCounters gloriaCounters;
   QueueCounters seedCounters;
-
+  QueueCounters chinampaCounters;
 
 
   void enqueueSeedlingData(SeedlingMonitorData data);
+  void enqueueChinampaData(ChinampaData data);
+  
   void enqueueDSData(DigitalStablesData data);
   void enqueueGloriaData(GloriaTankFlowPumpData data);
   void initializeDSDFile();
