@@ -72,6 +72,27 @@ void Esp32SecretManager::getTroughParameters( double& troughcolumnheight, double
     preferences.end();
 }
 
+void Esp32SecretManager::getChinampaParameters( double& fishq) {
+    preferences.begin("ChinampaP", true);
+   
+    
+    // Check if latitude and longitude are available, if not set default values  
+    if (!preferences.isKey("fishq")) {
+        fishq = 67;
+	//	serial.println("line 55, columnheight");
+    } else {
+        fishq = preferences.getDouble("fishq", 67);
+    }
+    preferences.end();
+}
+
+void Esp32SecretManager::saveChinampaParameters(double& fishq){
+	
+	preferences.begin("ChinampaP", false);
+	preferences.putDouble("fishq", fishq);
+	preferences.end();
+}
+
 void Esp32SecretManager::saveSecret(String secret, int numberDigits, int periodSeconds ){
 
 	preferences.begin("SecretManager", false);

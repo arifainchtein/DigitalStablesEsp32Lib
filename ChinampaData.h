@@ -81,13 +81,17 @@ struct ChinampaData{
 	// 1 Fish Tank Data Stale
 	// 2 Sump Trough Stale
 	// 3 Fish Tank and Sump Trough Data Stale
-	// 4 u Temp too high
+	// 4 Fish Solenoid is open and flow is less than 2
+	// 10 u Temp too high
 	//  99 value when no alert
 
 	uint8_t alertcode;
     //
     // flow  sensor
     float fishtankoutflowflowRate=0.0;
+	float fishtankoutPulsePerMinute=0.0;
+	float fishtankoutQFactor=63;
+
 	float pumpflowRate=0.0;
 
 	uint8_t operatingStatus=0;
