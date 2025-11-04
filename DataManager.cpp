@@ -489,8 +489,26 @@ void DataManager::exportDSDCSV() {
 }
  void DataManager::printChinampaData(const ChinampaData& data) {
 
-    Serial.println("pumprelaystatus: " + String(data.pumprelaystatus));
-    Serial.println("fishtankoutflowsolenoidrelaystatus: " + String(data.fishtankoutflowsolenoidrelaystatus));
+   Serial.println("Device Name: " + String(data.devicename));
+    Serial.println("Device Short Name: " + String(data.deviceshortname));
+    Serial.println("Group Identifier: " + String(data.groupidentifier));
+   
+    Serial.print("Serial Number: ");
+    for(int i = 0; i < 8; i++) {
+        Serial.print(data.serialnumberarray[i], HEX);
+        Serial.print(" ");
+    }
+    Serial.println();
+    
+    Serial.println("Device Type ID: " + String(data.deviceTypeId));
+    Serial.println("Seconds Time: " + String(data.secondsTime));
+    Serial.println("Data Sampling Sec: " + String(data.dataSamplingSec));
+    
+    Serial.println("RTC Battery Voltage: " + String(data.rtcBatVolt));
+    Serial.println("Operating Status: " + String(data.operatingStatus));
+
+    Serial.println("Pump Relay Status: " + String(data.pumprelaystatus));
+    Serial.println("Fish Tank Outflow Solenoid Relay Status: " + String(data.fishtankoutflowsolenoidrelaystatus));
     
     Serial.println("minimumFishTankLevel: " + String(data.minimumFishTankLevel));
     Serial.println("maximumFishTankLevel: " + String(data.maximumFishTankLevel));
@@ -509,7 +527,7 @@ void DataManager::exportDSDCSV() {
     Serial.println("fishtankoutflowflowRate: " + String(data.fishtankoutflowflowRate));
     Serial.println("pumpflowRate: " + String(data.pumpflowRate));
   
-     Serial.println("Temperature: " + String(data.microtemperature));
+     Serial.println("Microcontroller Temperature: " + String(data.microtemperature));
     Serial.println("RTC Battery Voltage: " + String(data.rtcBatVolt));
    
     Serial.println("RSSI: " + String(data.rssi));
