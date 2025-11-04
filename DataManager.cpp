@@ -499,7 +499,7 @@ void DataManager::exportDSDCSV() {
     
 
     Serial.println("alertstatus: " + String(data.alertstatus));
-    Serial.println("alertcode99: " + String(data.alertcode));
+    Serial.println("alertcode: " + String(data.alertcode));
     
     Serial.println("maximumSumpTroughLevel: " + String(data.maximumSumpTroughLevel));
     Serial.println("sumpTroughMeasuredHeight: " + String(data.sumpTroughMeasuredHeight));
