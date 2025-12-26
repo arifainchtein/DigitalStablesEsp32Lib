@@ -303,7 +303,6 @@ void ChinampaWifiManager::generateWebData(DynamicJsonDocument& json, String sent
     json["rtcBatVolt"] = chinampaData.rtcBatVolt;
     json["opMode"] = chinampaData.opMode;
     json["rtcBatVolt"] = chinampaData.rtcBatVolt;        
-    json["operatingStatus"] = chinampaData.operatingStatus;
     json["digitalStablesUpload"] = chinampaData.digitalStablesUpload;
     json["secondsSinceLastPulse"] = chinampaData.secondsSinceLastPulse;
     json["pumprelaystatus"] = chinampaData.pumprelaystatus;

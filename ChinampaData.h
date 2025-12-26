@@ -82,6 +82,7 @@ struct ChinampaData{
 	// 2 Sump Trough Stale
 	// 3 Fish Tank and Sump Trough Data Stale
 	// 4 Fish Solenoid is open and flow is less than 2
+	// 5 Sump too low
 	// 10 u Temp too high
 	//  99 value when no alert
 
@@ -94,7 +95,6 @@ struct ChinampaData{
 
 	float pumpflowRate=0.0;
 
-	uint8_t operatingStatus=0;
 	int secondsSinceLastPulse=5;
 	bool digitalStablesUpload=false;
 	long dsLastUpload=0;
@@ -102,5 +102,8 @@ struct ChinampaData{
 	float latitude=-37.17139;
 	float longitude=144.48861;
 	long totpcode;
+
+	 uint8_t operatingStatus=0;
+
 };
 #endif

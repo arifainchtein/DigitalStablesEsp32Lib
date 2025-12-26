@@ -505,8 +505,7 @@ void DataManager::exportDSDCSV() {
     Serial.println("Data Sampling Sec: " + String(data.dataSamplingSec));
     
     Serial.println("RTC Battery Voltage: " + String(data.rtcBatVolt));
-    Serial.println("Operating Status: " + String(data.operatingStatus));
-
+    
     Serial.println("Pump Relay Status: " + String(data.pumprelaystatus));
     Serial.println("Fish Tank Outflow Solenoid Relay Status: " + String(data.fishtankoutflowsolenoidrelaystatus));
     
@@ -887,7 +886,6 @@ void DataManager::generateChinampaData(ChinampaData &chinampaData, DynamicJsonDo
   json["secondsTime"] = chinampaData.secondsTime;
   json["dataSamplingSec"] = chinampaData.dataSamplingSec;
    json["rtcBatVolt"] = chinampaData.rtcBatVolt;
-  json["operatingStatus"] = chinampaData.operatingStatus;
   json["digitalStablesUpload"] = chinampaData.digitalStablesUpload;
   json["secondsSinceLastPulse"] = chinampaData.secondsSinceLastPulse;
   

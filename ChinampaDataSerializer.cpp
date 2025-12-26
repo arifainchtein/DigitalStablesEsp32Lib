@@ -57,6 +57,14 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
     serial.print(chinampaData.fishtankoutflowsolenoidrelaystatus);
     serial.print(F("#"));
 
+    
+    serial.print(chinampaData.fishtankoutflowflowRate);
+    serial.print(F("#"));
+
+     serial.print(chinampaData.fishtankoutQFactor);
+    serial.print(F("#"));
+
+
     serial.print(chinampaData.minimumFishTankLevel);
     serial.print(F("#"));
     serial.print(chinampaData.maximumFishTankLevel);
@@ -68,6 +76,8 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
      serial.print(F("#"));
     serial.print(chinampaData.minimumSumpTroughLevel);
      serial.print(F("#"));
+      serial.print(chinampaData.maximumSumpTroughLevel);
+     serial.print(F("#"));
     serial.print(chinampaData.sumpTroughMeasuredHeight);
      serial.print(F("#"));
     serial.print(chinampaData.sumpTroughHeight);
@@ -77,6 +87,8 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
     serial.print(chinampaData.fishTankStaleDataSeconds);
      serial.print(F("#"));
     serial.print(chinampaData.alertstatus);
+     serial.print(F("#"));
+      serial.print(chinampaData.alertcode);
      serial.print(F("#"));
     serial.print(chinampaData.pumpflowRate);
      serial.print(F("#"));
@@ -94,8 +106,6 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
     serial.print(chinampaData.snr);
     serial.print(F("#"));
 
-    serial.print(chinampaData.operatingStatus);
-    serial.print(F("#"));
     serial.print(chinampaData.digitalStablesUpload);
     serial.print(F("#"));
     serial.print(chinampaData.secondsSinceLastPulse);
