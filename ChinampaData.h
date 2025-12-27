@@ -59,21 +59,23 @@ struct ChinampaData{
 	bool pumprelaystatus;
     bool fishtankoutflowsolenoidrelaystatus;
 
-    // fishtank height
+    // fishtank 
 	float minimumFishTankLevel=60.0;
 	float maximumFishTankLevel=80.0;
     float fishTankMeasuredHeight=0.0;
 	float fishTankHeight=0.0;
-
-	// sumptrough height
-		float minimumSumpTroughLevel=60.0;
-		float maximumSumpTroughLevel=80.0;
-		float sumpTroughMeasuredHeight=0.0;
-		float sumpTroughHeight=0.0;
-
-	int sumpTroughStaleDataSeconds=90;
+	int secondsSinceLastFishTankData=0;
 	int fishTankStaleDataSeconds=90;
-	
+
+	// sumptrough 
+	float minimumSumpTroughLevel=60.0;
+	float maximumSumpTroughLevel=80.0;
+	float sumpTroughMeasuredHeight=0.0;
+	float sumpTroughHeight=0.0;
+	long fishtankSecondsTime=0L;
+	int sumpTroughStaleDataSeconds=90;
+	long sumpTroughSecondsTime=0L;
+	int secondsSinceLastSumpTroughData=0;
 	bool alertstatus;
 	//
 	// alert codes:
