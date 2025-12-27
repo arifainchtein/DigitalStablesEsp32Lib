@@ -45,6 +45,8 @@ struct ChinampaData{
 	long secondsTime=0L;
 	uint8_t dataSamplingSec=5;
 	uint8_t microtemperature=0;
+	uint8_t microtemperatureMaximum=75;
+	
 	float rtcBatVolt=0.0;
 	uint8_t opMode=0;
 	float rssi=0.0;
@@ -66,7 +68,8 @@ struct ChinampaData{
 	float fishTankHeight=0.0;
 	int secondsSinceLastFishTankData=0;
 	int fishTankStaleDataSeconds=90;
-
+	float previousFishTankMeasuredHeight=-99;
+	
 	// sumptrough 
 	float minimumSumpTroughLevel=60.0;
 	float maximumSumpTroughLevel=80.0;
@@ -76,6 +79,7 @@ struct ChinampaData{
 	int sumpTroughStaleDataSeconds=90;
 	long sumpTroughSecondsTime=0L;
 	int secondsSinceLastSumpTroughData=0;
+	float previousSumpTroughMeasuredHeight=-99;
 	bool alertstatus;
 	//
 	// alert codes:
@@ -85,10 +89,24 @@ struct ChinampaData{
 	// 3 Fish Tank and Sump Trough Data Stale
 	// 4 Fish Solenoid is open and flow is less than 2
 	// 5 Sump too low
-	// 10 u Temp too high
+	
 	//  99 value when no alert
 
 	uint8_t alertcode;
+	//
+	// positions
+	// 0 = uTemp Too High
+	// 1 = fish Tank Height suden change
+	// 2 = Sump Trough suden change
+	// 3 = Fish Tank Water Temperature suden Change
+	// 4 = Sump Trough Water Temperature suden Change
+	// 5 = TDS sudden change
+	// 6 = EC sudden change
+	// 7 = DO sudden change
+	// 8 = PH sudden change
+	// 9 = ORP sudden change
+
+	bool sensorstatus[12];
     //
     // flow  sensor
     float fishtankoutflowflowRate=0.0;
