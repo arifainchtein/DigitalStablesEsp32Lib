@@ -79,9 +79,6 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
     serial.print(F("#"));
     serial.print(chinampaData.fishTankMeasuredHeight);
     serial.print(F("#"));
-    serial.print(chinampaData.secondsSinceLastFishTankData);
-
-    serial.print(F("#"));
     serial.print(chinampaData.fishTankHeight);
      serial.print(F("#"));
     serial.print(chinampaData.minimumSumpTroughLevel);
@@ -96,35 +93,17 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
      serial.print(F("#"));
     serial.print(chinampaData.fishTankStaleDataSeconds);
     serial.print(F("#"));
-    serial.print(chinampaData.previousFishTankMeasuredHeight);
-    
-    serial.print(F("#"));
-    serial.print(chinampaData.previousFishTankMeasuredHeight);
-    serial.print(F("#"));
-    serial.print(chinampaData.secondsSinceLastSumpTroughData);
-    serial.print(F("#"));
-    serial.print(chinampaData.previousSumpTroughMeasuredHeight);
-    
-     serial.print(F("#"));
     serial.print(chinampaData.alertstatus);
      serial.print(F("#"));
       serial.print(chinampaData.alertcode);
 
 
-for (int i = 0; i < sizeof(chinampaData.sensorstatus); i++)
-    {
-        if (chinampaData.sensorstatus[i] != NULL){
-            serial.print(chinampaData.sensorstatus[i]);
-            serial.print(F("#"));
-        }   
-    }
+
     serial.print(F("#"));
     serial.print(chinampaData.pumpflowRate);
     serial.print(F("#"));
     serial.print(chinampaData.microtemperature);
-    serial.print(F("#"));
-    serial.print(chinampaData.microtemperatureMaximum);
-
+    
     serial.print(F("#"));
     serial.print(chinampaData.secondsTime);
     
@@ -150,6 +129,31 @@ for (int i = 0; i < sizeof(chinampaData.sensorstatus); i++)
     serial.print(F("#"));
     serial.print(chinampaData.totpcode);
     serial.println(F("#"));
+     serial.print(F("#"));
+    serial.print(chinampaData.secondsSinceLastFishTankData);
+
+    serial.print(chinampaData.previousFishTankMeasuredHeight);
+    ;
+    serial.print(F("#"));
+    serial.print(chinampaData.secondsSinceLastSumpTroughData);
+    serial.print(F("#"));
+    serial.print(chinampaData.previousSumpTroughMeasuredHeight);
+     serial.print(F("#"));
+    for (int i = 0; i < sizeof(chinampaData.sensorstatus); i++)
+    {
+        if (chinampaData.sensorstatus[i] != NULL){
+            serial.print(chinampaData.sensorstatus[i]);
+            serial.print(F("#"));
+        }   
+    }
+
+    serial.print(F("#"));
+    serial.print(chinampaData.microtemperatureMaximum);
+    serial.print(F("#"));
+    serial.print(chinampaData.outdoortemperature);
+    serial.print(F("#"));
+    serial.print(chinampaData.outdoorhumidity);
+
 }
 
 ChinampaDataSerializer::~ChinampaDataSerializer() {}

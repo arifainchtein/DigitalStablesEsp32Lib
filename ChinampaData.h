@@ -122,7 +122,8 @@ struct ChinampaData{
 	float latitude=-37.17139;
 	float longitude=144.48861;
 	long totpcode;
-
+	float outdoortemperature=0.0;
+	float outdoorhumidity=0.0;
 	 uint8_t operatingStatus=0;
 
 };
