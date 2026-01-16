@@ -124,7 +124,6 @@ struct ChinampaData{
 	long totpcode;
 	float outdoortemperature=0.0;
 	float outdoorhumidity=0.0;
-	 uint8_t operatingStatus=0;
-
+	 
 };
 #endif
