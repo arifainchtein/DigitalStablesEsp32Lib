@@ -32,21 +32,12 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
             serial.print(chinampaData.serialnumberarray[i], HEX);
     }
     serial.print(F("#"));
-    for (int i = 0; i < sizeof(chinampaData.sentbyarray); i++)
-    {
-        if (chinampaData.sentbyarray[i] != NULL)
-            serial.print(chinampaData.sentbyarray[i], HEX);
-    }
-    serial.print(F("#"));
 
     for (int i = 0; i < sizeof(chinampaData.groupidentifier); i++)
     {
         if (chinampaData.groupidentifier[i] != NULL)
             serial.print(chinampaData.groupidentifier[i]);
     }
-    serial.print(F("#"));
-
-    serial.print(chinampaData.secondsTime);
     serial.print(F("#"));
     serial.print(chinampaData.dataSamplingSec);
     serial.print(F("#"));
@@ -129,9 +120,9 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
     serial.print(F("#"));
     serial.print(chinampaData.totpcode);
     serial.println(F("#"));
-     serial.print(F("#"));
     serial.print(chinampaData.secondsSinceLastFishTankData);
-
+    serial.print(F("#"));
+    
     serial.print(chinampaData.previousFishTankMeasuredHeight);
     ;
     serial.print(F("#"));
@@ -143,8 +134,8 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
     {
         if (chinampaData.sensorstatus[i] != NULL){
             serial.print(chinampaData.sensorstatus[i]);
-            serial.print(F("#"));
         }   
+         serial.print(F("#"));
     }
 
     serial.print(F("#"));
