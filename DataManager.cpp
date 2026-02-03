@@ -41,20 +41,38 @@ void DataManager::initializeSeedlingMonitorFile() {
   file.close();
 }
 
-
 void DataManager::initializeDSDFile() { 
   if (_fs.exists(DSD_DATA_FILE)) {
-   _HardSerial.println("in initializeDSDFile,returning because file exists");
+  if(debug) _HardSerial.println("in initializeDSDFile,returning because file exists");
     return;
   }
 
   File file = _fs.open(DSD_DATA_FILE, "w");
   if (!file) {
-      _HardSerial.println("in init,Failed to initialize data file");
+     if(debug) _HardSerial.println("in init,Failed to initialize data file");
       return;
   }
   // Pre-allocate space for MAXIMUM_STORED_RECORDS
   DigitalStablesData dummy;
+  for (int i = 0; i < MAXIMUM_STORED_RECORDS; i++) {
+ //     file.write((uint8_t*)&dummy, sizeof(DigitalStablesData));
+  }
+  file.close();
+}
+
+void DataManager::initializeChinampaFile() { 
+  if (_fs.exists(CHINAMPA_DATA_FILE)) {
+   if(debug)_HardSerial.println("in initializeChinampaFile,returning because file exists");
+    return;
+  }
+
+  File file = _fs.open(DSD_DATA_FILE, "w");
+  if (!file) {
+      if(debug)_HardSerial.println("in init,Failed to initialize data file");
+      return;
+  }
+  // Pre-allocate space for MAXIMUM_STORED_RECORDS
+  ChinampaData dummy;
   for (int i = 0; i < MAXIMUM_STORED_RECORDS; i++) {
  //     file.write((uint8_t*)&dummy, sizeof(DigitalStablesData));
   }
@@ -130,6 +148,7 @@ void DataManager::updateSeedlingStoredCount(int count) {
     file.println(count);
     file.close();
 }
+
 
 // int DataManager::storeSeedlingMonitorData(SeedlingMonitorData& data) {
 //   if (!_initialized){
@@ -654,6 +673,97 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     Serial.println("Min Efficiency WiFi: " + String(data.minimumEfficiencyForWifi));
 }
 
+
+
+void DataManager::enqueueChinampaData(ChinampaData data){
+   if (chinampaCounters.itemCount < MAX_QUEUE_SIZE)
+  {
+    chinampaCounters.rear = (chinampaCounters.rear + 1) % MAX_QUEUE_SIZE;
+    chinampaQueue[chinampaCounters.rear].data = data;
+    chinampaCounters.itemCount++;
+  }
+    if (debug){
+    if(debug)_HardSerial.print("after storing  chinampadata  chinampaCounters.itemCount=");
+    if(debug)_HardSerial.println(chinampaCounters.itemCount);
+
+    }
+}
+
+void DataManager::processChinampaDataQueue()
+{
+  while (chinampaCounters.itemCount > 0)
+  {
+    chinampaDataSerializer.pushToSerial(_HardSerial, chinampaQueue[chinampaCounters.front].data);
+    chinampaCounters.front = (chinampaCounters.front + 1) % MAX_QUEUE_SIZE;
+    chinampaCounters.itemCount--;
+  }
+
+  // now clear
+  chinampaCounters.front=0;
+  chinampaCounters.rear = -1;
+  chinampaCounters.itemCount = 0;
+
+}
+
+void DataManager::clearAllChinampaData() {
+     if (!_initialized) return;
+    
+    if(_fs.remove(CHINAMPA_DATA_FILE)) {
+        updateChinampaStoredCount(0);
+        if(debug)_HardSerial.println("All data cleared");
+    } else {
+        if(debug)_HardSerial.println("Error clearing data");
+    }
+
+
+}
+
+void DataManager::updateChinampaStoredCount(int count) {
+    if (!_initialized) return;
+    File file = _fs.open(CHINAMPA_COUNT_FILE, "w");
+    file.println(count);
+    file.close();
+}
+
+ void DataManager::storeChinampaData(ChinampaData &chinampaData){
+   sn = "";
+  uint8_t checksum = 0;
+  for (uint8_t i = 0; i < 8; i++)
+  {
+    sn += String(chinampaData.serialnumberarray[i], HEX);
+    checksum += static_cast<uint8_t>(chinampaData.serialnumberarray[i]);
+  }
+  checksum &= 0xFF;
+  if (debug){
+    if(debug)_HardSerial.print("adding a chinampaData  serialNumber=");
+    if(debug)_HardSerial.print(sn);
+    if(debug)_HardSerial.print(" l=");
+    if(debug)_HardSerial.print(sn.length());
+    if(debug)_HardSerial.print(" checksum=");
+    if(debug)_HardSerial.println(checksum);
+    if(debug)_HardSerial.print(" chinampaData.checksum=");
+    if(debug)_HardSerial.println(chinampaData.checksum);
+  }
+  enqueueChinampaData(chinampaData);
+  if (chinampaData.checksum == checksum && (sn.length() == 15 || sn.length() == 14))
+  {
+    if (debug)
+    {
+      DynamicJsonDocument json(1800);
+      generateChinampaData(chinampaData, json);
+      serializeJsonPretty(json, _HardSerial);
+  }
+  else
+  {
+    if (debug)
+      if(debug)_HardSerial.println(" chinampaData rejected pulse serialnumne=");
+    if (debug)
+      if(debug)_HardSerial.println(sn);
+  }
+ }
+ }
+
+
 void DataManager::processGloriaQueue()
 {
   while (gloriaCounters.itemCount > 0)
@@ -672,17 +782,13 @@ void DataManager::processDigitalStablesDataQueue()
     dsCounters.front = (dsCounters.front + 1) % MAX_QUEUE_SIZE;
     dsCounters.itemCount--;
   }
+
+    // now clear
+  dsCounters.front=0;
+  dsCounters.rear = -1;
+  dsCounters.itemCount = 0;
 }
 
-void DataManager::processChinampaDataQueue()
-{
-  while (chinampaCounters.itemCount > 0)
-  {
-    chinampaDataSerializer.pushToSerial(_HardSerial, chinampaQueue[chinampaCounters.front].data);
-    chinampaCounters.front = (chinampaCounters.front + 1) % MAX_QUEUE_SIZE;
-    chinampaCounters.itemCount--;
-  }
-}
 
 
 void DataManager::processSeedlingMonitorDataQueue()
@@ -701,19 +807,7 @@ void DataManager::processSeedlingMonitorDataQueue()
   }
 }
 
-void DataManager::enqueueChinampaData(ChinampaData data){
-   if (chinampaCounters.itemCount < MAX_QUEUE_SIZE)
-  {
-    chinampaCounters.rear = (chinampaCounters.rear + 1) % MAX_QUEUE_SIZE;
-    chinampaQueue[chinampaCounters.rear].data = data;
-    chinampaCounters.itemCount++;
-  }
-    if (debug){
-    if(debug)_HardSerial.print("after storing  chinampadata  chinampaCounters.itemCount=");
-    if(debug)_HardSerial.println(chinampaCounters.itemCount);
 
-    }
-}
 
 void DataManager::enqueueSeedlingData(SeedlingMonitorData data)
 {
@@ -799,43 +893,7 @@ void DataManager::storeDigitalStablesData(DigitalStablesData &digitalStablesData
   }
 }
 
- void DataManager::storeChinampaData(ChinampaData &chinampaData){
-   sn = "";
-  uint8_t checksum = 0;
-  for (uint8_t i = 0; i < 8; i++)
-  {
-    sn += String(chinampaData.serialnumberarray[i], HEX);
-    checksum += static_cast<uint8_t>(chinampaData.serialnumberarray[i]);
-  }
-  checksum &= 0xFF;
-  if (debug){
-    if(debug)_HardSerial.print("adding a chinampaData  serialNumber=");
-    if(debug)_HardSerial.print(sn);
-    if(debug)_HardSerial.print(" l=");
-    if(debug)_HardSerial.print(sn.length());
-    if(debug)_HardSerial.print(" checksum=");
-    if(debug)_HardSerial.println(checksum);
-    if(debug)_HardSerial.print(" chinampaData.checksum=");
-    if(debug)_HardSerial.println(chinampaData.checksum);
-  }
-  enqueueChinampaData(chinampaData);
-  if (chinampaData.checksum == checksum && (sn.length() == 15 || sn.length() == 14))
-  {
-    if (debug)
-    {
-      DynamicJsonDocument json(1800);
-      generateChinampaData(chinampaData, json);
-      serializeJsonPretty(json, _HardSerial);
-  }
-  else
-  {
-    if (debug)
-      if(debug)_HardSerial.println(" chinampaData rejected pulse serialnumne=");
-    if (debug)
-      if(debug)_HardSerial.println(sn);
-  }
- }
- }
+
 
 void DataManager::storeSeedlingMonitorData(SeedlingMonitorData &seedlingMonitorData)
 {

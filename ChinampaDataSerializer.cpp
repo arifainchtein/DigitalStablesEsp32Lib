@@ -119,7 +119,7 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
     serial.print(chinampaData.dsLastUpload);
     serial.print(F("#"));
     serial.print(chinampaData.totpcode);
-    serial.println(F("#"));
+    serial.print(F("#"));
     serial.print(chinampaData.secondsSinceLastFishTankData);
     serial.print(F("#"));
     

@@ -154,15 +154,17 @@ void WifiManager::createDeneWord(JsonObject &deneWord, String name, long value, 
     deneWord["Value Type"] = valueType;
 }
 
+
 String WifiManager::getTeleonomeData(String url, bool debug)
 {
-
+    String ipA="";  
     int endPos = url.indexOf(".local");
     if (endPos > 0)
     {
         // http://Sento.local
         // http://Ra.local
         int startPos = 7;
+        
         String hostname = url.substring(startPos, endPos); // + ".local";
         if (debug)
         {
@@ -171,8 +173,9 @@ String WifiManager::getTeleonomeData(String url, bool debug)
         }
         IPAddress ipAddress;
 
-        int err = WiFi.hostByName(hostname.c_str(), ipAddress);
-        String ipA = String(ipAddress[0]) + String(".") + String(ipAddress[1]) + String(".") + String(ipAddress[2]) + String(".") + String(ipAddress[3]);
+        int err = 1;//WiFi.hostByName(hostname.c_str(), ipAddress);
+         ipAddress = MDNS.queryHost(hostname.c_str(), 2000);
+         ipA = String(ipAddress[0]) + String(".") + String(ipAddress[1]) + String(".") + String(ipAddress[2]) + String(".") + String(ipAddress[3]);
         if (debug)
         {
             Serial.print(" Ip address: ");
@@ -195,29 +198,42 @@ String WifiManager::getTeleonomeData(String url, bool debug)
 
     String toReturn = "Error";
 
-    // _HardSerial.println(WiFi.localIP());
+  HTTPClient localHttp; 
+    
+    localHttp.begin(url);
+   // http.begin(url);
+ 
+    if (ipA != "0.0.0.0") {
+        int retryCount = 0;
+        int httpCode = -1;
 
-    // _HardSerial.print("Fetching " + url );
+        while(httpCode < 0 && retryCount < 3) {
+            httpCode = localHttp.GET();
+            if(httpCode < 0) {
+                if(debug) Serial.printf("Attempt %d failed, error: %s\n", retryCount + 1, localHttp.errorToString(httpCode).c_str());
+                delay(500); // Wait a bit before retrying
+                retryCount++;
+            }
+        }
+        if (httpCode == 200)
+        { // Check for the returning code
+            toReturn = localHttp.getString();
+        }
+        else
+        {
+            toReturn = "Error:" + httpCode;
+        }
+        http.end();
+        // }
 
-    // if(WiFi.status()== WL_CONNECTED){
-    http.begin(url);
-    int httpCode = http.GET();
-    if (httpCode == 200)
-    { // Check for the returning code
-        toReturn = http.getString();
-    }
-    else
-    {
-        toReturn = "Error:" + httpCode;
-    }
-    http.end();
-    // }
-
-    if (debug)
-    {
-        _HardSerial.print("teleonome data httpCode: ");
-        _HardSerial.println(httpCode);
-    }
+        if (debug)
+        {
+            _HardSerial.print("teleonome data httpCode: ");
+            _HardSerial.println(httpCode);
+            _HardSerial.print("toReturn: ");
+            _HardSerial.println(toReturn);
+        }
+     }
 
     return toReturn;
 }

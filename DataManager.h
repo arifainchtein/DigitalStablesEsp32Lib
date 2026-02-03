@@ -46,9 +46,13 @@ public:
   void updateDSDStoredCount(int count) ;
   int storeDSDData(DigitalStablesData& data);
   void updateSeedlingStoredCount(int count) ;
+  void updateChinampaStoredCount(int count) ;
+  
   
   void printAllDSDData();
   void clearAllDSDData() ;
+  void clearAllChinampaData() ;
+  
   void printDigitalStablesData(const DigitalStablesData& data);
   void printSeedlingStoreData(const SeedlingMonitorData& data);
   void printChinampaData(const ChinampaData& data);
@@ -64,6 +68,9 @@ private:
   bool _initialized;
   const char* DSD_DATA_FILE = "/digitalstables.dat";
   const char* DSD_COUNT_FILE = "/dscount.txt";
+  const char* CHINAMPA_DATA_FILE = "/chinampa.dat";
+  const char* CHINAMPA_COUNT_FILE = "/chinampacount.txt";
+  
   const char* SEEDLING_DATA_FILE = "/seedling.dat";
   const char* SEEDLING_COUNT_FILE = "/seedlingcount.txt";
  
@@ -136,7 +143,9 @@ struct SeedlingIndex {
   void enqueueDSData(DigitalStablesData data);
   void enqueueGloriaData(GloriaTankFlowPumpData data);
   void initializeDSDFile();
+  void initializeChinampaFile();
   void initializeSeedlingMonitorFile();
+
   bool saveDSDIndex(const DSDIndex& index) ;
   bool loadDSDIndex(DSDIndex& index);
   bool loadSeedlingIndex(SeedlingIndex& index);
