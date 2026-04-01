@@ -23,7 +23,7 @@ void ChinampaWifiManager::start(){
     soft_ap_ssid = secretManager.getSoftAPSSID();
     soft_ap_password = secretManager.getSoftAPPASS();
     hostname=secretManager.getHostName();
-    stationmode = secretManager.getStationMode();
+    stationmode = true;//secretManager.getStationMode();
     _HardSerial.println("ssid=");
     _HardSerial.println(ssid);
     _HardSerial.println("stationmode=");
@@ -397,5 +397,42 @@ int ChinampaWifiManager::uploadDataToDigitalStables(){
   return httpResponseCode;//toReturn;
 }
 
+bool ChinampaWifiManager::pullSumpDataViaWifi() {
+  bool toReturn=false;
+    if (WiFi.status() == WL_CONNECTED) {
+        HTTPClient http;
+        http.begin(sumpUrl);
+        int httpCode = http.GET();
+      _HardSerial.print("httpCode= " + String (httpCode));
+    
+        if (httpCode == HTTP_CODE_OK) {
+            String payload = http.getString();
+             _HardSerial.print("payload= " + String (payload));
+            // Allocate the JSON document
+            StaticJsonDocument<2048> doc;
+            DeserializationError error = deserializeJson(doc, payload);
 
+            if (!error) {
+                // Map the JSON fields to your ChinampaData attributes
+                // Adjust these mappings based on your specific ChinampaData struct
+                 chinampaData.secondsSinceLastSumpTroughData = 0;
+                 chinampaData.minimumSumpTroughLevel   = doc["troughlevelminimumcm"];
+                  chinampaData.maximumSumpTroughLevel   = doc["troughlevelmaximumcm"];
+                  chinampaData.sumpTroughMeasuredHeight = doc["measuredHeight"];
+                  chinampaData.sumpTroughHeight         = doc["maximumScepticHeight"];
+                  chinampaData.outdoortemperature       = doc["outdoortemperature"];
+                  chinampaData.outdoorhumidity          = doc["outdoorhumidity"];
+                  chinampaData.lux                      = doc["lux"];
+                   Serial.println("Data received via WIFI from SumpTrough sumpTroughMeasuredHeight=" + String(chinampaData.sumpTroughMeasuredHeight));
+                   toReturn= true;
+                Serial.println("Sump Data updated via WiFi pull.");
+            }
+        }
+        http.end();
+    }else{
+      _HardSerial.println("WiFi.status() returns false ");
+    }
+
+    return toReturn;
+}
 ChinampaWifiManager::~ChinampaWifiManager() {}

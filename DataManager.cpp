@@ -479,11 +479,11 @@ void DataManager::exportDSDCSV() {
  //   Serial.print("," + String(data.tank2HeightMeters));
   //  Serial.print(", " + String(data.tank2maxvollit));
     
-    Serial.println("," + String(data.troughlevelminimumcm));
-    Serial.println("," + String(data.troughlevelmaximumcm));
-    Serial.println("," + String(data.scepticAvailablePercentage));
-    Serial.println("," + String(data.maximumScepticHeight));
-    Serial.println("," + String(data.measuredHeight));
+    Serial.print("," + String(data.troughlevelminimumcm));
+    Serial.print("," + String(data.troughlevelmaximumcm));
+    Serial.print("," + String(data.scepticAvailablePercentage));
+    Serial.print("," + String(data.maximumScepticHeight));
+    Serial.print("," + String(data.measuredHeight));
     // Location data
     Serial.print("," + String(data.latitude) + ", " + String(data.longitude));
     Serial.print(", " + String(data.altitude));

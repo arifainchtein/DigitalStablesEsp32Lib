@@ -17,12 +17,16 @@ class ChinampaWifiManager : public WifiManager{
 public:
 	ChinampaData& chinampaData;
     ChinampaConfigData& chinampaConfigData;
-	
+	const char* sumpSSID = "SumpTrough";
+	const char* sumpPassword = ""; // Assuming no password based on your logic
+	const char* sumpUrl = "http://192.168.4.1/DaffodilServlet?formName=GetWebData";
+
 	ChinampaWifiManager(HardwareSerial& serial , FS &fs, PCF8563TimeManager& t, Esp32SecretManager& e, ChinampaData& tf, ChinampaConfigData& p) ;
 	void start( );
 	void setWifiActiveSwitchStatus(bool b);
 	void generateWebData(DynamicJsonDocument& json, String s);
 	int uploadDataToDigitalStables();
+	bool pullSumpDataViaWifi();
 
     virtual ~ChinampaWifiManager();
 

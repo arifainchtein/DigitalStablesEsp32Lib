@@ -102,7 +102,7 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
     serial.print(chinampaData.rtcBatVolt);
     serial.print(F("#"));
     
-    serial.print(chinampaData.rssi);
+    serial.print(chinampaData.rssi);  //token 29        
     serial.print(F("#"));
     serial.print(chinampaData.snr);
     serial.print(F("#"));
@@ -137,13 +137,11 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
         }   
          serial.print(F("#"));
     }
-
-    serial.print(F("#"));
     serial.print(chinampaData.microtemperatureMaximum);
     serial.print(F("#"));
     serial.print(chinampaData.outdoortemperature);
     serial.print(F("#"));
-    serial.print(chinampaData.outdoorhumidity);
+    serial.println(chinampaData.outdoorhumidity);
 
 }
 

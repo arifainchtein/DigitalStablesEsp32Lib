@@ -81,6 +81,7 @@ struct ChinampaData{
 	int secondsSinceLastSumpTroughData=0;
 	float previousSumpTroughMeasuredHeight=-99;
 	bool alertstatus;
+	float lux=0;
 	//
 	// alert codes:
 	// 0 initializing device
@@ -89,6 +90,10 @@ struct ChinampaData{
 	// 3 Fish Tank and Sump Trough Data Stale
 	// 4 Fish Solenoid is open and flow is less than 2
 	// 5 Sump too low
+	// 6 = System is Low In Water
+	// 7 = Fish Tank Height Sensor Malfunction
+	// 8 = Sump Trough Tank Height Sensor Malfunction
+	// 9 = Fish Tank and Sump Trough Height Sensor Malfunction
 	
 	//  99 value when no alert
 
@@ -105,7 +110,7 @@ struct ChinampaData{
 	// 7 = DO sudden change
 	// 8 = PH sudden change
 	// 9 = ORP sudden change
-
+	// 
 	bool sensorstatus[12];
     //
     // flow  sensor
