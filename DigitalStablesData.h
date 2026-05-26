@@ -16,19 +16,19 @@
 #define DAFFODIL_LIGHT_DETECTOR 9
 #define VOLTAGE_MONITOR 10
 
-const uint8_t tank[] = {
-  TSEG_F | TSEG_G | TSEG_D | TSEG_E,                  // t
-  TSEG_C | TSEG_D | TSEG_E | TSEG_B | TSEG_A | TSEG_G,  // a
-  TSEG_C | TSEG_E | TSEG_G,                          // n
-  TSEG_G | TSEG_D | TSEG_E                           // c
-};
+// const uint8_t tank[] = {
+//   TSEG_F | TSEG_G | TSEG_D | TSEG_E,                  // t
+//   TSEG_C | TSEG_D | TSEG_E | TSEG_B | TSEG_A | TSEG_G,  // a
+//   TSEG_C | TSEG_E | TSEG_G,                          // n
+//   TSEG_G | TSEG_D | TSEG_E                           // c
+// };
 
-const uint8_t templabel[] = {
+// const uint8_t templabel[] = {
 
-  TSEG_F | TSEG_G | TSEG_D | TSEG_E,                  // t
-  TSEG_A | TSEG_D | TSEG_E | TSEG_F | TSEG_G,
-   0x00, 0x00  // e
-};
+//   TSEG_F | TSEG_G | TSEG_D | TSEG_E,                  // t
+//   TSEG_A | TSEG_D | TSEG_E | TSEG_F | TSEG_G,
+//    0x00, 0x00  // e
+// };
 
 // #define SEND_ASYNC_DATA 1
 // #define RECEIVED_OK 2
