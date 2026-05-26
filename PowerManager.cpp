@@ -36,7 +36,7 @@ unsigned long PowerManager::calculateOptimalSleepTime(RTCInfoRecord& currentTime
     //
     // if the current efficiemcy is greater than .3 sleep only for 3 minutes
     if(hourlySolarPowerData.efficiency>.3){
-        return  180UL;
+        return  60UL;
     }
 
     // .3
@@ -89,7 +89,7 @@ unsigned long PowerManager::calculateOptimalSleepTime(RTCInfoRecord& currentTime
     if (energyForTransmissions <= 0)
     {
         // Not enough energy even for sleep, wake up in 10 minute to check conditions
-        return 1801UL;
+        return 61UL;
     }
 
     // Calculate maximum possible transmissions until sunrise
@@ -99,16 +99,14 @@ unsigned long PowerManager::calculateOptimalSleepTime(RTCInfoRecord& currentTime
     if (maxPossibleTransmissions <= 0)
     {
         // Not enough energy for any transmissions, wake up in 10 minutes to check conditions
-        return 1802UL;
+        return 62UL;
     }
 
     // Calculate optimal time between transmissions in microseconds
-    unsigned long sleepTimeSec = (unsigned long)((minutesToSunrise * 180.0 ) / maxPossibleTransmissions);
+    unsigned long sleepTimeSec = (unsigned long)((minutesToSunrise * 60.0 ) / maxPossibleTransmissions);
     if(debug)_HardSerial.print(" sleepTimeUs:");
     if(debug)_HardSerial.println(sleepTimeSec);
-    // Minimum sleep time of 10 minute to prevent too frequent transmissions
-    //return max(sleepTimeSec, 1800UL); 
-    return min(sleepTimeSec, 1803UL); 
+    return min(sleepTimeSec, 63UL);
 }
 
 /*
@@ -328,10 +326,11 @@ uint8_t PowerManager::calculateSafeLEDBrightness(float startingVoltage, uint8_t 
 
     ledCurrent=numLeds*currentPerLed*LED_OFF_BRIGHTNESS/255;
      afterLedDrop = startingVoltage-predictVoltageDrop(startingVoltage,ledCurrent, duration);;
-    
+
     if(afterLedDrop >= MIN_OPERATING_VOLTAGE){
         return LED_OFF_BRIGHTNESS;
     }
+    return 0;
 }
 
 // Predict voltage drop for an operation

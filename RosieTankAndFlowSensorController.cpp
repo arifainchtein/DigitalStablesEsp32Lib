@@ -10,11 +10,11 @@ RosieTankAndFlowSensorController::RosieTankAndFlowSensorController(HardwareSeria
  _HardSerial(serial), rosieData(tf)   {}
 
 
- void   RosieTankAndFlowSensorController::pulseCounter()
+void IRAM_ATTR RosieTankAndFlowSensorController::pulseCounter()
 {
 	flowMeterPulseCount++;
 }
- void   RosieTankAndFlowSensorController::pulseCounter2()
+void IRAM_ATTR RosieTankAndFlowSensorController::pulseCounter2()
 {
 	flowMeterPulseCount2++;
 }

@@ -11,7 +11,7 @@
 //         {18, 20.0, 15, 60, 1013},
 //         {21, 19.0, 20, 65, 1014}
 //     };
-SolarInfo::SolarInfo( HardwareSerial& serial,double l, double lo,double a) : _HardSerial(serial), latitude(l),longitude(lo), altitude(a){
+SolarInfo::SolarInfo( HardwareSerial& serial,double l, double lo,double a) : _HardSerial(serial), latitude(l),longitude(lo), altitude(a), weatherForecasts(nullptr), forecastSize(0), weatherDataAvailable(false), isForecastValid(false) {
     // strncpy(timezoneinfo, tz, sizeof(timezoneinfo) - 1);
     // timezoneinfo[sizeof(timezoneinfo) - 1] = '\0';
 }
@@ -48,7 +48,7 @@ TimeOfDayFactors SolarInfo::calculateTimeFactors(double hour, int dayOfYear, dou
 void SolarInfo::setWeatherForecast(WeatherForecast forecasts[] ,int size){
    forecastSize = size;
 
-    // Allocate memory for the forecasts
+    delete[] weatherForecasts;
     weatherForecasts = new WeatherForecast[forecastSize];
 
     // Copy the data from the passed array to the class variable
@@ -301,6 +301,9 @@ WeatherForecast SolarInfo::getWeatherForHour(double hour)
 
     // Linear interpolation for the nearest forecasts
     WeatherForecast before = weatherForecasts[index];
+    if (index + 1 >= forecastCount) {
+        return before;
+    }
     WeatherForecast after = weatherForecasts[index + 1];
     double ratio = (hour - before.hour) / (after.hour - before.hour);
 

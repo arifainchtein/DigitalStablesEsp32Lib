@@ -109,35 +109,20 @@ uint8_t GeneralFunctions::getStateOfCharge(float batteryVoltage){
 }
 
 
-uint8_t GeneralFunctions::getCapacitorStateOfCharge(float capacitorVoltage){
-	if(capacitorVoltage>5.0)return 100;
-		else if(capacitorVoltage>=4.84)return 90;
-		else if(capacitorVoltage>=4.81)return 85;
-		else if(capacitorVoltage>=4.78)return 80;
-		else if(capacitorVoltage>=4.74)return 75;
-
-		else if(capacitorVoltage>=4.70)return 70;
-		else if(capacitorVoltage>=4.66)return 65;
-
-		else if(capacitorVoltage>=4.61)return 60;
-		else if(capacitorVoltage>=4.57)return 55;
-
-		else if(capacitorVoltage>=4.51)return 50;
-		else if(capacitorVoltage>=4.45)return 45;
-
-		else if(capacitorVoltage>=4.39)return 40;
-		else if(capacitorVoltage>=4.33)return 35;
-
-		else if(capacitorVoltage>=4.26)return 30;
-		else if(capacitorVoltage>=4.18)return 25;
-		else if(capacitorVoltage>=4.10)return 20;
-		else if(capacitorVoltage>=4.06)return 15;
-
-		else if(capacitorVoltage>=4.00)return 10;
-		else if(capacitorVoltage>=3.95)return 5;
-
-		else if(capacitorVoltage>=11.90)return 0;
-		return 0;
+uint8_t GeneralFunctions::getBatteryStateOfCharge(float batteryVoltage){
+	// LiFePO4 single-cell SOC curve (nominal 3.2V, max 3.6V, cutoff 2.8V)
+	if(batteryVoltage >= 3.60) return 100;
+	else if(batteryVoltage >= 3.45) return 90;
+	else if(batteryVoltage >= 3.38) return 80;
+	else if(batteryVoltage >= 3.32) return 70;
+	else if(batteryVoltage >= 3.26) return 60;
+	else if(batteryVoltage >= 3.22) return 50;
+	else if(batteryVoltage >= 3.18) return 40;
+	else if(batteryVoltage >= 3.15) return 30;
+	else if(batteryVoltage >= 3.10) return 20;
+	else if(batteryVoltage >= 3.05) return 10;
+	else if(batteryVoltage >= 3.00) return 5;
+	return 0;
 }
 
 

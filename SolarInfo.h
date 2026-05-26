@@ -42,6 +42,7 @@ class SolarInfo
 public:
     
     SolarInfo( HardwareSerial& serial,double latitude,double longitude, double altitude);
+    ~SolarInfo() { delete[] weatherForecasts; }
     DailySolarData getDailySolarData(RTCInfoRecord& r);
     void calculateDailySolarPowerSchedule(DailySolarPowerSchedule schedules[], int year, int month, int date);
     void calculateDailySolarPowerSchedule(DailySolarPowerSchedule schedules[], RTCInfoRecord& r);

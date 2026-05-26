@@ -352,7 +352,7 @@ void DaffodilWifiManager::generateWebData(DynamicJsonDocument& json, String sent
     json["groupidentifier"]=digitalStablesData.groupidentifier;
     json["secondsTime"] = digitalStablesData.secondsTime;
     json["dataSamplingSec"] = digitalStablesData.dataSamplingSec;
-    json["capacitorCurrent"] = digitalStablesData.capacitorCurrent;
+    json["batteryCurrent"] = digitalStablesData.batteryCurrent;
     json["temperature"] = digitalStablesData.temperature;
     json["rtcBatVolt"] = digitalStablesData.rtcBatVolt;
     json["opMode"] = digitalStablesData.opMode;
@@ -373,7 +373,10 @@ void DaffodilWifiManager::generateWebData(DynamicJsonDocument& json, String sent
     json["measuredHeight"] = digitalStablesData.measuredHeight;
     json["lux"] = digitalStablesData.lux;
     
-    json["capacitorVoltage"]=digitalStablesData.capacitorVoltage;
+    json["batteryVoltage"]=digitalStablesData.batteryVoltage;
+    json["v50Voltage"]=digitalStablesData.v50Voltage;
+    json["batteryCurrent"]=digitalStablesData.batteryCurrent;
+    json["estimatedRuntime"]=digitalStablesData.estimatedRuntime;
     json["soft_ap_ssid"] = soft_ap_ssid;
     json["serialnumber"] = serialNumber;
     json["sentBy"] = sentBy;

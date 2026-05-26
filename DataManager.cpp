@@ -60,13 +60,13 @@ void DataManager::initializeDSDFile() {
   file.close();
 }
 
-void DataManager::initializeChinampaFile() { 
+void DataManager::initializeChinampaFile() {
   if (_fs.exists(CHINAMPA_DATA_FILE)) {
    if(debug)_HardSerial.println("in initializeChinampaFile,returning because file exists");
     return;
   }
 
-  File file = _fs.open(DSD_DATA_FILE, "w");
+  File file = _fs.open(CHINAMPA_DATA_FILE, "w");
   if (!file) {
       if(debug)_HardSerial.println("in init,Failed to initialize data file");
       return;
@@ -125,6 +125,7 @@ int DataManager::getDSDStoredCount() {
     
     if (_fs.exists(DSD_COUNT_FILE)) {
         File file = _fs.open(DSD_COUNT_FILE, "r");
+        if (!file) return 0;
         String countStr = file.readString();
         file.close();
         return countStr.toInt();
@@ -136,6 +137,7 @@ int DataManager::getSeedlingStoredCount() {
     if (!_initialized) return 0;
     if (_fs.exists(SEEDLING_COUNT_FILE)) {
         File file = _fs.open(SEEDLING_COUNT_FILE, "r");
+        if (!file) return 0;
         String countStr = file.readString();
         file.close();
         return countStr.toInt();
@@ -145,6 +147,7 @@ int DataManager::getSeedlingStoredCount() {
 void DataManager::updateSeedlingStoredCount(int count) {
     if (!_initialized) return;
     File file = _fs.open(SEEDLING_COUNT_FILE, "w");
+    if (!file) return;
     file.println(count);
     file.close();
 }
@@ -181,6 +184,7 @@ void DataManager::updateSeedlingStoredCount(int count) {
 void DataManager::updateDSDStoredCount(int count) {
     if (!_initialized) return;
     File file = _fs.open(DSD_COUNT_FILE, "w");
+    if (!file) return;
     file.println(count);
     file.close();
 }
@@ -410,7 +414,7 @@ void DataManager::exportDSDCSV() {
                   "serialnumber,devicetype,secondsTime,secondstimestring,dataSamplingSec,"
                   " temperature,rtcBatVolt,opMode,operatingstatus,ledBrightness, rssi, snr,flowRate,totalMilliLitres,flowRate2,totalMilliLitres2,"
                   "tank1PressurePsi,tank2PressurePsi,latitude,longitude,altitude,"
-                  "solarVoltage,capacitorVoltage,capacitorCurrent,outdoortemperature,outdoorhumidity,lux, sleeptime,asyncdata,minimumEfficiencyForLed,minimumEfficiencyForWifi"));
+                  "batteryVoltage,v50Voltage,batteryCurrent,estimatedRuntime,outdoortemperature,outdoorhumidity,lux, sleeptime,asyncdata,minimumEfficiencyForLed,minimumEfficiencyForWifi"));
 
     DigitalStablesData data;
     while(file.read((uint8_t*)&data, sizeof(DigitalStablesData))) {
@@ -489,10 +493,11 @@ void DataManager::exportDSDCSV() {
     Serial.print(", " + String(data.altitude));
     
     // Environmental data
-    Serial.print("," + String(data.solarVoltage));
-    Serial.print(", " + String(data.capacitorVoltage));
-    Serial.print(", " + String(data.capacitorCurrent));
-    
+    Serial.print("," + String(data.batteryVoltage));
+    Serial.print(", " + String(data.v50Voltage));
+    Serial.print(", " + String(data.batteryCurrent));
+    Serial.print(", " + String(data.estimatedRuntime));
+
     Serial.print("," + String(data.outdoortemperature));
     Serial.print("," + String(data.outdoorhumidity));
     Serial.print("," + String(data.lux));
@@ -660,9 +665,9 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     Serial.println("Altitude: " + String(data.altitude));
     
     // Environmental data
-    Serial.println("Solar Voltage: " + String(data.solarVoltage));
-    Serial.println("Capacitor Voltage: " + String(data.capacitorVoltage));
-    Serial.println("Capacitor Current: " + String(data.capacitorCurrent));
+    Serial.println("Battery Voltage: " + String(data.batteryVoltage));
+    Serial.println("V50 Voltage: " + String(data.v50Voltage));
+    Serial.println("Battery Current: " + String(data.batteryCurrent));
     Serial.println("Outdoor Temperature: " + String(data.outdoortemperature));
     Serial.println("Outdoor Humidity: " + String(data.outdoorhumidity));
     Serial.println("Lux: " + String(data.lux));
@@ -1028,7 +1033,10 @@ void DataManager::generateDigitalStablesData(DigitalStablesData &digitalStablesD
   // json["minimumSepticHeight"] = digitalStablesData.minimumSepticHeight;
   json["maximumScepticHeight"] = digitalStablesData.maximumScepticHeight;
   json["scepticAvailablePercentage"] = digitalStablesData.scepticAvailablePercentage;
-  json["capacitorVoltage"] = digitalStablesData.capacitorVoltage;
+  json["batteryVoltage"] = digitalStablesData.batteryVoltage;
+  json["v50Voltage"] = digitalStablesData.v50Voltage;
+  json["batteryCurrent"] = digitalStablesData.batteryCurrent;
+  json["estimatedRuntime"] = digitalStablesData.estimatedRuntime;
   //  json["soft_ap_ssid"] = sn;
   json["serialnumber"] = sn;
   json["sentBy"] = sn;
@@ -1272,7 +1280,7 @@ void DataManager::generateDaffodilWebData(DaffodilData &daffodilData, DynamicJso
   json["minimumSepticHeight"] = daffodilData.minimumSepticHeight;
   json["maximumScepticHeight"] = daffodilData.maximumScepticHeight;
   json["scepticAvailablePercentage"] = daffodilData.scepticAvailablePercentage;
-  json["capacitorVoltage"] = daffodilData.capacitorVoltage;
+  json["batteryVoltage"] = daffodilData.capacitorVoltage;
   //  json["soft_ap_ssid"] = sn;
   json["serialnumber"] = sn;
   json["sentBy"] = sn;
@@ -1355,7 +1363,7 @@ void DataManager::generateRosieWebData(RosieData &rosieData, JsonObject &json)
   json["latitude"] = rosieData.latitude;
   json["longitude"] = rosieData.longitude;
   json["solarVoltage"] = rosieData.solarVoltage;
-  json["capacitorVoltage"] = rosieData.capacitorVoltage;
+  json["batteryVoltage"] = rosieData.capacitorVoltage;
 }
 
 

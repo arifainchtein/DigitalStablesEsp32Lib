@@ -126,11 +126,11 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     serial.print(F("#"));
     serial.print(digitalStablesData.dsLastUpload);
     serial.print(F("#"));
-    serial.print(digitalStablesData.solarVoltage);
+    serial.print(digitalStablesData.batteryVoltage);
     serial.print(F("#"));
-    serial.print(digitalStablesData.capacitorVoltage);
+    serial.print(digitalStablesData.v50Voltage);
     serial.print(F("#"));
-    serial.print(digitalStablesData.capacitorCurrent);
+    serial.print(digitalStablesData.batteryCurrent);
     serial.print(F("#"));
     serial.print(digitalStablesData.totpcode);
     serial.print(F("#"));

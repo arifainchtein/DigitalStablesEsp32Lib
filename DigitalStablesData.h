@@ -72,7 +72,7 @@ struct DigitalStablesConfigData{
 struct DigitalStablesData{
 	char devicename[12];
 	char deviceshortname[5];
-	char groupidentifier[8];
+	char groupidentifier[6];
 	char sensor1name[8];
 	char sensor2name[8];
 	uint8_t serialnumberarray[8];
@@ -125,8 +125,8 @@ struct DigitalStablesData{
 	float latitude;
 	float longitude;
 	float altitude;
-	float solarVoltage=0.0;
-	float capacitorVoltage=0.0;
+	float batteryVoltage=0.0;
+	float v50Voltage=0.0;
 	long totpcode;
 	float outdoortemperature=0.0;
 	float outdoorhumidity=0.0;
@@ -137,7 +137,8 @@ struct DigitalStablesData{
 	long sleepTime=600; // in seconds
 	uint8_t minimumEfficiencyForLed;
 	uint8_t minimumEfficiencyForWifi;
-	float capacitorCurrent=-99;
+	float batteryCurrent=-99;
+	float estimatedRuntime=0.0;
 	uint8_t asyncdata=0;
 };
 #endif

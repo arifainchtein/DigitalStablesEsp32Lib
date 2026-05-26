@@ -14,7 +14,7 @@ public:
 	GeneralFunctions();
 	static String getValue(String data, char separator, int index);
 	static uint8_t getStateOfCharge(float batteryVoltage);
-	static uint8_t getCapacitorStateOfCharge(float capacitorVoltage);
+	static uint8_t getBatteryStateOfCharge(float batteryVoltage);
 	static String getElapsedTimeHoursMinutesSecondsString(long elapsedTime);
 	static float stringToFloat(String s);
 	static double stringToDouble(String s);
