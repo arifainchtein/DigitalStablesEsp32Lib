@@ -1,8 +1,8 @@
 // WeatherForecastManager.cpp
 #include "WeatherForecastManager.h"
 
-WeatherForecastManager::WeatherForecastManager(HardwareSerial& serial, double latitude, double longitude, const char* apiKey) 
-    : _HardSerial(serial), lat(latitude), lon(longitude), apiKey(apiKey) { // Initialize the API key
+WeatherForecastManager::WeatherForecastManager(HardwareSerial& serial, double latitude, double longitude, const char* apiKey, int watchdogPin)
+    : _HardSerial(serial), lat(latitude), lon(longitude), apiKey(apiKey), _watchdogPin(watchdogPin) {
    //configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
 
@@ -105,61 +105,60 @@ bool WeatherForecastManager::downloadWeatherData(SolarInfo* solarInfo) {
 }
 
 bool WeatherForecastManager::downloadWeatherData() {
-    // Create an HTTP client
     HTTPClient http;
-    
-    // Construct the API URL using latitude and longitude
-   
-    String url = "http://api.openweathermap.org/data/2.5/forecast?lat=" + String(lat) + "&lon=" + String(lon) + "&appid=" + apiKey + "&units=metric";
-   if(debug)_HardSerial.print("line 70, wfm, url=");
-   if(debug)_HardSerial.println(url);
-    
-    http.begin(url);
-    //serial.println("line 77=");
-    int httpCode = http.GET();
-  //  serial.print("line 75, wfm, httpCode=");
- //   serial.println(httpCode);
-    if (httpCode > 0) {
-        // Parse the JSON response
-        String payload = http.getString();
-        // Create an array to hold the forecasts
-       
-        int size =  2*payload.length();;
 
-        // Parse the JSON response
-        DynamicJsonDocument doc(size); // Adjust size based on expected JSON response
-        DeserializationError error = deserializeJson(doc, payload);
-        // serial.println(error.c_str()); 
-        // serial.print("line 103,  Error=");
-        // serial.println(error.c_str()); 
-        String jsonString; 
-        if (!error) {
-            JsonArray list = doc["list"].as<JsonArray>();
-            size = list.size();
-            if(debug)_HardSerial.print("line 106, No Error, list size=");
-            if(debug)_HardSerial.println(size);
-            for (int i = 0; i < size && i < 8; i++) {
-                JsonObject forecast = list[i].as<JsonObject>();
-                forecasts[i].secondsTime = forecast["dt"].as<long>(); // Assuming dt is the timestamp
-                forecasts[i].temperature = forecast["main"]["temp"].as<float>(); // Assuming you have a temperature field
-                forecasts[i].cloudiness = forecast["clouds"][0]["all"]; // Weather description
-                forecasts[i].pressure = forecast["main"]["pressure"].as<float>(); // Assuming you have a temperature field
-                serializeJsonPretty(forecast, jsonString); 
-                if(debug)_HardSerial.println(jsonString);
-            }
-             saveForecasts(forecasts);
-             hasForecastData=true;
-            return true; // Indicate success
-        } else {
-            if(debug)_HardSerial.printf("Failed to parse JSON: %s\n", error.c_str());
-        }
-    } else {
-        // Handle error
-        if(debug)_HardSerial.printf("Error on HTTP request: %s\n", http.errorToString(httpCode).c_str());
+    // cnt=8 limits response to 8 x 3-hour slots (~24h), keeping payload ~3KB
+    String url = "http://api.openweathermap.org/data/2.5/forecast?lat=" + String(lat) + "&lon=" + String(lon) + "&appid=" + apiKey + "&units=metric&cnt=8";
+    if(debug)_HardSerial.println(url);
+
+    http.setTimeout(30000);  // 30s — avoids indefinite hang if OWM is slow
+    http.begin(url);
+    int httpCode = http.GET();
+    if (httpCode != 200) {
+        if(debug)_HardSerial.printf("HTTP error: %s\n", http.errorToString(httpCode).c_str());
+        http.end();
+        return false;
     }
 
-    // Invalidate the weather forecast in SolarInfo
-    return false; // Indicate failure
+    // Finish TCP read before parsing so WiFi stack frames don't overlap JSON parser frames
+    String payload = http.getString();
+    http.end();
+
+    if (payload.length() == 0) {
+        if(debug)_HardSerial.println("Empty payload");
+        return false;
+    }
+    if(debug){ _HardSerial.print("payload len="); _HardSerial.println(payload.length()); }
+
+    DynamicJsonDocument doc(9000);
+    DeserializationError error = deserializeJson(doc, payload);
+
+    if (error) {
+        if(debug)_HardSerial.printf("JSON parse error: %s\n", error.c_str());
+        return false;
+    }
+
+    JsonArray list = doc["list"].as<JsonArray>();
+    int size = list.size();
+    if(debug){ _HardSerial.print("list size="); _HardSerial.println(size); }
+
+    for (int i = 0; i < size && i < 8; i++) {
+        JsonObject forecast = list[i].as<JsonObject>();
+        long dt = forecast["dt"].as<long>();
+        forecasts[i].secondsTime = dt;
+        time_t t = (time_t)dt;
+        struct tm* localTime = localtime(&t);
+        forecasts[i].hour = localTime ? localTime->tm_hour : 0;
+        forecasts[i].temperature = forecast["main"]["temp"].as<float>();
+        forecasts[i].humidity    = forecast["main"]["humidity"].as<float>();
+        forecasts[i].cloudiness  = forecast["clouds"]["all"].as<int>();
+        forecasts[i].pressure    = forecast["main"]["pressure"].as<float>();
+        forecasts[i].rain        = forecast["rain"]["3h"] | 0.0f;
+    }
+
+    saveForecasts(forecasts);
+    hasForecastData = true;
+    return true;
 }
 
 void WeatherForecastManager::saveForecasts(const WeatherForecast newForecasts[8]) { 

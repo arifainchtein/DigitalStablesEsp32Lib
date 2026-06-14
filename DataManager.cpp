@@ -676,6 +676,7 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     Serial.println("Sleep Time (s): " + String(data.sleepTime));
     Serial.println("Min Efficiency LED: " + String(data.minimumEfficiencyForLed));
     Serial.println("Min Efficiency WiFi: " + String(data.minimumEfficiencyForWifi));
+     Serial.println("asyncdata: " + String(data.asyncdata));
 }
 
 
@@ -784,7 +785,7 @@ void DataManager::processDigitalStablesDataQueue()
   while (dsCounters.itemCount > 0)
   {
     digitalStablesDataSerializer.pushToSerial(_HardSerial, dsQueue[dsCounters.front].data);
-    dsCounters.front = (dsCounters.front + 1) % MAX_QUEUE_SIZE;
+    dsCounters.front = (dsCounters.front + 1) % MAX_DSD_QUEUE_SIZE;
     dsCounters.itemCount--;
   }
 
@@ -831,9 +832,9 @@ void DataManager::enqueueSeedlingData(SeedlingMonitorData data)
 
 void DataManager::enqueueDSData(DigitalStablesData data)
 {
-  if (dsCounters.itemCount < MAX_QUEUE_SIZE)
+  if (dsCounters.itemCount < MAX_DSD_QUEUE_SIZE)
   {
-    dsCounters.rear = (dsCounters.rear + 1) % MAX_QUEUE_SIZE;
+    dsCounters.rear = (dsCounters.rear + 1) % MAX_DSD_QUEUE_SIZE;
     dsQueue[dsCounters.rear].data = data;
     dsCounters.itemCount++;
   }

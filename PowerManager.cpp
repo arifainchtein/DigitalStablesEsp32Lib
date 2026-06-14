@@ -28,85 +28,52 @@ void PowerManager::updatePowerHistory(RTCInfoRecord& currentTimerRecord )
     historyIndex = (historyIndex + 1) % 24;
 }
 
+    
 unsigned long PowerManager::calculateOptimalSleepTime(RTCInfoRecord& currentTimerRecord)
 {
-    // Get sunrise/sunset times based on location and day of year
     DailySolarData dailySolarData = solarInfo.getDailySolarData(currentTimerRecord);
     HourlySolarPowerData hourlySolarPowerData = solarInfo.calculateActualPower(currentTimerRecord);
+
+    // Daytime: device is awake in the main loop; if sleep is forced (e.g. low battery) keep short.
+    if (hourlySolarPowerData.efficiency > 0.3) {
+        return 60UL;
+    }
+
+    // Minutes to next sunrise (sunrise is minutes since midnight).
+    int currentMinutes = currentTimerRecord.hour * 60 + currentTimerRecord.minute;
+    int minutesToSunrise = (int)dailySolarData.sunrise - currentMinutes;
+    if (minutesToSunrise < 0) minutesToSunrise += 24 * 60;
+    if (minutesToSunrise < 1) minutesToSunrise = 1;
+
+    // Pre-dawn window: wake every 90 s to catch the charging ramp without missing it.
+    // 90 min covers the full civil-twilight period even in winter.
+    if (minutesToSunrise <= 90) return 90UL;
+
+    // Total night duration in minutes — adapts automatically to season.
+    // Uses actual sunrise/sunset so summer nights (short) scale differently to winter (long).
+    int dayLength = max((int)dailySolarData.sunset - (int)dailySolarData.sunrise, 1);
+    int totalNightMinutes = max(24 * 60 - dayLength, 1);
+
+    // Sleep time scales inversely with the fraction of night remaining:
+    //   just after sunset → ~150 s (≈ 2.5 min)
+    //   deep night        → longer (COMMA mode protects against over-discharge)
     //
-    // if the current efficiemcy is greater than .3 sleep only for 3 minutes
-    if(hourlySolarPowerData.efficiency>.3){
-        return  60UL;
+    // Formula: sleepSec = 450 × totalNightMinutes / minutesToSunrise
+    //   Example Melbourne winter (night = 845 min):
+    //     6 pm  (minutesToSunrise = 831) → 457 s ≈ every 7.6 min
+    //     midnight (minutesToSunrise = 420) → 904 s ≈ every 15 min
+    //     3 am  (minutesToSunrise = 270) → 1408 s ≈ every 23 min
+    //     6 am  (minutesToSunrise = 90)  → pre-dawn 90 s window
+    unsigned long sleepSec = (unsigned long)(450.0 * totalNightMinutes / minutesToSunrise);
+    if (sleepSec < 90UL) sleepSec = 90UL;  // minimum 90 s (matches pre-dawn interval)
+
+    if (debug) {
+        _HardSerial.print("minutesToSunrise:"); _HardSerial.print(minutesToSunrise);
+        _HardSerial.print(" totalNightMin:"); _HardSerial.print(totalNightMinutes);
+        _HardSerial.print(" sleepSec:"); _HardSerial.println(sleepSec);
     }
 
-    // .3
-    // dailySolarData.sunrise is minutes since midnight so if the value is 410 then
-    // the sunrise time is 6:50 am  6*60=360 + 50
-    uint8_t sunriseHour = (int)(dailySolarData.sunrise/60);
-    uint8_t minutesinsunrisehour = dailySolarData.sunrise-sunriseHour*60;
-    int minutesToSunrise;
-    if(debug)_HardSerial.print(" sunriseHour:");
-    if(debug)_HardSerial.print(sunriseHour);
-
-    if(debug)_HardSerial.print(" currentTimerRecord.hour:");
-    if(debug)_HardSerial.print(currentTimerRecord.hour);
-    
-    if (currentTimerRecord.hour >= sunriseHour)
-    {
-        // Calculate for next day's sunrise
-        minutesToSunrise = ((24 - currentTimerRecord.hour + sunriseHour) * 60) - currentTimerRecord.minute + minutesinsunrisehour;
-    }
-    else
-    {
-        minutesToSunrise = (sunriseHour - currentTimerRecord.hour) * 60 - currentTimerRecord.minute;
-    }
-     if(debug)_HardSerial.print("minutesToSunrise:");
-     if(debug)_HardSerial.print(minutesToSunrise);
-     
-    // Calculate available energy
-    double currentVoltage = getCapacitorVoltage();
-    double availableEnergy = 0.5 * capacitorValue * (currentVoltage * currentVoltage - MIN_OPERATING_VOLTAGE * MIN_OPERATING_VOLTAGE);
-    if(debug)_HardSerial.print(" availableEnergy:");
-    if(debug)_HardSerial.print(availableEnergy);
-    
-    // Calculate energy per transmission
-    double energyPerTransmission = POWER_CONSUMPTION_LORA * (LORA_TRANSMISSION_TIME_MS / 1000.0);
-    if(debug)_HardSerial.print(" energyPerTransmission:");
-    if(debug)_HardSerial.print(energyPerTransmission);
- 
-    // Calculate energy needed for sleep per second
-    double sleepEnergyPerSecond = POWER_CONSUMPTION_SLEEP;
-    
-    // Calculate total sleep energy needed until sunrise
-    double totalSleepEnergy = sleepEnergyPerSecond * (minutesToSunrise * 60);
-    if(debug)_HardSerial.print(" totalSleepEnergy:");
-    if(debug)_HardSerial.print(totalSleepEnergy);
-
-    // Calculate remaining energy for transmissions
-    double energyForTransmissions = availableEnergy - totalSleepEnergy;
-    if(debug)_HardSerial.print(" energyForTransmissions:");
-    if(debug)_HardSerial.print(energyForTransmissions);
-    if (energyForTransmissions <= 0)
-    {
-        // Not enough energy even for sleep, wake up in 10 minute to check conditions
-        return 61UL;
-    }
-
-    // Calculate maximum possible transmissions until sunrise
-    int maxPossibleTransmissions = floor(energyForTransmissions / energyPerTransmission);
-     if(debug)_HardSerial.print(" maxPossibleTransmissions:");
-          if(debug)_HardSerial.print(maxPossibleTransmissions);
-    if (maxPossibleTransmissions <= 0)
-    {
-        // Not enough energy for any transmissions, wake up in 10 minutes to check conditions
-        return 62UL;
-    }
-
-    // Calculate optimal time between transmissions in microseconds
-    unsigned long sleepTimeSec = (unsigned long)((minutesToSunrise * 60.0 ) / maxPossibleTransmissions);
-    if(debug)_HardSerial.print(" sleepTimeUs:");
-    if(debug)_HardSerial.println(sleepTimeSec);
-    return min(sleepTimeSec, 63UL);
+    return sleepSec;
 }
 
 /*

@@ -16,19 +16,19 @@
 #define DAFFODIL_LIGHT_DETECTOR 9
 #define VOLTAGE_MONITOR 10
 
-// const uint8_t tank[] = {
-//   TSEG_F | TSEG_G | TSEG_D | TSEG_E,                  // t
-//   TSEG_C | TSEG_D | TSEG_E | TSEG_B | TSEG_A | TSEG_G,  // a
-//   TSEG_C | TSEG_E | TSEG_G,                          // n
-//   TSEG_G | TSEG_D | TSEG_E                           // c
-// };
+	// const uint8_t tank[] = {
+	//   TSEG_F | TSEG_G | TSEG_D | TSEG_E,                  // t
+	//   TSEG_C | TSEG_D | TSEG_E | TSEG_B | TSEG_A | TSEG_G,  // a
+	//   TSEG_C | TSEG_E | TSEG_G,                          // n
+	//   TSEG_G | TSEG_D | TSEG_E                           // c
+	// };
 
-// const uint8_t templabel[] = {
+	// const uint8_t templabel[] = {
 
-//   TSEG_F | TSEG_G | TSEG_D | TSEG_E,                  // t
-//   TSEG_A | TSEG_D | TSEG_E | TSEG_F | TSEG_G,
-//    0x00, 0x00  // e
-// };
+	//   TSEG_F | TSEG_G | TSEG_D | TSEG_E,                  // t
+	//   TSEG_A | TSEG_D | TSEG_E | TSEG_F | TSEG_G,
+	//    0x00, 0x00  // e
+	// };
 
 // #define SEND_ASYNC_DATA 1
 // #define RECEIVED_OK 2
@@ -72,7 +72,7 @@ struct DigitalStablesConfigData{
 struct DigitalStablesData{
 	char devicename[12];
 	char deviceshortname[5];
-	char groupidentifier[6];
+	char groupidentifier[5];
 	char sensor1name[8];
 	char sensor2name[8];
 	uint8_t serialnumberarray[8];
@@ -81,7 +81,7 @@ struct DigitalStablesData{
 	char deviceTypeId[12];
 	long secondsTime=0L;
 	uint8_t dataSamplingSec=2;
-	uint8_t currentFunctionValue=0;
+	int8_t currentFunctionValue=0;
 	uint8_t temperature=0;
 	float rtcBatVolt=0.0;
 	uint8_t opMode=0;
@@ -120,7 +120,6 @@ struct DigitalStablesData{
 
  	float qfactor1=.35;
 	float qfactor2=.82;
-	bool digitalStablesUpload;
 	long dsLastUpload;
 	float latitude;
 	float longitude;
@@ -131,14 +130,15 @@ struct DigitalStablesData{
 	float outdoortemperature=0.0;
 	float outdoorhumidity=0.0;
 	
-    
+    bool digitalStablesUpload;
 	
 	float lux=0;
-	long sleepTime=600; // in seconds
+	long sleepTime=0; // in seconds — set exclusively by goToSleep()
 	uint8_t minimumEfficiencyForLed;
 	uint8_t minimumEfficiencyForWifi;
 	float batteryCurrent=-99;
 	float estimatedRuntime=0.0;
 	uint8_t asyncdata=0;
+	uint8_t wakeTimeSec=0;
 };
 #endif

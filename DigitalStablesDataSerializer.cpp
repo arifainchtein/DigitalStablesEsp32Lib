@@ -132,6 +132,9 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     serial.print(F("#"));
     serial.print(digitalStablesData.batteryCurrent);
     serial.print(F("#"));
+    serial.print(digitalStablesData.estimatedRuntime);
+    serial.print(F("#"));
+    
     serial.print(digitalStablesData.totpcode);
     serial.print(F("#"));
     serial.print(digitalStablesData.outdoortemperature);
@@ -154,6 +157,21 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     serial.print(digitalStablesData.minimumEfficiencyForLed);
     serial.print(F("#"));
     serial.print(digitalStablesData.minimumEfficiencyForWifi);
+    serial.print(F("#"));
+
+// AsyncData Values
+// value     storedata     sendlora                                           in teleonome
+// 1 =          n             n    debug statement in setup                         n
+// 2 =          y             n    end of set up efficiemcy test                    yes - goes to sleep mode
+// 3 =          y             n    end of setup test for battery voltage            yes  -goes to sleep mode
+// 6 =          y             n    checking remotemonitortimer                       n
+// 7 =          y             n    in loop after before led display code            yes  was in loop mode and went to sleep
+// 9 =          n             y    in normal cycle                                  yes  in loop mode  
+// 10 =         y             n    Serial Command                                    n
+
+    serial.print(digitalStablesData.asyncdata);
+    serial.print(F("#"));
+    serial.print(digitalStablesData.wakeTimeSec);
     serial.println(F("#"));
 }
 

@@ -28,19 +28,15 @@ void PCF8563TimeManager::hourlyTasks(long time, int previousHour ){
 
  }
 
-// char* PCF8563TimeManager::epochToString(unsigned long epoch) {
-//   static char str[20];
-//   time_t t = epoch;
-//   struct tm *tm = gmtime(&t);
-//   sprintf(str, "%04d-%02d-%02d %02d:%02d:%02d",
-//     tm->tm_year + 1900,
-//     tm->tm_mon + 1,
-//     tm->tm_mday,
-//     tm->tm_hour,
-//     tm->tm_min,
-//     tm->tm_sec);
-//   return str;
-// }
+// Converts UTC epoch to a local time string using the TZ env var set via
+// setenv("TZ", ...) / tzset() in setup(). Handles AEDT/AEST automatically.
+String PCF8563TimeManager::epochToString(unsigned long epoch) {
+    time_t t = (time_t)epoch;
+    struct tm* tmInfo = localtime(&t);
+    char buf[25];
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", tmInfo);
+    return String(buf);
+}
 
 bool PCF8563TimeManager::setTime(RTCInfoRecord e){
 	Wire.beginTransmission(PCF8563address);
@@ -295,18 +291,13 @@ long PCF8563TimeManager::getTimeForCodeGeneration(RTCInfoRecord anRTCInfoRecord)
 
 
 long PCF8563TimeManager::getCurrentTimeInSeconds(RTCInfoRecord anRTCInfoRecord){
-
-	int month = anRTCInfoRecord.month-1;
-	long now=dateAsSeconds(anRTCInfoRecord.year, month, anRTCInfoRecord.date, anRTCInfoRecord.hour, anRTCInfoRecord.minute, anRTCInfoRecord.second);
-	return now;
+	// epoch is already computed DST-correctly in now() via TimeUtils::getEpochTime()
+	return anRTCInfoRecord.epoch;
 }
 
 long PCF8563TimeManager::getCurrentTimeInSeconds(){
-	RTCInfoRecord anRTCInfoRecord =now();
-
-	int month = anRTCInfoRecord.month-1;
-	long now=dateAsSeconds(anRTCInfoRecord.year, month, anRTCInfoRecord.date, anRTCInfoRecord.hour, anRTCInfoRecord.minute, anRTCInfoRecord.second);
-	return now;
+	RTCInfoRecord anRTCInfoRecord = now();
+	return anRTCInfoRecord.epoch;
 }
 
 

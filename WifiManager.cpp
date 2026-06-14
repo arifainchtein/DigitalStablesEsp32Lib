@@ -454,13 +454,14 @@ bool WifiManager::connectSTA()
         _HardSerial.print("Connected! IP address: ");
         _HardSerial.println(WiFi.localIP());
         ipAddress=WiFi.localIP().toString();
-         gotConnection = true;
+        gotConnection = true;
+        checkInternetConnectionAvailable();
     } else {
         _HardSerial.println();
         _HardSerial.println("Failed to connect to WiFi");
         _HardSerial.print("WiFi status: ");
         _HardSerial.println(WiFi.status());
-    
+
     }
     if (!MDNS.begin(hostname.c_str()))
     {
@@ -686,39 +687,21 @@ bool WifiManager::setTimeFromInternet(){
 }
 
 void WifiManager::ping(){
-   
     HTTPClient http;
-    http.setTimeout(950);
-    String url = "http://devices.digitalstables.com/DevicePingServlet?"; // Specify the URL with the Ping parameter
-    //String url = "http://www.google.com"; // Specify the URL with the Ping parameter
-    _HardSerial.println(" startmg http");
- 
-    http.begin(url); // Start the request
-       
-    unsigned long startTime = millis(); // Start time
-    int httpResponseCode = http.GET(); // Send the request
-    internetPingTime = millis() - startTime; // Calculate elapsed time
-    _HardSerial.print(" end http,httpResponseCode=");
-    _HardSerial.println(httpResponseCode);
-    
-    // Check for the response code
-    if (httpResponseCode >0) {
-      String payload = http.getString(); // Get the response payload
-      Serial.println(httpResponseCode); // Print HTTP response code
-      Serial.println(payload); // Print response payload
-      Serial.print("Response time: ");
-      Serial.print(internetPingTime); // Print the time taken for response
-      internetAvailable= true;
-      Serial.println(" ms");
-    } else {
-     // Serial.print("Error on HTTP request: ");
-      _HardSerial.printf("Error on HTTP request: %s\n", http.errorToString(httpResponseCode).c_str());
-       internetAvailable= false;
-    }
-      _HardSerial.print(" finished ping internetAvailable=");
+    http.setTimeout(5000); // Core 0 watchdog task handles WDT so no 950ms constraint
+    http.begin("http://clients3.google.com/generate_204");
+    unsigned long startTime = millis();
+    int httpResponseCode = http.GET();
+    internetPingTime = millis() - startTime;
+    http.end();
+
+    internetAvailable = (httpResponseCode > 0);
+
+    _HardSerial.print("ping code=");
+    _HardSerial.print(httpResponseCode);
+    _HardSerial.print(" time=");
+    _HardSerial.print(internetPingTime);
+    _HardSerial.print(" available=");
     _HardSerial.println(internetAvailable);
-         
-    http.end(); // Free resources
-        
 }
 WifiManager::~WifiManager() {}

@@ -91,7 +91,8 @@ struct SeedlingIndex {
   #define SEEDLING_INDEX_FILE "/seedling_index.dat"
 
   boolean debug = false;
-  #define MAX_QUEUE_SIZE 20
+  #define MAX_QUEUE_SIZE 20        // Chinampa, Gloria, Seedling queues
+  #define MAX_DSD_QUEUE_SIZE 50   // DigitalStablesData — larger to avoid losing records
   GloriaTankFlowPumpSerializer gloriaTankFlowPumpSerializer;
   DigitalStablesDataSerializer digitalStablesDataSerializer;
   SeedlingMonitorDataSerializer seedlingMonitorDataSerializer;
@@ -119,7 +120,7 @@ struct SeedlingIndex {
     ChinampaData data;
   };
 
-  DSQueueElement dsQueue[MAX_QUEUE_SIZE];
+  DSQueueElement dsQueue[MAX_DSD_QUEUE_SIZE];
   GloriaQueueElement gloriaQueue[MAX_QUEUE_SIZE];
   SeedQueueElement seedQueue[MAX_QUEUE_SIZE];
   ChinampaQueueElement chinampaQueue[MAX_QUEUE_SIZE];

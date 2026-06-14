@@ -33,7 +33,7 @@ public:
 	RTCInfoRecord now();
 	long getTimeForCodeGeneration(RTCInfoRecord aRTCInfoRecord);
 	long getTimeForCodeGeneration();
-	//char* epochToString(unsigned long epoch);
+	String epochToString(unsigned long epoch);
 	//
 	// Functions that represent Serial commands
 	//
