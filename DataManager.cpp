@@ -413,7 +413,7 @@ void DataManager::exportDSDCSV() {
        Serial.println(F("devicename,deviceshortname,groupidentifier,sensor1name,sensor2name,"
                   "serialnumber,devicetype,secondsTime,secondstimestring,dataSamplingSec,"
                   " temperature,rtcBatVolt,opMode,operatingstatus,ledBrightness, rssi, snr,flowRate,totalMilliLitres,flowRate2,totalMilliLitres2,"
-                  "tank1PressurePsi,tank2PressurePsi,latitude,longitude,altitude,"
+                  "tank1PressurePsi,tank2PressurePsi,troughlevelminimumcm,troughlevelmaximumcm,scepticAvailablePercentage,maximumScepticHeight,measuredHeight,latitude,longitude,altitude,"
                   "batteryVoltage,v50Voltage,batteryCurrent,estimatedRuntime,outdoortemperature,outdoorhumidity,lux, sleeptime,asyncdata,minimumEfficiencyForLed,minimumEfficiencyForWifi"));
 
     DigitalStablesData data;
@@ -638,7 +638,7 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     
     Serial.println("RSSI: " + String(data.rssi));
     Serial.println("SNR: " + String(data.snr));
-    
+     Serial.println("LoRa Active: " + String(data.loraActive));
 
 
     Serial.println("trough Level Minimum (cm): " + String(data.troughlevelminimumcm));
@@ -769,6 +769,85 @@ void DataManager::updateChinampaStoredCount(int count) {
  }
  }
 
+
+void DataManager::enqueueCommaRecord(CommaRecord data) {
+  if (commaCounters.itemCount < MAX_COMMA_QUEUE_SIZE) {
+    commaCounters.rear = (commaCounters.rear + 1) % MAX_COMMA_QUEUE_SIZE;
+    commaQueue[commaCounters.rear].data = data;
+    commaCounters.itemCount++;
+  }
+  if (debug) {
+    _HardSerial.print("enqueueCommaRecord itemCount=");
+    _HardSerial.println(commaCounters.itemCount);
+  }
+}
+
+void DataManager::storeCommaRecord(CommaRecord &r) {
+  String sn = "";
+  for (uint8_t i = 0; i < 8; i++) {
+    sn += String(r.serialnumber[i], HEX);
+  }
+  if (debug) {
+    _HardSerial.print("storeCommaRecord device=");
+    _HardSerial.print(r.devicename);
+    _HardSerial.print(" sn=");
+    _HardSerial.print(sn);
+    _HardSerial.print(" idx=");
+    _HardSerial.print(r.index);
+    _HardSerial.print("/");
+    _HardSerial.println(r.total);
+  }
+  enqueueCommaRecord(r);
+}
+
+void DataManager::processCommaRecordQueue() {
+  while (commaCounters.itemCount > 0) {
+    commaRecordSerializer.pushToSerial(_HardSerial, commaQueue[commaCounters.front].data);
+    commaCounters.front = (commaCounters.front + 1) % MAX_COMMA_QUEUE_SIZE;
+    commaCounters.itemCount--;
+  }
+  commaCounters.front = 0;
+  commaCounters.rear = -1;
+  commaCounters.itemCount = 0;
+}
+
+void DataManager::clearAllCommaRecords() {
+  commaCounters.front = 0;
+  commaCounters.rear = -1;
+  commaCounters.itemCount = 0;
+  if (debug) _HardSerial.println("clearAllCommaRecords: queue reset");
+}
+
+void DataManager::enqueueLangleyData(LangleyData data) {
+  if (langleyCounters.itemCount < MAX_QUEUE_SIZE) {
+    langleyCounters.rear = (langleyCounters.rear + 1) % MAX_QUEUE_SIZE;
+    langleyQueue[langleyCounters.rear].data = data;
+    langleyCounters.itemCount++;
+  }
+  if (debug) {
+    _HardSerial.print("enqueueLangleyData itemCount=");
+    _HardSerial.println(langleyCounters.itemCount);
+  }
+}
+
+void DataManager::storeLangleyData(LangleyData &p) {
+  if (debug) {
+    _HardSerial.print("storeLangleyData device=");
+    _HardSerial.println(p.devicename);
+  }
+  enqueueLangleyData(p);
+}
+
+void DataManager::processLangleyQueue() {
+  while (langleyCounters.itemCount > 0) {
+    langleyDataSerializer.pushToSerial(_HardSerial, langleyQueue[langleyCounters.front].data);
+    langleyCounters.front = (langleyCounters.front + 1) % MAX_QUEUE_SIZE;
+    langleyCounters.itemCount--;
+  }
+  langleyCounters.front = 0;
+  langleyCounters.rear = -1;
+  langleyCounters.itemCount = 0;
+}
 
 void DataManager::processGloriaQueue()
 {
@@ -1048,7 +1127,7 @@ void DataManager::generateDigitalStablesData(DigitalStablesData &digitalStablesD
   // json["ssid"] = ssid;
   // json["ssids"] = ssids;
   // json["lora"] = lora;
-  json["internetAvailable"] = digitalStablesData.internetAvailable;
+  json["wifiStatus"] = digitalStablesData.wifiStatus;
   // json["internetPingTime"] = internetPingTime;
   json["ipAddress"] = digitalStablesData.ipAddress;
   json["totp"] = digitalStablesData.totpcode;

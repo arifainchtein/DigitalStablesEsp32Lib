@@ -161,22 +161,26 @@ bool WeatherForecastManager::downloadWeatherData() {
     return true;
 }
 
-void WeatherForecastManager::saveForecasts(const WeatherForecast newForecasts[8]) { 
+void WeatherForecastManager::saveForecasts(const WeatherForecast newForecasts[], int count) {
 //    serial.println("First forecast before saving:");
 //     serial.println(newForecasts[0].temperature);
 //     serial.println(newForecasts[0].secondsTime);
-    
-    size_t forecastSize = sizeof(WeatherForecast) * 8;
-    // serial.print("Saving forecast size: ");
-    // serial.println(forecastSize);
 
-  
-    memcpy(forecasts, newForecasts, forecastSize);
-    preferences.begin(PREF_NAMESPACE, false); 
-    size_t written = preferences.putBytes(FORECAST_KEY, newForecasts, forecastSize); 
-    // serial.print("Bytes written: "); 
-    // serial.println(written); 
-    preferences.end(); 
+    if (count > 8) count = 8;
+    if (count < 0) count = 0;
+
+    // Only the first `count` slots come from the caller (e.g. LoRa-delivered
+    // updates only carry 4 of the 8 forecast slots due to packet size limits) —
+    // the remaining slots keep whatever was last persisted/downloaded.
+    memcpy(forecasts, newForecasts, sizeof(WeatherForecast) * count);
+
+    size_t forecastSize = sizeof(WeatherForecast) * 8;
+    preferences.begin(PREF_NAMESPACE, false);
+    size_t written = preferences.putBytes(FORECAST_KEY, forecasts, forecastSize);
+    // serial.print("Bytes written: ");
+    // serial.println(written);
+    preferences.end();
+    hasForecastData = true;
 }
 
 //  void WeatherForecastManager::saveForecasts(const WeatherForecast newForecasts[8]) {

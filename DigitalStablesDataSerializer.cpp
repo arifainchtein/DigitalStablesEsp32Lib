@@ -1,5 +1,21 @@
 #include <DigitalStablesDataSerializer.h>
 
+namespace {
+// Prints a fixed-size char buffer as a proper C string: stops at the first '\0'
+// instead of scanning the whole buffer and printing every non-null byte. The
+// latter prints stale leftover bytes (e.g. "low" instead of "" after a field is
+// overwritten with a shorter value) since a short write only nulls the bytes it
+// touches, not the rest of the buffer.
+void printFixedCString(HardwareSerial &serial, const char *buf, size_t size, bool stripNewlines = false)
+{
+    for (size_t i = 0; i < size && buf[i] != '\0'; i++)
+    {
+        if (stripNewlines && (buf[i] == '\n' || buf[i] == '\r')) continue;
+        serial.print(buf[i]);
+    }
+}
+}
+
 void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalStablesData digitalStablesData)
 {
 
@@ -7,24 +23,12 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     serial.print(F("#"));
 
     // definition
-    for (int i = 0; i < sizeof(digitalStablesData.deviceTypeId); i++)
-    {
-        if (digitalStablesData.deviceTypeId[i] != NULL)
-            serial.print(digitalStablesData.deviceTypeId[i]);
-    }
+    printFixedCString(serial, digitalStablesData.deviceTypeId, sizeof(digitalStablesData.deviceTypeId));
     serial.print(F("#"));
 
-    for (int i = 0; i < sizeof(digitalStablesData.devicename); i++)
-    {
-        if (digitalStablesData.devicename[i] != NULL && digitalStablesData.devicename[i] != '\n' && digitalStablesData.devicename[i] != '\r')
-            serial.print(digitalStablesData.devicename[i]);
-    }
+    printFixedCString(serial, digitalStablesData.devicename, sizeof(digitalStablesData.devicename), true);
     serial.print(F("#"));
-    for (int i = 0; i < sizeof(digitalStablesData.deviceshortname); i++)
-    {
-        if (digitalStablesData.deviceshortname[i] != NULL && digitalStablesData.deviceshortname[i] != '\n' && digitalStablesData.deviceshortname[i] != '\r')
-            serial.print(digitalStablesData.deviceshortname[i]);
-    }
+    printFixedCString(serial, digitalStablesData.deviceshortname, sizeof(digitalStablesData.deviceshortname), true);
     serial.print(F("#"));
     for (int i = 0; i < sizeof(digitalStablesData.serialnumberarray); i++)
     {
@@ -33,11 +37,7 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     }
     serial.print(F("#"));
 
-    for (int i = 0; i < sizeof(digitalStablesData.groupidentifier); i++)
-    {
-        if (digitalStablesData.groupidentifier[i] != NULL)
-            serial.print(digitalStablesData.groupidentifier[i]);
-    }
+    printFixedCString(serial, digitalStablesData.groupidentifier, sizeof(digitalStablesData.groupidentifier));
     serial.print(F("#"));
 
     serial.print(digitalStablesData.currentFunctionValue);
@@ -54,20 +54,12 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     //
     // Sensors
     //
-    for (int i = 0; i < sizeof(digitalStablesData.sensor1name); i++)
-    {
-        if (digitalStablesData.sensor1name[i] != NULL)
-            serial.print(digitalStablesData.sensor1name[i]);
-    }
+    printFixedCString(serial, digitalStablesData.sensor1name, sizeof(digitalStablesData.sensor1name));
     serial.print(F("#"));
     serial.print(digitalStablesData.qfactor1);
     serial.print(F("#"));
 
-    for (int i = 0; i < sizeof(digitalStablesData.sensor2name); i++)
-    {
-        if (digitalStablesData.sensor2name[i] != NULL)
-            serial.print(digitalStablesData.sensor2name[i]);
-    }
+    printFixedCString(serial, digitalStablesData.sensor2name, sizeof(digitalStablesData.sensor2name));
     serial.print(F("#"));
 
     serial.print(digitalStablesData.qfactor2);
@@ -172,6 +164,8 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     serial.print(digitalStablesData.asyncdata);
     serial.print(F("#"));
     serial.print(digitalStablesData.wakeTimeSec);
+    serial.print(F("#"));
+    serial.print(digitalStablesData.wifiStatus);
     serial.println(F("#"));
 }
 

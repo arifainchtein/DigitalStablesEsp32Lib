@@ -2,6 +2,8 @@
 #ifndef SOLARPOWERDATA_H
 #define SOLARPOWERDATA_H
 
+#include <Arduino.h>
+
     #pragma pack(push, 1)
     struct WeatherForecast
     {

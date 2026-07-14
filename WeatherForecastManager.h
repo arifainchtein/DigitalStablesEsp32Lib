@@ -23,7 +23,7 @@ public:
     bool hasValidForecasts();
     void loadForecasts(HardwareSerial& serial);
     bool isWeatherDataStale(RTCInfoRecord& currentTimerRecord);
-    void saveForecasts(const WeatherForecast newForecasts[8]);
+    void saveForecasts(const WeatherForecast newForecasts[], int count = 8);
 
 private:
 HardwareSerial& _HardSerial;

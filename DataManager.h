@@ -12,6 +12,9 @@
 #include <DaffodilData.h>
 #include <TimeUtils.h>
 #include <ChinampaDataSerializer.h>
+#include <CommaRecord.h>
+#include <CommaRecordSerializer.h>
+#include <LangleyDataSerializer.h>
 #include <ArduinoJson.h>
 #include <DigitalStablesData.h>
 #include <SeedlingMonitoringData.h>
@@ -38,6 +41,11 @@ public:
   void processDigitalStablesDataQueue();
   void processSeedlingMonitorDataQueue();
   void processChinampaDataQueue();
+  void storeCommaRecord(CommaRecord &r);
+  void processCommaRecordQueue();
+  void clearAllCommaRecords();
+  void storeLangleyData(LangleyData &p);
+  void processLangleyQueue();
 
   int getDSDStoredCount();
   int getSeedlingStoredCount();
@@ -93,10 +101,13 @@ struct SeedlingIndex {
   boolean debug = false;
   #define MAX_QUEUE_SIZE 20        // Chinampa, Gloria, Seedling queues
   #define MAX_DSD_QUEUE_SIZE 50   // DigitalStablesData — larger to avoid losing records
+  #define MAX_COMMA_QUEUE_SIZE 50  // CommaRecord — solar devices may send long batches
   GloriaTankFlowPumpSerializer gloriaTankFlowPumpSerializer;
   DigitalStablesDataSerializer digitalStablesDataSerializer;
   SeedlingMonitorDataSerializer seedlingMonitorDataSerializer;
   ChinampaDataSerializer chinampaDataSerializer;
+  CommaRecordSerializer commaRecordSerializer;
+  LangleyDataSerializer langleyDataSerializer;
   
   ;
   // Queue for DigitalStablesData
@@ -120,10 +131,22 @@ struct SeedlingIndex {
     ChinampaData data;
   };
 
+  struct CommaQueueElement
+  {
+    CommaRecord data;
+  };
+
+  struct LangleyQueueElement
+  {
+    LangleyData data;
+  };
+
   DSQueueElement dsQueue[MAX_DSD_QUEUE_SIZE];
   GloriaQueueElement gloriaQueue[MAX_QUEUE_SIZE];
   SeedQueueElement seedQueue[MAX_QUEUE_SIZE];
   ChinampaQueueElement chinampaQueue[MAX_QUEUE_SIZE];
+  CommaQueueElement commaQueue[MAX_COMMA_QUEUE_SIZE];
+  LangleyQueueElement langleyQueue[MAX_QUEUE_SIZE];
 
   struct QueueCounters
   {
@@ -136,11 +159,15 @@ struct SeedlingIndex {
   QueueCounters gloriaCounters;
   QueueCounters seedCounters;
   QueueCounters chinampaCounters;
+  QueueCounters commaCounters;
+  QueueCounters langleyCounters;
 
 
   void enqueueSeedlingData(SeedlingMonitorData data);
   void enqueueChinampaData(ChinampaData data);
-  
+  void enqueueCommaRecord(CommaRecord data);
+  void enqueueLangleyData(LangleyData data);
+
   void enqueueDSData(DigitalStablesData data);
   void enqueueGloriaData(GloriaTankFlowPumpData data);
   void initializeDSDFile();

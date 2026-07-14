@@ -419,7 +419,7 @@ int DaffodilWifiManager::uploadDataToDigitalStables(){
   _HardSerial.print("upload digitalstables return ");
   _HardSerial.println(httpResponseCode);
    digitalStablesData.digitalStablesUpload=false;
-   digitalStablesData.internetAvailable=false;
+   digitalStablesData.wifiStatus=2;
     digitalWrite(WATCHDOG_WDI, HIGH);
     delay(2);
     digitalWrite(WATCHDOG_WDI, LOW);
@@ -430,11 +430,11 @@ int DaffodilWifiManager::uploadDataToDigitalStables(){
       if(response=="Ok"){
         toReturn =true;
          digitalStablesData.digitalStablesUpload=true;
-          digitalStablesData.internetAvailable=true;
+          digitalStablesData.wifiStatus=3;
       }else{
         httpResponseCode =500;
          digitalStablesData.digitalStablesUpload=false;
-          digitalStablesData.internetAvailable=false;
+          digitalStablesData.wifiStatus=2;
         _HardSerial.print("line 405 upload digitalstables failed=");
          _HardSerial.print(response);
       }

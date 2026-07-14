@@ -109,6 +109,26 @@ uint8_t GeneralFunctions::getStateOfCharge(float batteryVoltage){
 }
 
 
+// Standard published 12V lead-acid open-circuit-voltage curve (resting, no load) - unlike
+// getStateOfCharge() above (whose thresholds look tuned against a LiFePO4 pack rather than real
+// lead-acid), this one is a genuine flooded/AGM/gel reference table. Under actual load the bus
+// voltage sags below the true resting value, so this will read a little pessimistic - acceptable
+// for a low-voltage safety cutoff, not for precision fuel-gauging.
+uint8_t GeneralFunctions::getLeadAcidStateOfCharge(float batteryVoltage){
+	if(batteryVoltage >= 12.70) return 100;
+	else if(batteryVoltage >= 12.50) return 80;
+	else if(batteryVoltage >= 12.32) return 70;
+	else if(batteryVoltage >= 12.20) return 60;
+	else if(batteryVoltage >= 12.06) return 50;
+	else if(batteryVoltage >= 11.90) return 40;
+	else if(batteryVoltage >= 11.75) return 30;
+	else if(batteryVoltage >= 11.58) return 20;
+	else if(batteryVoltage >= 11.31) return 10;
+	else if(batteryVoltage >= 10.50) return 0;
+	return 0;
+}
+
+
 uint8_t GeneralFunctions::getBatteryStateOfCharge(float batteryVoltage){
 	// LiFePO4 single-cell SOC curve (nominal 3.2V, max 3.6V, cutoff 2.8V)
 	if(batteryVoltage >= 3.60) return 100;

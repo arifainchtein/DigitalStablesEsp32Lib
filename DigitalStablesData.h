@@ -91,7 +91,7 @@ struct DigitalStablesData{
 	uint8_t loraActive=0;
 	uint8_t ledBrightness=0;
 	char ipAddress[16];
-	bool internetAvailable;
+	uint8_t wifiStatus;   // 0=off, 1=AP, 2=STA no internet, 3=STA+internet
 	float flowRate=0.0;
 	float totalMilliLitres=0.0;
 
