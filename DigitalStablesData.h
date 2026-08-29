@@ -15,6 +15,7 @@
 #define DAFFODIL_TEMP_SOILMOISTURE 8
 #define DAFFODIL_LIGHT_DETECTOR 9
 #define VOLTAGE_MONITOR 10
+#define DAFFODIL_WATER_TROUGH_TANK1 11
 
 	// const uint8_t tank[] = {
 	//   TSEG_F | TSEG_G | TSEG_D | TSEG_E,                  // t
@@ -73,8 +74,8 @@ struct DigitalStablesData{
 	char devicename[12];
 	char deviceshortname[5];
 	char groupidentifier[5];
-	char sensor1name[8];
-	char sensor2name[8];
+	char sensor1name[6];
+	char sensor2name[6];
 	uint8_t serialnumberarray[8];
 	uint8_t sentbyarray[8];
 	uint8_t checksum;
@@ -108,7 +109,7 @@ struct DigitalStablesData{
 
 	float troughlevelminimumcm=20.0;
 	float troughlevelmaximumcm=30.0;
-	float scepticAvailablePercentage=0.0;
+	float panelVoltage=-99;   // Wally USB/panel INA219 (0x45) bus voltage; -99 if sensor absent. Replaces the old scepticAvailablePercentage (was purely derived, never needed on the wire).
 	float maximumScepticHeight=0.0;
 	float measuredHeight=0.0;
 	//
@@ -140,5 +141,64 @@ struct DigitalStablesData{
 	float estimatedRuntime=0.0;
 	uint8_t asyncdata=0;
 	uint8_t wakeTimeSec=0;
+	float panelCurrent=-99;   // Wally USB/panel INA219 (0x45) current, mA; -99 if sensor absent. Freed by shrinking sensor1name/sensor2name from [8] to [6].
 };
+#endif
+
+
+#ifndef DIAGNOSTICRECORD_H
+#define DIAGNOSTICRECORD_H
+
+// Generic on-demand diagnostics, triggered remotely via a RequestCommand
+// ("EnableDiagnostics#<type>" / "DisableDiagnostics") — NOT part of the normal periodic
+// uplink. diagnosticType selects which member of the payload union is populated; add new
+// diagnostic kinds by adding a payload struct + union member + DIAGNOSTIC_TYPE_* constant,
+// not a new top-level LoRa packet type/size.
+#define DIAGNOSTIC_TYPE_NONE        0
+#define DIAGNOSTIC_TYPE_TX_CURRENT  1
+#define DIAGNOSTIC_TYPE_I2C_STATUS  2
+
+#define DIAGNOSTIC_TX_MAX_SAMPLES 20
+
+#pragma pack(push, 1)
+struct TxCurrentSample {
+    uint16_t offsetMs;    // ms since LoRa.beginPacket()
+    uint16_t milliamps;   // INA219 current_mA at that offset
+};
+
+struct TxCurrentDiagnosticPayload {
+    uint16_t v50i_mV;     // V50_I sampled just before keying up, millivolts
+    uint16_t mAPre;       // battery current just before keying up
+    uint16_t mAPost;      // battery current just after TX completed
+    uint8_t  sampleCount; // valid entries in samples[]
+    TxCurrentSample samples[DIAGNOSTIC_TX_MAX_SAMPLES];
+};
+
+// Snapshot of the boot-time I2C scan — which sensors were actually found. Unlike TX-current,
+// this needs no sampling window: it's ready the instant EnableDiagnostics#2 is processed.
+// Bit assignments (see buildI2CStatusMask() in Daffodil.ino). DS18B20 is OneWire, not I2C,
+// and is deliberately excluded — bit7 is reserved.
+//   bit0=lcd(0x03) bit1=temp(0x40) bit2=ADS1115(0x48) bit3=BH1750(0x23)
+//   bit4=INA219 battery(0x41) bit5=PCF8563T(0x51) bit6=INA219 solar(0x45) bit7=reserved
+struct I2CStatusDiagnosticPayload {
+    uint8_t deviceFoundMask;
+};
+
+// Total size: 4 (totpcode) + 8 (serialnumberarray) + 1 (diagnosticType)
+//           + 87 (payload union, sized to TxCurrentDiagnosticPayload) + 1 (checksum) = 101 bytes.
+// Must stay unique relative to other LoRa packet structs (DigitalStablesData, RequestCommand,
+// WeatherForecastUpdate, GraveyardShiftUpdate) since receivers dispatch on packet size.
+struct DiagnosticRecord {
+    long    totpcode = 0;
+    uint8_t serialnumberarray[8];
+    uint8_t diagnosticType = DIAGNOSTIC_TYPE_NONE;
+    union DiagnosticPayload {
+        TxCurrentDiagnosticPayload txCurrent;
+        I2CStatusDiagnosticPayload i2cStatus;
+        DiagnosticPayload() : txCurrent() {}
+    } payload;
+    uint8_t checksum = 0;
+};
+#pragma pack(pop)
+
 #endif

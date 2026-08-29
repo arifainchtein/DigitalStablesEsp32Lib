@@ -136,7 +136,7 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
 
     serial.print(digitalStablesData.measuredHeight);
     serial.print(F("#"));
-    serial.print(digitalStablesData.scepticAvailablePercentage);
+    serial.print(digitalStablesData.panelVoltage);
     serial.print(F("#"));
     serial.print(digitalStablesData.lux);
     serial.print(F("#"));
@@ -166,7 +166,11 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     serial.print(digitalStablesData.wakeTimeSec);
     serial.print(F("#"));
     serial.print(digitalStablesData.wifiStatus);
+    serial.print(F("#"));
+    serial.print(digitalStablesData.panelCurrent);
     serial.println(F("#"));
 }
 
 DigitalStablesDataSerializer::~DigitalStablesDataSerializer() {}
+
+

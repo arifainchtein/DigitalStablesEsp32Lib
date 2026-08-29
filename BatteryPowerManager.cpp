@@ -6,12 +6,18 @@ BatteryPowerManager::BatteryPowerManager(BatteryChemistry chemistry, float capac
 
 float BatteryPowerManager::sleepingVoltage() const {
   if (_chemistry == CHEM_LIFEPO4) return 12.0;  // ~3.0V/cell average
-  return 12.0;  // generic lead-acid (flooded/AGM/gel) - see BatteryChemistry comment
+  // ~75% SoC for generic lead-acid (flooded/AGM/gel). Raised from 12.0V (~20-25% SoC) on
+  // 2026-08-19 at Ari's request - routinely cycling a lead-acid pack that deep shortens its life,
+  // unlike LiFePO4's much flatter/more tolerant discharge curve. See commaVoltage() below, raised
+  // in step to keep the same ~0.4V margin between "sleep" and "critical".
+  return 12.4;
 }
 
 float BatteryPowerManager::commaVoltage() const {
   if (_chemistry == CHEM_LIFEPO4) return 11.6;  // ~2.9V/cell average, margin above BMS undervoltage cutoff
-  return 11.6;  // generic lead-acid (flooded/AGM/gel)
+  // Generic lead-acid (flooded/AGM/gel) - raised from 11.6V alongside sleepingVoltage() above,
+  // same ~0.4V margin preserved (2026-08-19).
+  return 12.0;
 }
 
 uint8_t BatteryPowerManager::stateOfCharge(float busVoltage) const {

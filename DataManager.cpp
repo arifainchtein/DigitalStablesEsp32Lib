@@ -413,8 +413,8 @@ void DataManager::exportDSDCSV() {
        Serial.println(F("devicename,deviceshortname,groupidentifier,sensor1name,sensor2name,"
                   "serialnumber,devicetype,secondsTime,secondstimestring,dataSamplingSec,"
                   " temperature,rtcBatVolt,opMode,operatingstatus,ledBrightness, rssi, snr,flowRate,totalMilliLitres,flowRate2,totalMilliLitres2,"
-                  "tank1PressurePsi,tank2PressurePsi,troughlevelminimumcm,troughlevelmaximumcm,scepticAvailablePercentage,maximumScepticHeight,measuredHeight,latitude,longitude,altitude,"
-                  "batteryVoltage,v50Voltage,batteryCurrent,estimatedRuntime,outdoortemperature,outdoorhumidity,lux, sleeptime,asyncdata,minimumEfficiencyForLed,minimumEfficiencyForWifi"));
+                  "tank1PressurePsi,tank2PressurePsi,troughlevelminimumcm,troughlevelmaximumcm,panelVoltage,maximumScepticHeight,measuredHeight,latitude,longitude,altitude,"
+                  "batteryVoltage,v50Voltage,batteryCurrent,estimatedRuntime,outdoortemperature,outdoorhumidity,lux, sleeptime,asyncdata,minimumEfficiencyForLed,minimumEfficiencyForWifi,panelCurrent"));
 
     DigitalStablesData data;
     while(file.read((uint8_t*)&data, sizeof(DigitalStablesData))) {
@@ -485,7 +485,7 @@ void DataManager::exportDSDCSV() {
     
     Serial.print("," + String(data.troughlevelminimumcm));
     Serial.print("," + String(data.troughlevelmaximumcm));
-    Serial.print("," + String(data.scepticAvailablePercentage));
+    Serial.print("," + String(data.panelVoltage));
     Serial.print("," + String(data.maximumScepticHeight));
     Serial.print("," + String(data.measuredHeight));
     // Location data
@@ -506,7 +506,8 @@ void DataManager::exportDSDCSV() {
     Serial.print(", " + String(data.sleepTime));
      Serial.print(", " + String(data.asyncdata));
     Serial.print("," + String(data.minimumEfficiencyForLed));
-    Serial.println(", " + String(data.minimumEfficiencyForWifi));
+    Serial.print(", " + String(data.minimumEfficiencyForWifi));
+    Serial.println("," + String(data.panelCurrent));
     }
     
     file.close();
@@ -633,6 +634,8 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     functionname="DAFFODIL_LIGHT_DETECTOR";
    }else if(data.currentFunctionValue== VOLTAGE_MONITOR){
     functionname="VOLTAGE_MONITOR";
+   }else if(data.currentFunctionValue== DAFFODIL_WATER_TROUGH_TANK1){
+    functionname="DAFFODIL_WATER_TROUGH_TANK1";
    }
     Serial.println("Current Function Value: " + functionname);
     
@@ -668,6 +671,8 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     Serial.println("Battery Voltage: " + String(data.batteryVoltage));
     Serial.println("V50 Voltage: " + String(data.v50Voltage));
     Serial.println("Battery Current: " + String(data.batteryCurrent));
+    Serial.println("Panel Voltage: " + String(data.panelVoltage));
+    Serial.println("Panel Current: " + String(data.panelCurrent));
     Serial.println("Outdoor Temperature: " + String(data.outdoortemperature));
     Serial.println("Outdoor Humidity: " + String(data.outdoorhumidity));
     Serial.println("Lux: " + String(data.lux));
@@ -687,6 +692,8 @@ void DataManager::enqueueChinampaData(ChinampaData data){
     chinampaCounters.rear = (chinampaCounters.rear + 1) % MAX_QUEUE_SIZE;
     chinampaQueue[chinampaCounters.rear].data = data;
     chinampaCounters.itemCount++;
+  } else {
+    overflowChinampaData(data);
   }
     if (debug){
     if(debug)_HardSerial.print("after storing  chinampadata  chinampaCounters.itemCount=");
@@ -775,6 +782,8 @@ void DataManager::enqueueCommaRecord(CommaRecord data) {
     commaCounters.rear = (commaCounters.rear + 1) % MAX_COMMA_QUEUE_SIZE;
     commaQueue[commaCounters.rear].data = data;
     commaCounters.itemCount++;
+  } else {
+    overflowCommaRecord(data);
   }
   if (debug) {
     _HardSerial.print("enqueueCommaRecord itemCount=");
@@ -823,6 +832,8 @@ void DataManager::enqueueLangleyData(LangleyData data) {
     langleyCounters.rear = (langleyCounters.rear + 1) % MAX_QUEUE_SIZE;
     langleyQueue[langleyCounters.rear].data = data;
     langleyCounters.itemCount++;
+  } else {
+    overflowLangleyData(data);
   }
   if (debug) {
     _HardSerial.print("enqueueLangleyData itemCount=");
@@ -847,6 +858,14 @@ void DataManager::processLangleyQueue() {
   langleyCounters.front = 0;
   langleyCounters.rear = -1;
   langleyCounters.itemCount = 0;
+}
+
+int DataManager::getPendingQueueItemCount()
+{
+  return dsCounters.itemCount + gloriaCounters.itemCount + seedCounters.itemCount +
+         chinampaCounters.itemCount + commaCounters.itemCount + langleyCounters.itemCount +
+         getDSDOverflowCount() + getLangleyOverflowCount() + getGloriaOverflowCount() +
+         getSeedlingOverflowCount() + getChinampaOverflowCount() + getCommaOverflowCount();
 }
 
 void DataManager::processGloriaQueue()
@@ -901,6 +920,8 @@ void DataManager::enqueueSeedlingData(SeedlingMonitorData data)
     seedCounters.rear = (seedCounters.rear + 1) % MAX_QUEUE_SIZE;
     seedQueue[seedCounters.rear].data = data;
     seedCounters.itemCount++;
+  } else {
+    overflowSeedlingData(data);
   }
     if (debug){
     if(debug)_HardSerial.print("after storing  SeedlingMonitorData  seedCounters.itemCount=");
@@ -916,6 +937,13 @@ void DataManager::enqueueDSData(DigitalStablesData data)
     dsCounters.rear = (dsCounters.rear + 1) % MAX_DSD_QUEUE_SIZE;
     dsQueue[dsCounters.rear].data = data;
     dsCounters.itemCount++;
+  } else {
+    //
+    // RAM queue is full -- fall through to the flash-backed overflow tier
+    // instead of silently discarding. See conversation 2026-08-04
+    // (ChinampaMonitor scale-up planning, 20+ Daffodil deployment).
+    //
+    overflowDSDData(data);
   }
     if (debug){
     if(debug)_HardSerial.print("after storing  digitalStablesData  dsCounters.itemCount=");
@@ -924,6 +952,735 @@ void DataManager::enqueueDSData(DigitalStablesData data)
     }
 }
 
+bool DataManager::loadOverflowIndex(const char* indexFile, OverflowIndex& index) {
+    if (!_fs.exists(indexFile)) {
+        index = OverflowIndex();
+        return true;
+    }
+    File file = _fs.open(indexFile, "r");
+    if (!file) return false;
+    file.read((uint8_t*)&index, sizeof(OverflowIndex));
+    file.close();
+    //
+    // Sanity check against the largest per-type capacity (Comma, 2000) --
+    // this helper is shared-shape across all six types so it doesn't know
+    // its caller's exact capacity, but any legitimate count/head/tail for
+    // ANY type must fall within this generous bound. Catches stale or
+    // incompatible flash content at this path (e.g. leftover data from
+    // before this struct existed, or a previous struct layout with a
+    // different size) that would otherwise be trusted blindly -- a garbage
+    // count in the millions runs the process*Overflow() loops (no yield()
+    // inside) long enough to starve the watchdog and force a silent reboot
+    // mid-transmission. Self-heals by resetting and persisting a clean
+    // index so this doesn't re-trigger on the next boot.
+    //
+    if (index.count < 0 || index.count > 2000 || index.head < 0 || index.tail < -1) {
+        if (debug) _HardSerial.println("loadOverflowIndex: corrupted index detected, resetting");
+        index = OverflowIndex();
+        saveOverflowIndex(indexFile, index);
+    }
+    return true;
+}
+
+bool DataManager::saveOverflowIndex(const char* indexFile, const OverflowIndex& index) {
+    File file = _fs.open(indexFile, "w");
+    if (!file) return false;
+    file.write((uint8_t*)&index, sizeof(OverflowIndex));
+    file.close();
+    return true;
+}
+
+//
+// Drop-oldest circular buffer on flash. Only called from enqueueDSData() above
+// when the RAM queue is already full, so this is the rare path, not the
+// routine one -- see the endurance note on MAX_OVERFLOW_DSD_RECORDS in
+// DataManager.h. "dropped" only increments once this store is ALSO full,
+// i.e. the backlog has outgrown both tiers -- real, permanent loss.
+//
+void DataManager::overflowDSDData(DigitalStablesData &data) {
+  if (!_initialized) return;
+
+  OverflowIndex index;
+  if (!loadOverflowIndex(DSD_OVERFLOW_INDEX_FILE, index)) {
+    if (debug) _HardSerial.println("overflowDSDData: failed to load index");
+    return;
+  }
+
+  bool evicting = (index.count >= MAX_OVERFLOW_DSD_RECORDS);
+
+  // "r+" needs the file to already exist; create it empty first if this is
+  // the very first overflow write since boot/format.
+  if (!_fs.exists(DSD_OVERFLOW_DATA_FILE)) {
+    File create = _fs.open(DSD_OVERFLOW_DATA_FILE, "w");
+    if (create) create.close();
+  }
+
+  File file = _fs.open(DSD_OVERFLOW_DATA_FILE, "r+");
+  if (!file) {
+    if (debug) _HardSerial.println("overflowDSDData: failed to open data file");
+    return;
+  }
+
+  int writeSlot = (index.tail + 1) % MAX_OVERFLOW_DSD_RECORDS;
+  file.seek(writeSlot * sizeof(DigitalStablesData));
+  file.write((uint8_t*)&data, sizeof(DigitalStablesData));
+  file.close();
+
+  index.tail = writeSlot;
+  if (evicting) {
+    // Already full -- this write just overwrote the oldest slot, so head
+    // moves forward too and that old record is now permanently gone.
+    index.head = (index.head + 1) % MAX_OVERFLOW_DSD_RECORDS;
+    index.dropped++;
+  } else {
+    index.count++;
+  }
+
+  // Flash-wear tracking -- every overflow write erases/programs a flash
+  // block regardless of whether it was an eviction, so this counts all of
+  // them, not just the dropped ones.
+  index.writeCount++;
+  if (index.firstWriteEpoch == 0 && _currentEpoch > 0) {
+    index.firstWriteEpoch = _currentEpoch;
+  }
+
+  saveOverflowIndex(DSD_OVERFLOW_INDEX_FILE, index);
+
+  if (debug) {
+    _HardSerial.print("overflowDSDData: count=");
+    _HardSerial.print(index.count);
+    _HardSerial.print(" dropped=");
+    _HardSerial.println(index.dropped);
+  }
+}
+
+//
+// Drains the overflow store over Serial, oldest-first, same wire format as
+// processDigitalStablesDataQueue()'s pushToSerial() calls. Call this AFTER
+// processDigitalStablesDataQueue() so RAM (newest arrivals) goes out before
+// flash overflow (older backlog) -- a minor chronological inversion during
+// backlog recovery, accepted since every record carries its own secondsTime.
+// Resets count/head/tail to empty once drained, but deliberately leaves
+// "dropped" alone -- that's a permanent record of loss that already
+// happened, not current queue state.
+//
+void DataManager::processDSDOverflow() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(DSD_OVERFLOW_INDEX_FILE, index)) return;
+  if (index.count == 0) return;
+
+  File file = _fs.open(DSD_OVERFLOW_DATA_FILE, "r");
+  if (!file) return;
+
+  DigitalStablesData record;
+  for (int i = 0; i < index.count; i++) {
+    int slot = (index.head + i) % MAX_OVERFLOW_DSD_RECORDS;
+    file.seek(slot * sizeof(DigitalStablesData));
+    file.read((uint8_t*)&record, sizeof(DigitalStablesData));
+    digitalStablesDataSerializer.pushToSerial(_HardSerial, record);
+    yield(); // let the watchdog/WiFi stack breathe on a long backlog drain
+  }
+  file.close();
+
+  index.head = 0;
+  index.tail = -1;
+  index.count = 0;
+  saveOverflowIndex(DSD_OVERFLOW_INDEX_FILE, index);
+}
+
+int DataManager::getDSDOverflowCount() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(DSD_OVERFLOW_INDEX_FILE, index)) return 0;
+  return index.count;
+}
+
+unsigned long DataManager::getDSDDroppedCount() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(DSD_OVERFLOW_INDEX_FILE, index)) return 0;
+  return index.dropped;
+}
+
+void DataManager::setCurrentEpoch(unsigned long epoch) {
+  _currentEpoch = epoch;
+}
+
+long DataManager::getDSDFlashHealthDaysRemaining() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(DSD_OVERFLOW_INDEX_FILE, index)) return -1;
+  if (index.writeCount == 0 || index.firstWriteEpoch == 0 || _currentEpoch <= index.firstWriteEpoch) {
+    return -1;
+  }
+
+  unsigned long elapsedSeconds = _currentEpoch - index.firstWriteEpoch;
+  // Need a real sample window before extrapolating -- a handful of writes in
+  // the first few minutes would produce a wildly noisy rate estimate.
+  if (elapsedSeconds < 3600) return -1;
+
+  double writesPerSecond = (double)index.writeCount / (double)elapsedSeconds;
+  double fileSizeBytes = (double)MAX_OVERFLOW_DSD_RECORDS * sizeof(DigitalStablesData);
+  double blocksUsed = ceil(fileSizeBytes / FLASH_ERASE_BLOCK_SIZE);
+  if (blocksUsed < 1) blocksUsed = 1;
+
+  double avgCyclesPerBlockSoFar = (double)index.writeCount / blocksUsed;
+  double cyclesPerBlockPerSecond = writesPerSecond / blocksUsed;
+  if (cyclesPerBlockPerSecond <= 0) return -1;
+
+  double remainingCycles = (double)FLASH_RATED_ERASE_CYCLES - avgCyclesPerBlockSoFar;
+  if (remainingCycles <= 0) return 0; // already past the rated estimate
+
+  double secondsRemaining = remainingCycles / cyclesPerBlockPerSecond;
+  return (long)(secondsRemaining / 86400.0);
+}
+
+//
+// Langley -- same shape as the DSD block above.
+//
+void DataManager::overflowLangleyData(LangleyData &data) {
+  if (!_initialized) return;
+
+  OverflowIndex index;
+  if (!loadOverflowIndex(LANGLEY_OVERFLOW_INDEX_FILE, index)) {
+    if (debug) _HardSerial.println("overflowLangleyData: failed to load index");
+    return;
+  }
+
+  bool evicting = (index.count >= MAX_OVERFLOW_LANGLEY_RECORDS);
+
+  if (!_fs.exists(LANGLEY_OVERFLOW_DATA_FILE)) {
+    File create = _fs.open(LANGLEY_OVERFLOW_DATA_FILE, "w");
+    if (create) create.close();
+  }
+
+  File file = _fs.open(LANGLEY_OVERFLOW_DATA_FILE, "r+");
+  if (!file) {
+    if (debug) _HardSerial.println("overflowLangleyData: failed to open data file");
+    return;
+  }
+
+  int writeSlot = (index.tail + 1) % MAX_OVERFLOW_LANGLEY_RECORDS;
+  file.seek(writeSlot * sizeof(LangleyData));
+  file.write((uint8_t*)&data, sizeof(LangleyData));
+  file.close();
+
+  index.tail = writeSlot;
+  if (evicting) {
+    index.head = (index.head + 1) % MAX_OVERFLOW_LANGLEY_RECORDS;
+    index.dropped++;
+  } else {
+    index.count++;
+  }
+
+  index.writeCount++;
+  if (index.firstWriteEpoch == 0 && _currentEpoch > 0) {
+    index.firstWriteEpoch = _currentEpoch;
+  }
+
+  saveOverflowIndex(LANGLEY_OVERFLOW_INDEX_FILE, index);
+}
+
+void DataManager::processLangleyOverflow() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(LANGLEY_OVERFLOW_INDEX_FILE, index)) return;
+  if (index.count == 0) return;
+
+  File file = _fs.open(LANGLEY_OVERFLOW_DATA_FILE, "r");
+  if (!file) return;
+
+  LangleyData record;
+  for (int i = 0; i < index.count; i++) {
+    int slot = (index.head + i) % MAX_OVERFLOW_LANGLEY_RECORDS;
+    file.seek(slot * sizeof(LangleyData));
+    file.read((uint8_t*)&record, sizeof(LangleyData));
+    langleyDataSerializer.pushToSerial(_HardSerial, record);
+    yield(); // let the watchdog/WiFi stack breathe on a long backlog drain
+  }
+  file.close();
+
+  index.head = 0;
+  index.tail = -1;
+  index.count = 0;
+  saveOverflowIndex(LANGLEY_OVERFLOW_INDEX_FILE, index);
+}
+
+int DataManager::getLangleyOverflowCount() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(LANGLEY_OVERFLOW_INDEX_FILE, index)) return 0;
+  return index.count;
+}
+
+unsigned long DataManager::getLangleyDroppedCount() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(LANGLEY_OVERFLOW_INDEX_FILE, index)) return 0;
+  return index.dropped;
+}
+
+long DataManager::getLangleyFlashHealthDaysRemaining() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(LANGLEY_OVERFLOW_INDEX_FILE, index)) return -1;
+  if (index.writeCount == 0 || index.firstWriteEpoch == 0 || _currentEpoch <= index.firstWriteEpoch) {
+    return -1;
+  }
+
+  unsigned long elapsedSeconds = _currentEpoch - index.firstWriteEpoch;
+  if (elapsedSeconds < 3600) return -1;
+
+  double writesPerSecond = (double)index.writeCount / (double)elapsedSeconds;
+  double fileSizeBytes = (double)MAX_OVERFLOW_LANGLEY_RECORDS * sizeof(LangleyData);
+  double blocksUsed = ceil(fileSizeBytes / FLASH_ERASE_BLOCK_SIZE);
+  if (blocksUsed < 1) blocksUsed = 1;
+
+  double avgCyclesPerBlockSoFar = (double)index.writeCount / blocksUsed;
+  double cyclesPerBlockPerSecond = writesPerSecond / blocksUsed;
+  if (cyclesPerBlockPerSecond <= 0) return -1;
+
+  double remainingCycles = (double)FLASH_RATED_ERASE_CYCLES - avgCyclesPerBlockSoFar;
+  if (remainingCycles <= 0) return 0;
+
+  double secondsRemaining = remainingCycles / cyclesPerBlockPerSecond;
+  return (long)(secondsRemaining / 86400.0);
+}
+
+//
+// Gloria -- same shape as the DSD block above.
+//
+void DataManager::overflowGloriaData(GloriaTankFlowPumpData &data) {
+  if (!_initialized) return;
+
+  OverflowIndex index;
+  if (!loadOverflowIndex(GLORIA_OVERFLOW_INDEX_FILE, index)) {
+    if (debug) _HardSerial.println("overflowGloriaData: failed to load index");
+    return;
+  }
+
+  bool evicting = (index.count >= MAX_OVERFLOW_GLORIA_RECORDS);
+
+  if (!_fs.exists(GLORIA_OVERFLOW_DATA_FILE)) {
+    File create = _fs.open(GLORIA_OVERFLOW_DATA_FILE, "w");
+    if (create) create.close();
+  }
+
+  File file = _fs.open(GLORIA_OVERFLOW_DATA_FILE, "r+");
+  if (!file) {
+    if (debug) _HardSerial.println("overflowGloriaData: failed to open data file");
+    return;
+  }
+
+  int writeSlot = (index.tail + 1) % MAX_OVERFLOW_GLORIA_RECORDS;
+  file.seek(writeSlot * sizeof(GloriaTankFlowPumpData));
+  file.write((uint8_t*)&data, sizeof(GloriaTankFlowPumpData));
+  file.close();
+
+  index.tail = writeSlot;
+  if (evicting) {
+    index.head = (index.head + 1) % MAX_OVERFLOW_GLORIA_RECORDS;
+    index.dropped++;
+  } else {
+    index.count++;
+  }
+
+  index.writeCount++;
+  if (index.firstWriteEpoch == 0 && _currentEpoch > 0) {
+    index.firstWriteEpoch = _currentEpoch;
+  }
+
+  saveOverflowIndex(GLORIA_OVERFLOW_INDEX_FILE, index);
+}
+
+void DataManager::processGloriaOverflow() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(GLORIA_OVERFLOW_INDEX_FILE, index)) return;
+  if (index.count == 0) return;
+
+  File file = _fs.open(GLORIA_OVERFLOW_DATA_FILE, "r");
+  if (!file) return;
+
+  GloriaTankFlowPumpData record;
+  for (int i = 0; i < index.count; i++) {
+    int slot = (index.head + i) % MAX_OVERFLOW_GLORIA_RECORDS;
+    file.seek(slot * sizeof(GloriaTankFlowPumpData));
+    file.read((uint8_t*)&record, sizeof(GloriaTankFlowPumpData));
+    gloriaTankFlowPumpSerializer.pushToSerial(_HardSerial, record);
+    yield(); // let the watchdog/WiFi stack breathe on a long backlog drain
+  }
+  file.close();
+
+  index.head = 0;
+  index.tail = -1;
+  index.count = 0;
+  saveOverflowIndex(GLORIA_OVERFLOW_INDEX_FILE, index);
+}
+
+int DataManager::getGloriaOverflowCount() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(GLORIA_OVERFLOW_INDEX_FILE, index)) return 0;
+  return index.count;
+}
+
+unsigned long DataManager::getGloriaDroppedCount() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(GLORIA_OVERFLOW_INDEX_FILE, index)) return 0;
+  return index.dropped;
+}
+
+long DataManager::getGloriaFlashHealthDaysRemaining() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(GLORIA_OVERFLOW_INDEX_FILE, index)) return -1;
+  if (index.writeCount == 0 || index.firstWriteEpoch == 0 || _currentEpoch <= index.firstWriteEpoch) {
+    return -1;
+  }
+
+  unsigned long elapsedSeconds = _currentEpoch - index.firstWriteEpoch;
+  if (elapsedSeconds < 3600) return -1;
+
+  double writesPerSecond = (double)index.writeCount / (double)elapsedSeconds;
+  double fileSizeBytes = (double)MAX_OVERFLOW_GLORIA_RECORDS * sizeof(GloriaTankFlowPumpData);
+  double blocksUsed = ceil(fileSizeBytes / FLASH_ERASE_BLOCK_SIZE);
+  if (blocksUsed < 1) blocksUsed = 1;
+
+  double avgCyclesPerBlockSoFar = (double)index.writeCount / blocksUsed;
+  double cyclesPerBlockPerSecond = writesPerSecond / blocksUsed;
+  if (cyclesPerBlockPerSecond <= 0) return -1;
+
+  double remainingCycles = (double)FLASH_RATED_ERASE_CYCLES - avgCyclesPerBlockSoFar;
+  if (remainingCycles <= 0) return 0;
+
+  double secondsRemaining = remainingCycles / cyclesPerBlockPerSecond;
+  return (long)(secondsRemaining / 86400.0);
+}
+
+//
+// Seedling -- same shape as the DSD block above.
+//
+void DataManager::overflowSeedlingData(SeedlingMonitorData &data) {
+  if (!_initialized) return;
+
+  OverflowIndex index;
+  if (!loadOverflowIndex(SEEDLING_OVERFLOW_INDEX_FILE, index)) {
+    if (debug) _HardSerial.println("overflowSeedlingData: failed to load index");
+    return;
+  }
+
+  bool evicting = (index.count >= MAX_OVERFLOW_SEEDLING_RECORDS);
+
+  if (!_fs.exists(SEEDLING_OVERFLOW_DATA_FILE)) {
+    File create = _fs.open(SEEDLING_OVERFLOW_DATA_FILE, "w");
+    if (create) create.close();
+  }
+
+  File file = _fs.open(SEEDLING_OVERFLOW_DATA_FILE, "r+");
+  if (!file) {
+    if (debug) _HardSerial.println("overflowSeedlingData: failed to open data file");
+    return;
+  }
+
+  int writeSlot = (index.tail + 1) % MAX_OVERFLOW_SEEDLING_RECORDS;
+  file.seek(writeSlot * sizeof(SeedlingMonitorData));
+  file.write((uint8_t*)&data, sizeof(SeedlingMonitorData));
+  file.close();
+
+  index.tail = writeSlot;
+  if (evicting) {
+    index.head = (index.head + 1) % MAX_OVERFLOW_SEEDLING_RECORDS;
+    index.dropped++;
+  } else {
+    index.count++;
+  }
+
+  index.writeCount++;
+  if (index.firstWriteEpoch == 0 && _currentEpoch > 0) {
+    index.firstWriteEpoch = _currentEpoch;
+  }
+
+  saveOverflowIndex(SEEDLING_OVERFLOW_INDEX_FILE, index);
+}
+
+void DataManager::processSeedlingOverflow() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(SEEDLING_OVERFLOW_INDEX_FILE, index)) return;
+  if (index.count == 0) return;
+
+  File file = _fs.open(SEEDLING_OVERFLOW_DATA_FILE, "r");
+  if (!file) return;
+
+  SeedlingMonitorData record;
+  for (int i = 0; i < index.count; i++) {
+    int slot = (index.head + i) % MAX_OVERFLOW_SEEDLING_RECORDS;
+    file.seek(slot * sizeof(SeedlingMonitorData));
+    file.read((uint8_t*)&record, sizeof(SeedlingMonitorData));
+    seedlingMonitorDataSerializer.pushToSerial(_HardSerial, record);
+    yield(); // let the watchdog/WiFi stack breathe on a long backlog drain
+  }
+  file.close();
+
+  index.head = 0;
+  index.tail = -1;
+  index.count = 0;
+  saveOverflowIndex(SEEDLING_OVERFLOW_INDEX_FILE, index);
+}
+
+int DataManager::getSeedlingOverflowCount() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(SEEDLING_OVERFLOW_INDEX_FILE, index)) return 0;
+  return index.count;
+}
+
+unsigned long DataManager::getSeedlingDroppedCount() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(SEEDLING_OVERFLOW_INDEX_FILE, index)) return 0;
+  return index.dropped;
+}
+
+long DataManager::getSeedlingFlashHealthDaysRemaining() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(SEEDLING_OVERFLOW_INDEX_FILE, index)) return -1;
+  if (index.writeCount == 0 || index.firstWriteEpoch == 0 || _currentEpoch <= index.firstWriteEpoch) {
+    return -1;
+  }
+
+  unsigned long elapsedSeconds = _currentEpoch - index.firstWriteEpoch;
+  if (elapsedSeconds < 3600) return -1;
+
+  double writesPerSecond = (double)index.writeCount / (double)elapsedSeconds;
+  double fileSizeBytes = (double)MAX_OVERFLOW_SEEDLING_RECORDS * sizeof(SeedlingMonitorData);
+  double blocksUsed = ceil(fileSizeBytes / FLASH_ERASE_BLOCK_SIZE);
+  if (blocksUsed < 1) blocksUsed = 1;
+
+  double avgCyclesPerBlockSoFar = (double)index.writeCount / blocksUsed;
+  double cyclesPerBlockPerSecond = writesPerSecond / blocksUsed;
+  if (cyclesPerBlockPerSecond <= 0) return -1;
+
+  double remainingCycles = (double)FLASH_RATED_ERASE_CYCLES - avgCyclesPerBlockSoFar;
+  if (remainingCycles <= 0) return 0;
+
+  double secondsRemaining = remainingCycles / cyclesPerBlockPerSecond;
+  return (long)(secondsRemaining / 86400.0);
+}
+
+//
+// Chinampa -- same shape as the DSD block above.
+//
+void DataManager::overflowChinampaData(ChinampaData &data) {
+  if (!_initialized) return;
+
+  OverflowIndex index;
+  if (!loadOverflowIndex(CHINAMPA_OVERFLOW_INDEX_FILE, index)) {
+    if (debug) _HardSerial.println("overflowChinampaData: failed to load index");
+    return;
+  }
+
+  bool evicting = (index.count >= MAX_OVERFLOW_CHINAMPA_RECORDS);
+
+  if (!_fs.exists(CHINAMPA_OVERFLOW_DATA_FILE)) {
+    File create = _fs.open(CHINAMPA_OVERFLOW_DATA_FILE, "w");
+    if (create) create.close();
+  }
+
+  File file = _fs.open(CHINAMPA_OVERFLOW_DATA_FILE, "r+");
+  if (!file) {
+    if (debug) _HardSerial.println("overflowChinampaData: failed to open data file");
+    return;
+  }
+
+  int writeSlot = (index.tail + 1) % MAX_OVERFLOW_CHINAMPA_RECORDS;
+  file.seek(writeSlot * sizeof(ChinampaData));
+  file.write((uint8_t*)&data, sizeof(ChinampaData));
+  file.close();
+
+  index.tail = writeSlot;
+  if (evicting) {
+    index.head = (index.head + 1) % MAX_OVERFLOW_CHINAMPA_RECORDS;
+    index.dropped++;
+  } else {
+    index.count++;
+  }
+
+  index.writeCount++;
+  if (index.firstWriteEpoch == 0 && _currentEpoch > 0) {
+    index.firstWriteEpoch = _currentEpoch;
+  }
+
+  saveOverflowIndex(CHINAMPA_OVERFLOW_INDEX_FILE, index);
+}
+
+void DataManager::processChinampaOverflow() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(CHINAMPA_OVERFLOW_INDEX_FILE, index)) return;
+  if (index.count == 0) return;
+
+  File file = _fs.open(CHINAMPA_OVERFLOW_DATA_FILE, "r");
+  if (!file) return;
+
+  ChinampaData record;
+  for (int i = 0; i < index.count; i++) {
+    int slot = (index.head + i) % MAX_OVERFLOW_CHINAMPA_RECORDS;
+    file.seek(slot * sizeof(ChinampaData));
+    file.read((uint8_t*)&record, sizeof(ChinampaData));
+    chinampaDataSerializer.pushToSerial(_HardSerial, record);
+    yield(); // let the watchdog/WiFi stack breathe on a long backlog drain
+  }
+  file.close();
+
+  index.head = 0;
+  index.tail = -1;
+  index.count = 0;
+  saveOverflowIndex(CHINAMPA_OVERFLOW_INDEX_FILE, index);
+}
+
+int DataManager::getChinampaOverflowCount() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(CHINAMPA_OVERFLOW_INDEX_FILE, index)) return 0;
+  return index.count;
+}
+
+unsigned long DataManager::getChinampaDroppedCount() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(CHINAMPA_OVERFLOW_INDEX_FILE, index)) return 0;
+  return index.dropped;
+}
+
+long DataManager::getChinampaFlashHealthDaysRemaining() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(CHINAMPA_OVERFLOW_INDEX_FILE, index)) return -1;
+  if (index.writeCount == 0 || index.firstWriteEpoch == 0 || _currentEpoch <= index.firstWriteEpoch) {
+    return -1;
+  }
+
+  unsigned long elapsedSeconds = _currentEpoch - index.firstWriteEpoch;
+  if (elapsedSeconds < 3600) return -1;
+
+  double writesPerSecond = (double)index.writeCount / (double)elapsedSeconds;
+  double fileSizeBytes = (double)MAX_OVERFLOW_CHINAMPA_RECORDS * sizeof(ChinampaData);
+  double blocksUsed = ceil(fileSizeBytes / FLASH_ERASE_BLOCK_SIZE);
+  if (blocksUsed < 1) blocksUsed = 1;
+
+  double avgCyclesPerBlockSoFar = (double)index.writeCount / blocksUsed;
+  double cyclesPerBlockPerSecond = writesPerSecond / blocksUsed;
+  if (cyclesPerBlockPerSecond <= 0) return -1;
+
+  double remainingCycles = (double)FLASH_RATED_ERASE_CYCLES - avgCyclesPerBlockSoFar;
+  if (remainingCycles <= 0) return 0;
+
+  double secondsRemaining = remainingCycles / cyclesPerBlockPerSecond;
+  return (long)(secondsRemaining / 86400.0);
+}
+
+//
+// Comma -- same shape as the DSD block above. Records are tiny (~32 bytes),
+// so this store affords much deeper history (2000 records) at negligible
+// flash cost -- see the capacity table in DataManager.h.
+//
+void DataManager::overflowCommaRecord(CommaRecord &data) {
+  if (!_initialized) return;
+
+  OverflowIndex index;
+  if (!loadOverflowIndex(COMMA_OVERFLOW_INDEX_FILE, index)) {
+    if (debug) _HardSerial.println("overflowCommaRecord: failed to load index");
+    return;
+  }
+
+  bool evicting = (index.count >= MAX_OVERFLOW_COMMA_RECORDS);
+
+  if (!_fs.exists(COMMA_OVERFLOW_DATA_FILE)) {
+    File create = _fs.open(COMMA_OVERFLOW_DATA_FILE, "w");
+    if (create) create.close();
+  }
+
+  File file = _fs.open(COMMA_OVERFLOW_DATA_FILE, "r+");
+  if (!file) {
+    if (debug) _HardSerial.println("overflowCommaRecord: failed to open data file");
+    return;
+  }
+
+  int writeSlot = (index.tail + 1) % MAX_OVERFLOW_COMMA_RECORDS;
+  file.seek(writeSlot * sizeof(CommaRecord));
+  file.write((uint8_t*)&data, sizeof(CommaRecord));
+  file.close();
+
+  index.tail = writeSlot;
+  if (evicting) {
+    index.head = (index.head + 1) % MAX_OVERFLOW_COMMA_RECORDS;
+    index.dropped++;
+  } else {
+    index.count++;
+  }
+
+  index.writeCount++;
+  if (index.firstWriteEpoch == 0 && _currentEpoch > 0) {
+    index.firstWriteEpoch = _currentEpoch;
+  }
+
+  saveOverflowIndex(COMMA_OVERFLOW_INDEX_FILE, index);
+}
+
+void DataManager::processCommaOverflow() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(COMMA_OVERFLOW_INDEX_FILE, index)) return;
+  if (index.count == 0) return;
+
+  File file = _fs.open(COMMA_OVERFLOW_DATA_FILE, "r");
+  if (!file) return;
+
+  CommaRecord record;
+  for (int i = 0; i < index.count; i++) {
+    int slot = (index.head + i) % MAX_OVERFLOW_COMMA_RECORDS;
+    file.seek(slot * sizeof(CommaRecord));
+    file.read((uint8_t*)&record, sizeof(CommaRecord));
+    commaRecordSerializer.pushToSerial(_HardSerial, record);
+    yield(); // let the watchdog/WiFi stack breathe on a long backlog drain
+  }
+  file.close();
+
+  index.head = 0;
+  index.tail = -1;
+  index.count = 0;
+  saveOverflowIndex(COMMA_OVERFLOW_INDEX_FILE, index);
+}
+
+int DataManager::getCommaOverflowCount() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(COMMA_OVERFLOW_INDEX_FILE, index)) return 0;
+  return index.count;
+}
+
+unsigned long DataManager::getCommaDroppedCount() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(COMMA_OVERFLOW_INDEX_FILE, index)) return 0;
+  return index.dropped;
+}
+
+long DataManager::getCommaFlashHealthDaysRemaining() {
+  OverflowIndex index;
+  if (!loadOverflowIndex(COMMA_OVERFLOW_INDEX_FILE, index)) return -1;
+  if (index.writeCount == 0 || index.firstWriteEpoch == 0 || _currentEpoch <= index.firstWriteEpoch) {
+    return -1;
+  }
+
+  unsigned long elapsedSeconds = _currentEpoch - index.firstWriteEpoch;
+  if (elapsedSeconds < 3600) return -1;
+
+  double writesPerSecond = (double)index.writeCount / (double)elapsedSeconds;
+  double fileSizeBytes = (double)MAX_OVERFLOW_COMMA_RECORDS * sizeof(CommaRecord);
+  double blocksUsed = ceil(fileSizeBytes / FLASH_ERASE_BLOCK_SIZE);
+  if (blocksUsed < 1) blocksUsed = 1;
+
+  double avgCyclesPerBlockSoFar = (double)index.writeCount / blocksUsed;
+  double cyclesPerBlockPerSecond = writesPerSecond / blocksUsed;
+  if (cyclesPerBlockPerSecond <= 0) return -1;
+
+  double remainingCycles = (double)FLASH_RATED_ERASE_CYCLES - avgCyclesPerBlockSoFar;
+  if (remainingCycles <= 0) return 0;
+
+  double secondsRemaining = remainingCycles / cyclesPerBlockPerSecond;
+  return (long)(secondsRemaining / 86400.0);
+}
+
+int DataManager::getDSDQueueCount() { return dsCounters.itemCount; }
+int DataManager::getGloriaQueueCount() { return gloriaCounters.itemCount; }
+int DataManager::getSeedlingQueueCount() { return seedCounters.itemCount; }
+int DataManager::getChinampaQueueCount() { return chinampaCounters.itemCount; }
+int DataManager::getCommaQueueCount() { return commaCounters.itemCount; }
+int DataManager::getLangleyQueueCount() { return langleyCounters.itemCount; }
+
 void DataManager::enqueueGloriaData(GloriaTankFlowPumpData data)
 {
   if (gloriaCounters.itemCount < MAX_QUEUE_SIZE)
@@ -931,6 +1688,8 @@ void DataManager::enqueueGloriaData(GloriaTankFlowPumpData data)
     gloriaCounters.rear = (gloriaCounters.rear + 1) % MAX_QUEUE_SIZE;
     gloriaQueue[gloriaCounters.rear].data = data;
     gloriaCounters.itemCount++;
+  } else {
+    overflowGloriaData(data);
   }
 }
 
@@ -1112,7 +1871,8 @@ void DataManager::generateDigitalStablesData(DigitalStablesData &digitalStablesD
   json["outdoorhumidity"] = digitalStablesData.outdoorhumidity;
   // json["minimumSepticHeight"] = digitalStablesData.minimumSepticHeight;
   json["maximumScepticHeight"] = digitalStablesData.maximumScepticHeight;
-  json["scepticAvailablePercentage"] = digitalStablesData.scepticAvailablePercentage;
+  json["panelVoltage"] = digitalStablesData.panelVoltage;
+  json["panelCurrent"] = digitalStablesData.panelCurrent;
   json["batteryVoltage"] = digitalStablesData.batteryVoltage;
   json["v50Voltage"] = digitalStablesData.v50Voltage;
   json["batteryCurrent"] = digitalStablesData.batteryCurrent;

@@ -55,6 +55,23 @@ public:
 	String getGroupIdentifier();
 	void setGroupIdentifier(String groupIdentifier);
 	bool getStationMode();
+
+	// Fence topology mapping (Langley) - own namespace, deliberately separate from
+	// {save,get}DeviceSensorConfig so that adding this never touches that shared signature
+	// (also used by Daffodil/Cajal/Rosie/ChinampaMonitor/gloria-tank-flow-pump/pancho-tank-flow/
+	// Annabelle) - see conversation 2026-07-26.
+	void saveTopologyConfig(String parentShortname, String branchLabel);
+	void getTopologyConfig(char* parentShortname, char* branchLabel);
+
+	// Product definition snapshot injected by Factory at manufacture time (Get Serial Number step).
+	// Own namespace ("productdef"), same namespace/keys serialnumberextractor.ino writes directly via
+	// raw Preferences - kept here too so Daffodil/Langley can both receive it directly (SetProductDefinition)
+	// and read it back for the Inspect flow (GetProductDefinition), without depending on flashing order.
+	void saveProductDefinition(String name, String powerSource, String battery, String pcbs, String firmware);
+	void getProductDefinition(String& name, String& powerSource, String& battery, String& pcbs, String& firmware);
+	unsigned long getCommissionDate();
+	void setCommissionDate(unsigned long epochSeconds);
+
 	virtual ~Esp32SecretManager();
 };
 

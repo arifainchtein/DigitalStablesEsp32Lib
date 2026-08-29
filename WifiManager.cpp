@@ -174,7 +174,20 @@ String WifiManager::getTeleonomeData(String url, bool debug)
         IPAddress ipAddress;
 
         int err = 1;//WiFi.hostByName(hostname.c_str(), ipAddress);
-         ipAddress = MDNS.queryHost(hostname.c_str(), 2000);
+        // A single mDNS query frequently misses its response (normal multicast timing/packet
+        // loss over WiFi) -- retry a few times before giving up, same pattern as the HTTP GET
+        // retry loop below.
+        for (int mdnsAttempt = 0; mdnsAttempt < 3; mdnsAttempt++) {
+            ipAddress = MDNS.queryHost(hostname.c_str(), 2000);
+            if (ipAddress[0] != 0 || ipAddress[1] != 0 || ipAddress[2] != 0 || ipAddress[3] != 0) {
+                break;
+            }
+            if (debug) {
+                Serial.print(" mDNS attempt ");
+                Serial.print(mdnsAttempt + 1);
+                Serial.println(" failed, retrying");
+            }
+        }
          ipA = String(ipAddress[0]) + String(".") + String(ipAddress[1]) + String(".") + String(ipAddress[2]) + String(".") + String(ipAddress[3]);
         if (debug)
         {
@@ -424,6 +437,16 @@ bool WifiManager::connectSTA()
     ;
     ssid = secretManager.getSSID();
     hostname = secretManager.getHostName();
+
+    if (ssid == "") {
+        // No SSID configured (blank on purpose, or never set) - don't burn ~20s in
+        // WiFi.begin()'s connect loop for a station config that can't work. Force AP
+        // mode directly here rather than just returning false, so this is correct
+        // regardless of caller (configWifiSTA has no fallback of its own on failure).
+        _HardSerial.println("connectSTA: no SSID configured, forcing AP mode");
+        return connectAP();
+    }
+
     _HardSerial.print("Setting hostname=");
     _HardSerial.println(hostname);
     

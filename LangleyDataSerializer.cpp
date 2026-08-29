@@ -13,6 +13,11 @@ void LangleyDataSerializer::pushToSerial(HardwareSerial& serial, LangleyData dat
             serial.print(data.deviceshortname[i]);
     }
     serial.print(F("#"));
+    for (int i = 0; i < (int)sizeof(data.serialnumberarray); i++) {
+        if (data.serialnumberarray[i] != 0)
+            serial.print(data.serialnumberarray[i], HEX);
+    }
+    serial.print(F("#"));
     serial.print(data.secondsTime);
     serial.print(F("#"));
     serial.print(data.externalBatteryVoltage, 2);
@@ -62,6 +67,22 @@ void LangleyDataSerializer::pushToSerial(HardwareSerial& serial, LangleyData dat
     serial.print(data.rtcBatVolt, 2);
     serial.print(F("#"));
     serial.print(data.overnightMah, 4);
+    serial.print(F("#"));
+    for (int i = 0; i < (int)sizeof(data.parentShortname); i++) {
+        if (data.parentShortname[i] != '\0' && data.parentShortname[i] != '\n' && data.parentShortname[i] != '\r')
+            serial.print(data.parentShortname[i]);
+    }
+    serial.print(F("#"));
+    for (int i = 0; i < (int)sizeof(data.branchLabel); i++) {
+        if (data.branchLabel[i] != '\0' && data.branchLabel[i] != '\n' && data.branchLabel[i] != '\r')
+            serial.print(data.branchLabel[i]);
+    }
+    serial.print(F("#"));
+    serial.print(data.latitude, 8);
+    serial.print(F("#"));
+    serial.print(data.longitude, 8);
+    serial.print(F("#"));
+    serial.print(data.altitude, 2);
     serial.print(F("#"));
     serial.println(data.checksum);
 }

@@ -279,6 +279,22 @@ String Esp32SecretManager::getGroupIdentifier(){
 	return groupIdentifier;
 }
 
+void Esp32SecretManager::saveTopologyConfig(String parentShortname, String branchLabel){
+	preferences.begin("TopologyCfg", false);
+	preferences.putString("parentSN", parentShortname);
+	preferences.putString("branchLabel", branchLabel);
+	preferences.end();
+}
+
+void Esp32SecretManager::getTopologyConfig(char* parentShortname, char* branchLabel){
+	preferences.begin("TopologyCfg", true);
+	String _psn = preferences.getString("parentSN");
+	String _bl = preferences.getString("branchLabel");
+	preferences.end();
+	_psn.toCharArray(parentShortname, 5);
+	_bl.toCharArray(branchLabel, 2);
+}
+
 String Esp32SecretManager::getStationName(){
 	preferences.begin("ConfigData",false);
 	String stationName = preferences.getString("stationName");
@@ -380,6 +396,39 @@ String Esp32SecretManager::getHostName(){
 	if(preferences.isKey("hostName"))hostName=preferences.getString("hostName","");
 	preferences.end();
 	return hostName;
+}
+
+void Esp32SecretManager::saveProductDefinition(String name, String powerSource, String battery, String pcbs, String firmware){
+	preferences.begin("productdef", false);
+	preferences.putString("name", name);
+	preferences.putString("power", powerSource);
+	preferences.putString("battery", battery);
+	preferences.putString("pcbs", pcbs);
+	preferences.putString("firmware", firmware);
+	preferences.end();
+}
+
+void Esp32SecretManager::getProductDefinition(String& name, String& powerSource, String& battery, String& pcbs, String& firmware){
+	preferences.begin("productdef", true);
+	name = preferences.getString("name", "");
+	powerSource = preferences.getString("power", "");
+	battery = preferences.getString("battery", "");
+	pcbs = preferences.getString("pcbs", "");
+	firmware = preferences.getString("firmware", "");
+	preferences.end();
+}
+
+unsigned long Esp32SecretManager::getCommissionDate(){
+	preferences.begin("productdef", true);
+	unsigned long commissionDate = preferences.getULong("commission", 0);
+	preferences.end();
+	return commissionDate;
+}
+
+void Esp32SecretManager::setCommissionDate(unsigned long epochSeconds){
+	preferences.begin("productdef", false);
+	preferences.putULong("commission", epochSeconds);
+	preferences.end();
 }
 
 Esp32SecretManager::~Esp32SecretManager() {}
