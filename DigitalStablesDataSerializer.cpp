@@ -138,7 +138,12 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     serial.print(F("#"));
     serial.print(digitalStablesData.panelVoltage);
     serial.print(F("#"));
-    serial.print(digitalStablesData.lux);
+    // lux removed from the struct 2026-09-01 (freed for measuredHeight2/maximumScepticHeight2) —
+    // this wire position is kept as a placeholder so every token index after it (sleepTime
+    // onward, all the way through panelCurrent) doesn't shift; AnnabelleDeserializer.java reads
+    // those by hardcoded token[N] position. New fields get appended at the very end instead —
+    // same convention already used for panelCurrent/wifiStatus below.
+    serial.print(-99);
     serial.print(F("#"));
     serial.print(digitalStablesData.sleepTime);
     serial.print(F("#"));
@@ -168,6 +173,13 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     serial.print(digitalStablesData.wifiStatus);
     serial.print(F("#"));
     serial.print(digitalStablesData.panelCurrent);
+    serial.print(F("#"));
+
+    // token[55]/[56] = measuredHeight2/maximumScepticHeight2 (2nd independent trough, UART
+    // ultrasonic on Serial2) — appended 2026-09-01, absent in older firmware/parsers.
+    serial.print(digitalStablesData.measuredHeight2);
+    serial.print(F("#"));
+    serial.print(digitalStablesData.maximumScepticHeight2);
     serial.println(F("#"));
 }
 

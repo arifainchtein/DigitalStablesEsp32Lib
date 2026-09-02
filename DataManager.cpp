@@ -413,8 +413,8 @@ void DataManager::exportDSDCSV() {
        Serial.println(F("devicename,deviceshortname,groupidentifier,sensor1name,sensor2name,"
                   "serialnumber,devicetype,secondsTime,secondstimestring,dataSamplingSec,"
                   " temperature,rtcBatVolt,opMode,operatingstatus,ledBrightness, rssi, snr,flowRate,totalMilliLitres,flowRate2,totalMilliLitres2,"
-                  "tank1PressurePsi,tank2PressurePsi,troughlevelminimumcm,troughlevelmaximumcm,panelVoltage,maximumScepticHeight,measuredHeight,latitude,longitude,altitude,"
-                  "batteryVoltage,v50Voltage,batteryCurrent,estimatedRuntime,outdoortemperature,outdoorhumidity,lux, sleeptime,asyncdata,minimumEfficiencyForLed,minimumEfficiencyForWifi,panelCurrent"));
+                  "tank1PressurePsi,tank2PressurePsi,troughlevelminimumcm,troughlevelmaximumcm,panelVoltage,maximumScepticHeight,measuredHeight,maximumScepticHeight2,measuredHeight2,latitude,longitude,altitude,"
+                  "batteryVoltage,v50Voltage,batteryCurrent,estimatedRuntime,outdoortemperature,outdoorhumidity, sleeptime,asyncdata,minimumEfficiencyForLed,minimumEfficiencyForWifi,panelCurrent"));
 
     DigitalStablesData data;
     while(file.read((uint8_t*)&data, sizeof(DigitalStablesData))) {
@@ -488,6 +488,8 @@ void DataManager::exportDSDCSV() {
     Serial.print("," + String(data.panelVoltage));
     Serial.print("," + String(data.maximumScepticHeight));
     Serial.print("," + String(data.measuredHeight));
+    Serial.print("," + String(data.maximumScepticHeight2));
+    Serial.print("," + String(data.measuredHeight2));
     // Location data
     Serial.print("," + String(data.latitude) + ", " + String(data.longitude));
     Serial.print(", " + String(data.altitude));
@@ -500,8 +502,7 @@ void DataManager::exportDSDCSV() {
 
     Serial.print("," + String(data.outdoortemperature));
     Serial.print("," + String(data.outdoorhumidity));
-    Serial.print("," + String(data.lux));
-    
+
     // System settings
     Serial.print(", " + String(data.sleepTime));
      Serial.print(", " + String(data.asyncdata));
@@ -636,6 +637,8 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     functionname="VOLTAGE_MONITOR";
    }else if(data.currentFunctionValue== DAFFODIL_WATER_TROUGH_TANK1){
     functionname="DAFFODIL_WATER_TROUGH_TANK1";
+   }else if(data.currentFunctionValue== DAFFODIL_2_WATER_TROUGH){
+    functionname="DAFFODIL_2_WATER_TROUGH";
    }
     Serial.println("Current Function Value: " + functionname);
     
@@ -648,6 +651,8 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     Serial.println("trough Level Maximum (cm): " + String(data.troughlevelmaximumcm));
     Serial.println("Measured Height (cm): " + String(data.measuredHeight));
     Serial.println("Maximum Height Height (cm): " + String(data.maximumScepticHeight));
+    Serial.println("Measured Height 2 (cm): " + String(data.measuredHeight2));
+    Serial.println("Maximum Height Height 2 (cm): " + String(data.maximumScepticHeight2));
     // Flow data
     Serial.println("Flow Rate 1: " + String(data.flowRate));
     Serial.println("Total Millilitres 1: " + String(data.totalMilliLitres));
@@ -671,12 +676,12 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     Serial.println("Battery Voltage: " + String(data.batteryVoltage));
     Serial.println("V50 Voltage: " + String(data.v50Voltage));
     Serial.println("Battery Current: " + String(data.batteryCurrent));
+    Serial.println("Estimated Runtime: " + String(data.estimatedRuntime));
     Serial.println("Panel Voltage: " + String(data.panelVoltage));
     Serial.println("Panel Current: " + String(data.panelCurrent));
     Serial.println("Outdoor Temperature: " + String(data.outdoortemperature));
     Serial.println("Outdoor Humidity: " + String(data.outdoorhumidity));
-    Serial.println("Lux: " + String(data.lux));
-    
+
     // System settings
     Serial.println("Sleep Time (s): " + String(data.sleepTime));
     Serial.println("Min Efficiency LED: " + String(data.minimumEfficiencyForLed));

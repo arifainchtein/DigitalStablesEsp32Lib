@@ -16,6 +16,7 @@
 #define DAFFODIL_LIGHT_DETECTOR 9
 #define VOLTAGE_MONITOR 10
 #define DAFFODIL_WATER_TROUGH_TANK1 11
+#define DAFFODIL_2_WATER_TROUGH 12  // 2 independent troughs, UART ultrasonic sensors on Serial1/Serial2 - added 2026-09-01, reclaims switch position 0011 (was a duplicate DAFFODIL_WATER_TROUGH slot). Sensor-reading/display code not yet implemented - pending hardware.
 
 	// const uint8_t tank[] = {
 	//   TSEG_F | TSEG_G | TSEG_D | TSEG_E,                  // t
@@ -91,7 +92,7 @@ struct DigitalStablesData{
 	uint8_t operatingStatus=0;
 	uint8_t loraActive=0;
 	uint8_t ledBrightness=0;
-	char ipAddress[16];
+	char ipAddress[12];  // Shrunk from 16 2026-09-01 to fund measuredHeight2/maximumScepticHeight2 (avoids growing sizeof(DigitalStablesData) past 244, which would collide with ChinampaData's 248). Confirmed dead across every project using this struct — none of them ever write to it (each has its own local ipAddress String for its own WiFi/display logic instead) — so there's nothing to truncate. Must shrink by a multiple of 4 to actually reduce sizeof: this field sits right before a 4-byte-aligned member, so a 2-byte trim is silently absorbed as alignment padding instead of freeing anything (verified by compiling the struct — deviceTypeId has the same issue, left at its original size since one 4-byte cut here is enough).
 	uint8_t wifiStatus;   // 0=off, 1=AP, 2=STA no internet, 3=STA+internet
 	float flowRate=0.0;
 	float totalMilliLitres=0.0;
@@ -112,6 +113,8 @@ struct DigitalStablesData{
 	float panelVoltage=-99;   // Wally USB/panel INA219 (0x45) bus voltage; -99 if sensor absent. Replaces the old scepticAvailablePercentage (was purely derived, never needed on the wire).
 	float maximumScepticHeight=0.0;
 	float measuredHeight=0.0;
+	float maximumScepticHeight2=0.0;  // 2nd independent trough (UART ultrasonic on Serial2) — added 2026-09-01, funded by removing lux and shrinking ipAddress below (estimatedRuntime kept — parsed by AnnabelleDeserializer.java)
+	float measuredHeight2=0.0;
 	//
 	// from aliexpress
 	//  25mm flow meter qfactor =1.08   https://www.aliexpress.com/item/32792886446.html
@@ -133,12 +136,11 @@ struct DigitalStablesData{
 	
     bool digitalStablesUpload;
 	
-	float lux=0;
 	long sleepTime=0; // in seconds — set exclusively by goToSleep()
 	uint8_t minimumEfficiencyForLed;
 	uint8_t minimumEfficiencyForWifi;
 	float batteryCurrent=-99;
-	float estimatedRuntime=0.0;
+	float estimatedRuntime=0.0;  // kept 2026-09-01: parsed by AnnabelleDeserializer (Teleonome), unlike lux which was display-only there
 	uint8_t asyncdata=0;
 	uint8_t wakeTimeSec=0;
 	float panelCurrent=-99;   // Wally USB/panel INA219 (0x45) current, mA; -99 if sensor absent. Freed by shrinking sensor1name/sensor2name from [8] to [6].

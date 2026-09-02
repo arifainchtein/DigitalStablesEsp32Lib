@@ -40,6 +40,8 @@ public:
 	float getSleepPingMinutes();
 	void setTimeZone(String s);
 	String readTimeZone( );
+	void saveDeviceName(String devicename);
+	void saveDeviceShortName(String deviceshortname);
 	String readDeviceName();
 	String readDeviceShortName();
 	String readFlow1Name();
@@ -71,6 +73,25 @@ public:
 	void getProductDefinition(String& name, String& powerSource, String& battery, String& pcbs, String& firmware);
 	unsigned long getCommissionDate();
 	void setCommissionDate(unsigned long epochSeconds);
+
+	// Per-device CSW (config switch) calibration reference (Daffodil) - own namespace. The raw
+	// ADC value read at the 00000 switch position (all off, no solar) scales proportionally with
+	// whatever this specific unit's actual battery/boost-converter output happens to be, so a
+	// single shared threshold table drifts between units. Storing one reference reading per
+	// device (captured via a one-time install-time calibration step) lets firmware scale the
+	// whole table to match, instead of resweeping all 32 positions per battery. 0 = not yet
+	// calibrated (caller should fall back to using the table unscaled).
+	void saveCSWReference(int32_t referenceRawValue);
+	int32_t getCSWReference();
+	// The serial command that requests calibration can't safely read the ladder itself - it runs
+	// mid-runtime (WiFi/LoRa already up), a different electrical load on V50/DEVICE_POWER than
+	// the actual early-boot decode ever sees (confirmed 2026-09-01: a mid-runtime read landed
+	// right back on the ORIGINAL unscaled calibration point while the same boot's early-setup
+	// reading matched the properly-scaled value). So the command only arms a flag here; setup()
+	// checks it and captures the reference at the exact same point in boot as the real decode.
+	void armCSWCalibration();
+	bool isCSWCalibrationArmed();
+	void clearCSWCalibrationArm();
 
 	virtual ~Esp32SecretManager();
 };

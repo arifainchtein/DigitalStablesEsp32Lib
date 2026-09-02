@@ -218,6 +218,16 @@ void Esp32SecretManager::getDeviceSensorConfig(char* devicename, char* devicesho
     preferences.end();
 }
 
+void Esp32SecretManager::saveDeviceName(String devicename){
+	preferences.begin("DeviceSenInf", false);
+	preferences.putString("devicename", devicename);
+	preferences.end();
+}
+void Esp32SecretManager::saveDeviceShortName(String deviceshortname){
+	preferences.begin("DeviceSenInf", false);
+	preferences.putString("deviceshortname", deviceshortname);
+	preferences.end();
+}
 String Esp32SecretManager::readDeviceName(){
 	preferences.begin("DeviceSenInf", false);
 	String ret = preferences.getString("devicename");
@@ -428,6 +438,38 @@ unsigned long Esp32SecretManager::getCommissionDate(){
 void Esp32SecretManager::setCommissionDate(unsigned long epochSeconds){
 	preferences.begin("productdef", false);
 	preferences.putULong("commission", epochSeconds);
+	preferences.end();
+}
+
+void Esp32SecretManager::saveCSWReference(int32_t referenceRawValue){
+	preferences.begin("CSWCal", false);
+	preferences.putInt("refRaw", referenceRawValue);
+	preferences.end();
+}
+
+int32_t Esp32SecretManager::getCSWReference(){
+	preferences.begin("CSWCal", true);
+	int32_t referenceRawValue = preferences.getInt("refRaw", 0);
+	preferences.end();
+	return referenceRawValue;
+}
+
+void Esp32SecretManager::armCSWCalibration(){
+	preferences.begin("CSWCal", false);
+	preferences.putBool("armed", true);
+	preferences.end();
+}
+
+bool Esp32SecretManager::isCSWCalibrationArmed(){
+	preferences.begin("CSWCal", true);
+	bool armed = preferences.getBool("armed", false);
+	preferences.end();
+	return armed;
+}
+
+void Esp32SecretManager::clearCSWCalibrationArm(){
+	preferences.begin("CSWCal", false);
+	preferences.putBool("armed", false);
 	preferences.end();
 }
 
