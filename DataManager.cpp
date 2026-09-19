@@ -654,9 +654,9 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     Serial.println("Measured Height 2 (cm): " + String(data.measuredHeight2));
     Serial.println("Maximum Height Height 2 (cm): " + String(data.maximumScepticHeight2));
     // Flow data
-    Serial.println("Flow Rate 1: " + String(data.flowRate));
+    Serial.println("Flow Rate 1: " + String(data.flowRate) + " (qfactor1=" + String(data.qfactor1, 4) + ")");
     Serial.println("Total Millilitres 1: " + String(data.totalMilliLitres));
-    Serial.println("Flow Rate 2: " + String(data.flowRate2));
+    Serial.println("Flow Rate 2: " + String(data.flowRate2) + " (qfactor2=" + String(data.qfactor2, 4) + ")");
     Serial.println("Total Millilitres 2: " + String(data.totalMilliLitres2));
     
     // Tank data

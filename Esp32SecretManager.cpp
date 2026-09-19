@@ -473,4 +473,106 @@ void Esp32SecretManager::clearCSWCalibrationArm(){
 	preferences.end();
 }
 
+void Esp32SecretManager::saveQFactor1(float qfactor1){
+	preferences.begin("FlowCal", false);
+	preferences.putFloat("qfactor1", qfactor1);
+	preferences.end();
+}
+
+float Esp32SecretManager::getQFactor1(){
+	preferences.begin("FlowCal", true);
+	float qfactor1 = preferences.getFloat("qfactor1", 0.0f);
+	preferences.end();
+	return qfactor1;
+}
+
+void Esp32SecretManager::saveQFactor2(float qfactor2){
+	preferences.begin("FlowCal", false);
+	preferences.putFloat("qfactor2", qfactor2);
+	preferences.end();
+}
+
+float Esp32SecretManager::getQFactor2(){
+	preferences.begin("FlowCal", true);
+	float qfactor2 = preferences.getFloat("qfactor2", 0.0f);
+	preferences.end();
+	return qfactor2;
+}
+
+void Esp32SecretManager::saveFlow1Name(String name){
+	preferences.begin("DeviceSenInf", false);
+	preferences.putString("flow1name", name);
+	preferences.end();
+}
+
+void Esp32SecretManager::saveFlow2Name(String name){
+	preferences.begin("DeviceSenInf", false);
+	preferences.putString("flow2name", name);
+	preferences.end();
+}
+
+void Esp32SecretManager::saveTank1Name(String name){
+	preferences.begin("DeviceSenInf", false);
+	preferences.putString("tank1name", name);
+	preferences.end();
+}
+
+void Esp32SecretManager::saveTank2Name(String name){
+	preferences.begin("DeviceSenInf", false);
+	preferences.putString("tank2name", name);
+	preferences.end();
+}
+
+void Esp32SecretManager::saveTank1Height(float heightMeters){
+	preferences.begin("TankCal", false);
+	preferences.putFloat("tank1height", heightMeters);
+	preferences.end();
+}
+
+float Esp32SecretManager::getTank1Height(){
+	preferences.begin("TankCal", true);
+	float heightMeters = preferences.getFloat("tank1height", 0.0f);
+	preferences.end();
+	return heightMeters;
+}
+
+void Esp32SecretManager::saveTank2Height(float heightMeters){
+	preferences.begin("TankCal", false);
+	preferences.putFloat("tank2height", heightMeters);
+	preferences.end();
+}
+
+float Esp32SecretManager::getTank2Height(){
+	preferences.begin("TankCal", true);
+	float heightMeters = preferences.getFloat("tank2height", 0.0f);
+	preferences.end();
+	return heightMeters;
+}
+
+void Esp32SecretManager::saveTank1MaxVol(float maxVolLiters){
+	preferences.begin("TankCal", false);
+	preferences.putFloat("tank1maxvol", maxVolLiters);
+	preferences.end();
+}
+
+float Esp32SecretManager::getTank1MaxVol(){
+	preferences.begin("TankCal", true);
+	float maxVolLiters = preferences.getFloat("tank1maxvol", 0.0f);
+	preferences.end();
+	return maxVolLiters;
+}
+
+void Esp32SecretManager::saveTank2MaxVol(float maxVolLiters){
+	preferences.begin("TankCal", false);
+	preferences.putFloat("tank2maxvol", maxVolLiters);
+	preferences.end();
+}
+
+float Esp32SecretManager::getTank2MaxVol(){
+	preferences.begin("TankCal", true);
+	float maxVolLiters = preferences.getFloat("tank2maxvol", 0.0f);
+	preferences.end();
+	return maxVolLiters;
+}
+
 Esp32SecretManager::~Esp32SecretManager() {}

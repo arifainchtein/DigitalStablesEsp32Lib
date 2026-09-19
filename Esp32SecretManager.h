@@ -93,6 +93,38 @@ public:
 	bool isCSWCalibrationArmed();
 	void clearCSWCalibrationArm();
 
+	// Per-device flow sensor qfactor calibration (Daffodil) - own namespace. qfactor is defined
+	// by flowRate = pulsesPerSecond / qfactor (see readFlowMeter1()/2() in Daffodil.ino) -
+	// equivalent to pulses-per-liter/60. Datasheet nominal values (e.g. YF-G1's 1.08 or 4.8
+	// depending on variant) are a starting point at best; the struct's hardcoded defaults
+	// (0.35/0.82) were wrong for at least one real sensor (confirmed 2026-09-09: read ~25 L/min
+	// against an actual measured ~7.8 L/min). 0 = not yet calibrated (caller falls back to the
+	// struct default).
+	void saveQFactor1(float qfactor1);
+	float getQFactor1();
+	void saveQFactor2(float qfactor2);
+	float getQFactor2();
+
+	// Per-device sensor/tank display names (Daffodil) - same "DeviceSenInf" namespace/keys the
+	// existing readFlow1Name/readFlow2Name/readTank1Name/readTank2Name already read from; those
+	// getters had no matching setters until now (web config forms had nowhere to persist to).
+	void saveFlow1Name(String name);
+	void saveFlow2Name(String name);
+	void saveTank1Name(String name);
+	void saveTank2Name(String name);
+
+	// Per-device pressure-tank calibration (Daffodil) - own namespace, mirrors the qfactor
+	// pattern above. 0 stored = never calibrated, caller falls back to the struct default
+	// (tank1HeightMeters/tank2HeightMeters=.3, tank1maxvollit/tank2maxvollit).
+	void saveTank1Height(float heightMeters);
+	float getTank1Height();
+	void saveTank2Height(float heightMeters);
+	float getTank2Height();
+	void saveTank1MaxVol(float maxVolLiters);
+	float getTank1MaxVol();
+	void saveTank2MaxVol(float maxVolLiters);
+	float getTank2MaxVol();
+
 	virtual ~Esp32SecretManager();
 };
 

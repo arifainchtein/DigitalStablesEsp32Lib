@@ -225,11 +225,76 @@ asyncWebServer.on("/DaffodilServlet", HTTP_POST, [this](AsyncWebServerRequest *r
      
       }
     }else  if(formName=="SetSensor1Param"){
-      p = request->getParam(1);
-      String flow1Name =p->value();    
-  
-      p = request->getParam(2);
-      String qfactor1 =p->value();  
+      String flow1Name = request->getParam("flow1Name",true)->value();
+      float qfactor1 = request->getParam("qfactor1",true)->value().toFloat();
+
+      flow1Name.toCharArray(digitalStablesData.sensor1name, sizeof(digitalStablesData.sensor1name));
+      digitalStablesData.qfactor1 = qfactor1;
+      secretManager.saveFlow1Name(flow1Name);
+      secretManager.saveQFactor1(qfactor1);
+
+      DynamicJsonDocument json(1800);
+      this->generateWebData(json,serialNumber);
+      serializeJson(json, *response);
+      request->send(response);
+
+    }else if(formName=="SetFlowSensor2Param"){
+      String flow2Name = request->getParam("flow2Name",true)->value();
+      float qfactor2 = request->getParam("qfactor2",true)->value().toFloat();
+
+      flow2Name.toCharArray(digitalStablesData.sensor2name, sizeof(digitalStablesData.sensor2name));
+      digitalStablesData.qfactor2 = qfactor2;
+      secretManager.saveFlow2Name(flow2Name);
+      secretManager.saveQFactor2(qfactor2);
+
+      DynamicJsonDocument json(1800);
+      this->generateWebData(json,serialNumber);
+      serializeJson(json, *response);
+      request->send(response);
+
+    }else if(formName=="SetTank1Param"){
+      String tank1Name = request->getParam("tank1Name",true)->value();
+      float tank1heightmeters = request->getParam("tank1heightmeters",true)->value().toFloat();
+      float tank1maxvollit = request->getParam("tank1maxvollit",true)->value().toFloat();
+
+      tank1Name.toCharArray(digitalStablesData.sensor1name, sizeof(digitalStablesData.sensor1name));
+      digitalStablesData.tank1HeightMeters = tank1heightmeters;
+      digitalStablesData.tank1maxvollit = tank1maxvollit;
+      secretManager.saveTank1Name(tank1Name);
+      secretManager.saveTank1Height(tank1heightmeters);
+      secretManager.saveTank1MaxVol(tank1maxvollit);
+
+      DynamicJsonDocument json(1800);
+      this->generateWebData(json,serialNumber);
+      serializeJson(json, *response);
+      request->send(response);
+
+    }else if(formName=="SetTank2Param"){
+      String tank2name = request->getParam("tank2name",true)->value();
+      float tank2heightmeters = request->getParam("tank2heightmeters",true)->value().toFloat();
+      float tank2maxvollit = request->getParam("tank2maxvollit",true)->value().toFloat();
+
+      tank2name.toCharArray(digitalStablesData.sensor2name, sizeof(digitalStablesData.sensor2name));
+      digitalStablesData.tank2HeightMeters = tank2heightmeters;
+      digitalStablesData.tank2maxvollit = tank2maxvollit;
+      secretManager.saveTank2Name(tank2name);
+      secretManager.saveTank2Height(tank2heightmeters);
+      secretManager.saveTank2MaxVol(tank2maxvollit);
+
+      DynamicJsonDocument json(1800);
+      this->generateWebData(json,serialNumber);
+      serializeJson(json, *response);
+      request->send(response);
+
+    }else if(formName=="CalibrateCSW"){
+      // Web equivalent of the serial CalibrateCSWReference command: arms the flag, then reboots
+      // so setup() captures the reference at the correct point in boot (see the serial command's
+      // handler in Daffodil.ino for why it can't just read the ladder here). Caller is
+      // responsible for having the config switches at 00000 before triggering this - same
+      // requirement as the serial command.
+      secretManager.armCSWCalibration();
+      this->_HardSerial.println("CSW calibration armed via web - rebooting now to capture the reference (switches must be at 00000).");
+      ESP.restart();
 
     }else if(formName=="SetTimeViaInternet"){
       bool r = setTimeFromInternet();
@@ -397,6 +462,26 @@ void DaffodilWifiManager::generateWebData(DynamicJsonDocument& json, String sent
     json["dsLastUpload"]=digitalStablesData.dsLastUpload;
     json["latitude"]=digitalStablesData.latitude;
      json["longitude"]=digitalStablesData.longitude;
+
+    json["flow1name"] = digitalStablesData.sensor1name;
+    json["flow2name"] = digitalStablesData.sensor2name;
+    json["tank1name"] = digitalStablesData.sensor1name;
+    json["tank2name"] = digitalStablesData.sensor2name;
+    json["qfactor1"] = digitalStablesData.qfactor1;
+    json["qfactor2"] = digitalStablesData.qfactor2;
+    json["flowrate"] = digitalStablesData.flowRate;
+    json["flowrate2"] = digitalStablesData.flowRate2;
+    json["totalmilliLitres"] = digitalStablesData.totalMilliLitres;
+    json["totalmilliLitres2"] = digitalStablesData.totalMilliLitres2;
+    json["tank1heightmeters"] = digitalStablesData.tank1HeightMeters;
+    json["tank2heightmeters"] = digitalStablesData.tank2HeightMeters;
+    json["tank1maxvollit"] = digitalStablesData.tank1maxvollit;
+    json["tank2maxvollit"] = digitalStablesData.tank2maxvollit;
+
+    // 0 = this device has never run CalibrateCSW/CalibrateCSWReference - see the serial command's
+    // comment in Daffodil.ino for why this matters after a battery swap (the CSW ladder's raw
+    // reading scales with whatever the attached battery/boost-converter actually outputs).
+    json["cswReferenceRaw"] = secretManager.getCSWReference();
   }
 
 int DaffodilWifiManager::uploadDataToDigitalStables(){

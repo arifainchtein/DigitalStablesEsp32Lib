@@ -102,11 +102,11 @@ struct DigitalStablesData{
 
 	
 	float tank1HeightMeters=.3;
-	float tank1maxvollit;
+	float tank1maxvollit=0.0;
 	float tank1PressurePsi;
 	float tank2PressurePsi;
 	float tank2HeightMeters=.3;
-	float tank2maxvollit;
+	float tank2maxvollit=0.0;
 
 	float troughlevelminimumcm=20.0;
 	float troughlevelmaximumcm=30.0;
