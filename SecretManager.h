@@ -20,6 +20,7 @@ class SecretManager{
 		virtual void saveSecret(String secret, int numberDigits, int periodSeconds )=0;
 		virtual String  readSecret()=0;
 		long generateCode();
+		long generateCodeAt(long timestamp);  // code for a given time; does not touch the code history
 		boolean checkCode(long userCode);
 		static constexpr int SHARED_SECRET_LENGTH=27;
 		long* getCommandCodeHistory() ;

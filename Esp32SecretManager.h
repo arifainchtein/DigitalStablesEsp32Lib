@@ -69,8 +69,13 @@ public:
 	// Own namespace ("productdef"), same namespace/keys serialnumberextractor.ino writes directly via
 	// raw Preferences - kept here too so Daffodil/Langley can both receive it directly (SetProductDefinition)
 	// and read it back for the Inspect flow (GetProductDefinition), without depending on flashing order.
-	void saveProductDefinition(String name, String powerSource, String battery, String pcbs, String firmware);
+	// runningBuild (2026-10-07): the build stamp (YYMMDDhh) of the code running when the label is
+	// saved, stored as "labelBuild" - if a later boot runs a different build, the firmware label is
+	// stale (the board was flashed without updating it). 0 = unknown (serialnumberextractor, old callers).
+	// Also flags a DeviceIdentityRecord as due (see DeviceIdentityTracker.h).
+	void saveProductDefinition(String name, String powerSource, String battery, String pcbs, String firmware, uint32_t runningBuild = 0);
 	void getProductDefinition(String& name, String& powerSource, String& battery, String& pcbs, String& firmware);
+	uint32_t getProductDefinitionBuild();
 	unsigned long getCommissionDate();
 	void setCommissionDate(unsigned long epochSeconds);
 

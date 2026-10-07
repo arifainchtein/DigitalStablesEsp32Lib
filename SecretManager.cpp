@@ -53,6 +53,14 @@ long SecretManager::generateCode(){
 }
 
 
+// TOTP code for a timestamp other than this device's clock - used to check Annabelle's
+// WeatherForecastUpdate, whose code is calculated at the annabelleTime it carries.
+long SecretManager::generateCodeAt(long timestamp){
+	String secretCode = readSecret();
+	TOTP totp = TOTP(secretCode.c_str());
+	return totp.gen_code(timestamp);
+}
+
 long* SecretManager::getCommandCodeHistory() {
 	return commandCodeHistory;
   }

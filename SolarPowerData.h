@@ -18,10 +18,20 @@
     #pragma pack(pop)
 
 
+    // Annabelle's forecast broadcast, also its field time sync (Field_Time_Sync_Proposal, 2026-10-07).
+    // totpcode is calculated at annabelleTime, so a receiver checks it with
+    // SecretManager::generateCodeAt(annabelleTime) and can authenticate the packet even when its own
+    // clock is off, then set its RTC from annabelleTime. Packed: 169 bytes (was 164 before
+    // annabelleTime/flags) - must stay unique relative to the other LoRa packet structs.
+    #define WEATHER_FLAG_DST 0x01   // flags bit 0: daylight saving in effect at Annabelle
+    #pragma pack(push, 1)
     struct WeatherForecastUpdate{
         long totpcode=0;
         WeatherForecast forecasts[4];
+        uint32_t annabelleTime=0;   // Annabelle's local time as "local fields as seconds" (same convention as getTimeForCodeGeneration()), stamped for the end of the transmit
+        uint8_t flags=0;            // WEATHER_FLAG_DST
     };
+    #pragma pack(pop)
 
     // Overnight battery forecast sent by Annabelle from Cerebellum GraveyardShift task.
     // Fields mirror buildAnnabelleCommand() in GraveyardShift.java.

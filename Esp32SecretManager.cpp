@@ -408,14 +408,23 @@ String Esp32SecretManager::getHostName(){
 	return hostName;
 }
 
-void Esp32SecretManager::saveProductDefinition(String name, String powerSource, String battery, String pcbs, String firmware){
+void Esp32SecretManager::saveProductDefinition(String name, String powerSource, String battery, String pcbs, String firmware, uint32_t runningBuild){
 	preferences.begin("productdef", false);
 	preferences.putString("name", name);
 	preferences.putString("power", powerSource);
 	preferences.putString("battery", battery);
 	preferences.putString("pcbs", pcbs);
 	preferences.putString("firmware", firmware);
+	preferences.putULong("labelBuild", runningBuild);
+	preferences.putUChar("identPend", 2);  // DEVICE_IDENTITY_REASON_LABEL_CHANGED - see DeviceIdentityTracker
 	preferences.end();
+}
+
+uint32_t Esp32SecretManager::getProductDefinitionBuild(){
+	preferences.begin("productdef", true);
+	uint32_t labelBuild = preferences.getULong("labelBuild", 0);
+	preferences.end();
+	return labelBuild;
 }
 
 void Esp32SecretManager::getProductDefinition(String& name, String& powerSource, String& battery, String& pcbs, String& firmware){
