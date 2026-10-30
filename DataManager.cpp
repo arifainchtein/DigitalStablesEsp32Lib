@@ -947,9 +947,28 @@ void DataManager::enqueueDSData(DigitalStablesData data)
     }
 }
 
+int DataManager::overflowIndexCacheSlot(const char* indexFile) {
+    const char* files[6] = { DSD_OVERFLOW_INDEX_FILE, LANGLEY_OVERFLOW_INDEX_FILE,
+                             GLORIA_OVERFLOW_INDEX_FILE, SEEDLING_OVERFLOW_INDEX_FILE,
+                             CHINAMPA_OVERFLOW_INDEX_FILE, COMMA_OVERFLOW_INDEX_FILE };
+    for (int i = 0; i < 6; i++) {
+        if (strcmp(indexFile, files[i]) == 0) return i;
+    }
+    return -1;
+}
+
 bool DataManager::loadOverflowIndex(const char* indexFile, OverflowIndex& index) {
+    int slot = overflowIndexCacheSlot(indexFile);
+    if (slot >= 0 && _overflowIndexCached[slot]) {
+        index = _overflowIndexCache[slot];
+        return true;
+    }
     if (!_fs.exists(indexFile)) {
         index = OverflowIndex();
+        if (slot >= 0) {
+            _overflowIndexCache[slot] = index;
+            _overflowIndexCached[slot] = true;
+        }
         return true;
     }
     File file = _fs.open(indexFile, "r");
@@ -974,6 +993,10 @@ bool DataManager::loadOverflowIndex(const char* indexFile, OverflowIndex& index)
         index = OverflowIndex();
         saveOverflowIndex(indexFile, index);
     }
+    if (slot >= 0) {
+        _overflowIndexCache[slot] = index;
+        _overflowIndexCached[slot] = true;
+    }
     return true;
 }
 
@@ -982,6 +1005,11 @@ bool DataManager::saveOverflowIndex(const char* indexFile, const OverflowIndex& 
     if (!file) return false;
     file.write((uint8_t*)&index, sizeof(OverflowIndex));
     file.close();
+    int slot = overflowIndexCacheSlot(indexFile);
+    if (slot >= 0) {
+        _overflowIndexCache[slot] = index;
+        _overflowIndexCached[slot] = true;
+    }
     return true;
 }
 

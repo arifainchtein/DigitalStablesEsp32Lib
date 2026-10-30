@@ -255,6 +255,17 @@ struct SeedlingIndex {
   // near-identical functions each, not a templated/generic one).
   bool loadOverflowIndex(const char* indexFile, OverflowIndex& index);
   bool saveOverflowIndex(const char* indexFile, const OverflowIndex& index);
+
+  // RAM copy of each type's OverflowIndex, so the getters the Pi poll calls
+  // (~40 per AsyncData reply) don't fopen the index file every time -- each
+  // fopen allocates and frees FILE/lock/VFS buffers, and that churn every
+  // ~6 s fragmented the heap until fopen itself aborted in lock_init_generic
+  // (Annabelle panics 2026-10-28 and 2026-10-30). Filled on the first load
+  // after boot, written through on every save; saveOverflowIndex() is the
+  // only writer of these files, so the copy can't go stale.
+  OverflowIndex _overflowIndexCache[6];
+  bool _overflowIndexCached[6] = {false, false, false, false, false, false};
+  int overflowIndexCacheSlot(const char* indexFile);
   GloriaTankFlowPumpSerializer gloriaTankFlowPumpSerializer;
   DigitalStablesDataSerializer digitalStablesDataSerializer;
   SeedlingMonitorDataSerializer seedlingMonitorDataSerializer;
