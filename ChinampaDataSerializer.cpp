@@ -1,4 +1,5 @@
 #include <ChinampaDataSerializer.h>
+#include "DeviceSerial.h"
 
 void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData chinampaData)
 {
@@ -26,11 +27,7 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
             serial.print(chinampaData.deviceshortname[i]);
     }
     serial.print(F("#"));
-    for (int i = 0; i < sizeof(chinampaData.serialnumberarray); i++)
-    {
-        if (chinampaData.serialnumberarray[i] != NULL)
-            serial.print(chinampaData.serialnumberarray[i], HEX);
-    }
+    serial.print(DeviceSerial::toString(chinampaData.serialnumberarray));  // the efuse MAC, as the factory records it
     serial.print(F("#"));
 
     for (int i = 0; i < sizeof(chinampaData.groupidentifier); i++)

@@ -11,7 +11,10 @@
 //   #<minVoltageSinceReport_mV>#<txDurationMs>#<txBatteryPre_mA>#<txBatteryPeak_mA>
 //   #<txBatteryPost_mA>#<txPanel_mA>#<txV50i_mV>#<txMinVoltage_mV>#<loraTxFailCount>#<seq>
 //   #<i2cDeviceMask>#<rssi>#<snr>#<receivedAgeSeconds>
-// = 30 tokens. receivedAgeSeconds is how long ago Annabelle received the record; the Hypothalamus
+//   #<chargeIn_cmAh>#<dischargeOut_cmAh>#<panelIn_dmWh>#<ledgerMeasuredSec>#<ledgerMaxGapMs>
+//   #<batteryTemp_dC>
+// = 36 tokens (the last 6 added with VitalSignsRecord v3, after the original 30 so older
+// framework code still parses the line). receivedAgeSeconds is how long ago Annabelle received the record; the Hypothalamus
 // subtracts it from its own clock. Annabelle's RTC is local wall time and isn't trusted for an
 // absolute timestamp (no DST switch, no timezone conversion in TimeUtils::getEpochTime unless
 // parseTimezone() was called - see conversation 2026-10-05). serialHex uses the same per-byte HEX (no leading zeros) convention as the other

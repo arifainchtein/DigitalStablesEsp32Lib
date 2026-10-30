@@ -1,11 +1,10 @@
 #include <VitalSignsSerializer.h>
+#include "DeviceSerial.h"
 
 void VitalSignsSerializer::pushToSerial(HardwareSerial& serial, const VitalSignsRecord& r, float rssi, float snr, uint32_t receivedAgeSeconds) {
     serial.print("VitalSignsDeserializer");
     serial.print(F("#"));
-    for (int i = 0; i < (int)sizeof(r.serialnumberarray); i++) {
-        serial.print(r.serialnumberarray[i], HEX);
-    }
+    serial.print(DeviceSerial::toString(r.serialnumberarray));  // the efuse MAC, as the factory records it
     serial.print(F("#")); serial.print(r.version);
     serial.print(F("#")); serial.print(r.firmwareBuild);
     serial.print(F("#")); serial.print(r.resetCount);
@@ -33,7 +32,18 @@ void VitalSignsSerializer::pushToSerial(HardwareSerial& serial, const VitalSigns
     serial.print(F("#")); serial.print(r.i2cDeviceMask);
     serial.print(F("#")); serial.print(rssi, 1);
     serial.print(F("#")); serial.print(snr, 1);
-    serial.print(F("#")); serial.println(receivedAgeSeconds);
+    serial.print(F("#")); serial.print(receivedAgeSeconds);
+    // v3 battery ledger, appended AFTER receivedAgeSeconds so a framework that only knows the
+    // first 30 tokens keeps working. Always sent (zeros / -32768 for a version-2 record).
+    serial.print(F("#")); serial.print(r.chargeIn_cmAh);
+    serial.print(F("#")); serial.print(r.dischargeOut_cmAh);
+    serial.print(F("#")); serial.print(r.panelIn_dmWh);
+    serial.print(F("#")); serial.print(r.ledgerMeasuredSec);
+    serial.print(F("#")); serial.print(r.ledgerMaxGapMs);
+    serial.print(F("#")); serial.print(r.batteryTemp_dC);
+    // v4 WiFi totals (tokens 36-37), appended the same way. Zeros for a version 2/3 record.
+    serial.print(F("#")); serial.print(r.wifiOnSec);
+    serial.print(F("#")); serial.println(r.wifiOut_cmAh);
 }
 
 VitalSignsSerializer::~VitalSignsSerializer() {}

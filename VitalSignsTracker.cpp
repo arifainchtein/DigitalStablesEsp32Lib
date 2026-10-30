@@ -3,6 +3,7 @@
 #include <esp_system.h>
 #include <esp_sleep.h>
 #include <esp_attr.h>
+#include <esp_timer.h>
 
 // Running totals - survive deep sleep, re-initialised by the bootloader on every real reset
 // (the same moment resetCount goes up, so the Teleonome knows the totals restarted).
@@ -29,6 +30,19 @@ RTC_DATA_ATTR static uint16_t rtc_vs_txV50i_mV = 0;
 RTC_DATA_ATTR static uint16_t rtc_vs_txMin_mV = 0;
 RTC_DATA_ATTR static uint16_t rtc_vs_txFailCount = 0;
 RTC_DATA_ATTR static uint16_t rtc_vs_seq = 0;
+// Battery ledger - full-precision running totals, converted to record units only in buildRecord()
+// so no rounding is lost between records. Units: uA x ms (0.01 mAh = 36,000,000 uA.ms) and, for
+// panel energy, uW x ms = nJ (0.1 mWh = 360,000,000 nJ).
+RTC_DATA_ATTR static uint64_t rtc_vs_chargeIn_uAms = 0;
+RTC_DATA_ATTR static uint64_t rtc_vs_dischargeOut_uAms = 0;
+RTC_DATA_ATTR static uint64_t rtc_vs_panelIn_nJ = 0;
+RTC_DATA_ATTR static uint64_t rtc_vs_ledgerMeasuredMs = 0;
+RTC_DATA_ATTR static uint16_t rtc_vs_ledgerMaxGapMs = 0;   // since the last record
+RTC_DATA_ATTR static int16_t  rtc_vs_batteryTemp_dC = INT16_MIN;
+// tagged sub-ledger (setLedgerTag) - same units as the main totals
+RTC_DATA_ATTR static uint64_t rtc_vs_tagMs = 0;
+RTC_DATA_ATTR static uint64_t rtc_vs_tagDischargeOut_uAms = 0;
+RTC_DATA_ATTR static uint64_t rtc_vs_tagChargeIn_uAms = 0;
 
 static uint16_t toMilliVolts(float volts) {
   if (volts <= 0) return 0;
@@ -82,6 +96,15 @@ void VitalSignsTracker::recordBoot(uint32_t nowEpoch) {
     rtc_vs_minVoltage_mV = 0;
     rtc_vs_txFailCount = 0;
     rtc_vs_seq = 0;
+    rtc_vs_chargeIn_uAms = 0;
+    rtc_vs_dischargeOut_uAms = 0;
+    rtc_vs_panelIn_nJ = 0;
+    rtc_vs_ledgerMeasuredMs = 0;
+    rtc_vs_ledgerMaxGapMs = 0;
+    rtc_vs_batteryTemp_dC = INT16_MIN;
+    rtc_vs_tagMs = 0;
+    rtc_vs_tagDischargeOut_uAms = 0;
+    rtc_vs_tagChargeIn_uAms = 0;
   } else {
     rtc_vs_wakeCount++;
     if (nowEpoch > 0 && rtc_vs_intendedWakeEpoch > 0) {
@@ -130,6 +153,22 @@ void VitalSignsTracker::txSamplerTask(void *arg) {
 }
 
 void VitalSignsTracker::beginTx(VitalSignsSampleFn sampleFn, int16_t panel_mA, uint16_t v50i_mV) {
+  if (_ledgerRun) {
+    // The ledger already samples on core 0 - switch it to fast mode for a true TX peak instead of
+    // starting a second task on the same sensors.
+    rtc_vs_txPanel_mA = panel_mA;
+    rtc_vs_txV50i_mV = v50i_mV;
+    LedgerSample s;
+    rtc_vs_txPre_mA = latestSample(s) ? (int16_t)constrain(s.battery_uA / 1000, -32768, 32767) : 0;
+    portENTER_CRITICAL(&_ledgerMux);
+    _peakMa = rtc_vs_txPre_mA;
+    _minMv = 0;
+    portEXIT_CRITICAL(&_ledgerMux);
+    if (_ledgerModeFn) _ledgerModeFn(true);
+    _txActive = true;
+    _txStartMs = millis();
+    return;
+  }
   _sampleFn = sampleFn;
   rtc_vs_txPanel_mA = panel_mA;
   rtc_vs_txV50i_mV = v50i_mV;
@@ -157,7 +196,17 @@ void VitalSignsTracker::beginTx(VitalSignsSampleFn sampleFn, int16_t panel_mA, u
 void VitalSignsTracker::endTx(bool ok) {
   unsigned long duration = millis() - _txStartMs;
   rtc_vs_txDurationMs = duration > 65535 ? 65535 : (uint16_t)duration;
-  if (_sampleFn) {
+  if (_txActive) {
+    _txActive = false;
+    if (_ledgerModeFn) _ledgerModeFn(false);
+    LedgerSample s;
+    rtc_vs_txPost_mA = latestSample(s) ? (int16_t)constrain(s.battery_uA / 1000, -32768, 32767) : 0;
+    portENTER_CRITICAL(&_ledgerMux);
+    rtc_vs_txPeak_mA = _peakMa;
+    rtc_vs_txMin_mV = _minMv;
+    portEXIT_CRITICAL(&_ledgerMux);
+    if (rtc_vs_txMin_mV > 0 && (rtc_vs_minVoltage_mV == 0 || rtc_vs_txMin_mV < rtc_vs_minVoltage_mV)) rtc_vs_minVoltage_mV = rtc_vs_txMin_mV;
+  } else if (_sampleFn) {
     _samplerRun = false;
     unsigned long waitStart = millis();
     while (!_samplerDone && millis() - waitStart < 100) delay(1);
@@ -172,6 +221,7 @@ void VitalSignsTracker::endTx(bool ok) {
 }
 
 void VitalSignsTracker::recordSleep(uint32_t nowEpoch, uint32_t sleepSeconds) {
+  stopLedger();   // no sampling across deep sleep - the Cerebellum covers it with sleepCurrent_uA
   unsigned long awake = millis();
   unsigned long awakeSec = (awake + 500) / 1000;
   rtc_vs_lastAwakeSec = awakeSec > 65535 ? 65535 : (uint16_t)awakeSec;
@@ -215,10 +265,120 @@ VitalSignsRecord VitalSignsTracker::buildRecord(const uint8_t serialnumber[8], u
   r.loraTxFailCount = rtc_vs_txFailCount;
   r.seq = ++rtc_vs_seq;
   r.i2cDeviceMask = i2cDeviceMask;
+  portENTER_CRITICAL(&_ledgerMux);
+  r.chargeIn_cmAh = (uint32_t)(rtc_vs_chargeIn_uAms / 36000000ULL);
+  r.dischargeOut_cmAh = (uint32_t)(rtc_vs_dischargeOut_uAms / 36000000ULL);
+  r.panelIn_dmWh = (uint32_t)(rtc_vs_panelIn_nJ / 360000000ULL);
+  r.wifiOnSec = (uint32_t)(rtc_vs_tagMs / 1000ULL);                        // v4: the tagged sub-ledger
+  r.wifiOut_cmAh = (uint32_t)(rtc_vs_tagDischargeOut_uAms / 36000000ULL);
+  r.ledgerMeasuredSec = (uint32_t)(rtc_vs_ledgerMeasuredMs / 1000);
+  r.ledgerMaxGapMs = rtc_vs_ledgerMaxGapMs;
+  rtc_vs_ledgerMaxGapMs = 0;
+  portEXIT_CRITICAL(&_ledgerMux);
+  r.batteryTemp_dC = rtc_vs_batteryTemp_dC;
+  rtc_vs_batteryTemp_dC = INT16_MIN;   // "no reading" unless the sketch notes one again next cycle
   rtc_vs_minVoltage_mV = 0;
   return r;
 }
 
+void VitalSignsTracker::noteTxFailed() {
+  rtc_vs_txFailCount++;
+}
+
 void VitalSignsTracker::markSent() {
   rtc_vs_resetReportPending = false;
+}
+
+// --- Battery ledger -------------------------------------------------------------------------
+
+void VitalSignsTracker::startLedger(LedgerSampleFn sampleFn, LedgerModeFn modeFn, uint16_t periodMs) {
+  if (_ledgerRun || !sampleFn) return;
+  _ledgerFn = sampleFn;
+  _ledgerModeFn = modeFn;
+  _ledgerPeriodMs = periodMs;
+  _haveSample = false;
+  _ledgerRun = true;
+  _ledgerDone = false;
+  if (xTaskCreatePinnedToCore(ledgerTask, "vsLedger", 3072, this, 1, NULL, 0) != pdPASS) {
+    _ledgerRun = false;
+    _ledgerDone = true;
+  }
+}
+
+void VitalSignsTracker::stopLedger() {
+  if (!_ledgerRun) return;
+  _ledgerRun = false;
+  unsigned long waitStart = millis();
+  while (!_ledgerDone && millis() - waitStart < 300) delay(1);
+}
+
+void VitalSignsTracker::ledgerTask(void *arg) {
+  VitalSignsTracker *t = (VitalSignsTracker *)arg;
+  while (t->_ledgerRun) {
+    t->ledgerStep();
+    // During TX the battery sensor is in single-sample mode (modeFn) - sample every tick for the peak.
+    vTaskDelay(t->_txActive ? 1 : pdMS_TO_TICKS(t->_ledgerPeriodMs));
+  }
+  t->_ledgerDone = true;
+  vTaskDelete(NULL);
+}
+
+// Trapezoid integration between consecutive samples on the real elapsed time (esp_timer, us), so
+// the totals don't depend on the sampling rate or on how often records are sent. The sensor read
+// (I2C) happens in the callback before the lock - only arithmetic runs inside it.
+void VitalSignsTracker::ledgerStep() {
+  LedgerSample s;
+  if (!_ledgerFn(s)) return;
+  int64_t nowUs = esp_timer_get_time();
+  int64_t panel_uW = s.panel_mV > 0 ? (int64_t)s.panel_uA * s.panel_mV / 1000 : 0;
+  portENTER_CRITICAL(&_ledgerMux);
+  if (_haveSample) {
+    int64_t dtMs = (nowUs - _lastSampleUs) / 1000;
+    int64_t avg_uA = ((int64_t)_lastBattery_uA + s.battery_uA) / 2;
+    if (avg_uA > 0) rtc_vs_dischargeOut_uAms += (uint64_t)(avg_uA * dtMs);
+    else            rtc_vs_chargeIn_uAms     += (uint64_t)(-avg_uA * dtMs);
+    if (_tag) {
+      rtc_vs_tagMs += (uint64_t)dtMs;
+      if (avg_uA > 0) rtc_vs_tagDischargeOut_uAms += (uint64_t)(avg_uA * dtMs);
+      else            rtc_vs_tagChargeIn_uAms     += (uint64_t)(-avg_uA * dtMs);
+    }
+    int64_t avg_uW = (_lastPanel_uW + panel_uW) / 2;
+    if (avg_uW > 0) rtc_vs_panelIn_nJ += (uint64_t)(avg_uW * dtMs);
+    rtc_vs_ledgerMeasuredMs += (uint64_t)dtMs;
+    uint16_t gap = dtMs > 65535 ? 65535 : (uint16_t)dtMs;
+    if (gap > rtc_vs_ledgerMaxGapMs) rtc_vs_ledgerMaxGapMs = gap;
+  }
+  _lastSampleUs = nowUs;
+  _lastBattery_uA = s.battery_uA;
+  _lastPanel_uW = panel_uW;
+  _latest = s;
+  _haveSample = true;
+  if (_txActive) {
+    int16_t mA = (int16_t)constrain(s.battery_uA / 1000, -32768, 32767);
+    if (mA > _peakMa) _peakMa = mA;
+    if (s.battery_mV > 0 && (_minMv == 0 || s.battery_mV < _minMv)) _minMv = s.battery_mV;
+  }
+  portEXIT_CRITICAL(&_ledgerMux);
+}
+
+void VitalSignsTracker::taggedTotals(uint32_t &taggedMs, float &dischargeOut_mAh, float &chargeIn_mAh) {
+  portENTER_CRITICAL(&_ledgerMux);
+  uint64_t ms = rtc_vs_tagMs, out = rtc_vs_tagDischargeOut_uAms, in = rtc_vs_tagChargeIn_uAms;
+  portEXIT_CRITICAL(&_ledgerMux);
+  taggedMs = (uint32_t)ms;
+  dischargeOut_mAh = out / 3.6e9f;  // uA*ms -> mAh
+  chargeIn_mAh = in / 3.6e9f;
+}
+
+bool VitalSignsTracker::latestSample(LedgerSample &s) {
+  portENTER_CRITICAL(&_ledgerMux);
+  bool ok = _haveSample;
+  if (ok) s = _latest;
+  portEXIT_CRITICAL(&_ledgerMux);
+  return ok;
+}
+
+void VitalSignsTracker::noteBatteryTemperature(float celsius) {
+  float d = celsius * 10.0f;
+  rtc_vs_batteryTemp_dC = (int16_t)constrain(d, -32767.0f, 32767.0f);
 }

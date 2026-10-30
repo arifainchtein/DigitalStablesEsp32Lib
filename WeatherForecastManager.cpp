@@ -112,6 +112,7 @@ bool WeatherForecastManager::downloadWeatherData() {
     if(debug)_HardSerial.println(url);
 
     http.setTimeout(30000);  // 30s — avoids indefinite hang if OWM is slow
+    http.setConnectTimeout(5000);  // and no long connect wait when the router/WAN is down (2026-10-17)
     http.begin(url);
     int httpCode = http.GET();
     if (httpCode != 200) {

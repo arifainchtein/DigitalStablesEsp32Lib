@@ -75,6 +75,9 @@ protected:
    
 
 public:
+    // ping() prints its result on the serial port; Annabelle turns this off because that port is
+    // the Pi's command line (2026-10-17). Default true keeps the other boards as they were.
+    bool pingVerbose = true;
 	WifiManager(HardwareSerial& serial , FS &fs, PCF8563TimeManager& t, Esp32SecretManager& e) ;
 	virtual void start( )=0;
     void stop( );

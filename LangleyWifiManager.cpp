@@ -124,6 +124,12 @@ void LangleyWifiManager::start(){
 			this->generateWebData(json, serialNumber);
 			serializeJson(json, *response);
 			request->send(response);
+		}else if(formName=="GetPowerData"){
+			AsyncResponseStream *response = request->beginResponseStream("text/plain");
+			JsonDocument json;
+			if (powerDataProvider) powerDataProvider(json);
+			serializeJson(json, *response);
+			request->send(response);
 		}else{
 			request->send(400, "text/plain", "Unknown formName");
 		}

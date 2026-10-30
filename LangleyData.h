@@ -36,9 +36,14 @@ struct LangleyData{
   // 4=CLOUDY 5=COMMA. (Older Langley firmware used a separate 0=Comma/1=WPS/2=Active scheme -
   // this struct has been updated to the shared taxonomy, see Langley.ino's updateOperatingMode().)
   float operatingStatus=0;
-  float wpsFrequencySeconds=1800;
-  float maxWPSVoltage=3.75;
-  float minWPSVoltage=3.25;
+  // These three were wpsFrequencySeconds/maxWPSVoltage/minWPSVoltage, never used. They now carry
+  // what Daffodil's DigitalStablesData sends for Annabelle's weather reply and WiFi on/off command
+  // delivery (2026-10-23). Still floats in the same places, so the packet size (Annabelle and the
+  // Pi tell structs apart by size) and LangleyDataSerializer's field order don't change. Firmware
+  // built before this sends 1800 / 3.75 / 3.25 here.
+  float sleepTime=0;    // seconds the unit sleeps after this packet, 0 = staying awake
+  float wifiStatus=0;   // 0 off, 1 own hotspot, 2 router no internet, 3 router + internet
+  float opMode=0;       // bit 1: holds an Annabelle forecast under 31 min old (same bit as Daffodil)
   long secondsSinceLastPulse;
   // Valentino onboard power monitors: U8 (solar input, 0x40) and U9 (battery, 0x41).
   // Shunt is 2mΩ on both; current computed as getShuntVoltage_mV() / 0.002.

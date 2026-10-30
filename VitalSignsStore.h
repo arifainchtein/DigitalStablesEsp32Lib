@@ -10,9 +10,12 @@
 // running totals, so only the newest one per device matters.
 //
 // Sized for the whole fleet, not one poll's worth: while the Pi is down every device's latest
-// record has to wait here. 64 slots x ~88 bytes = ~5.6 KB. When full, the oldest record is
-// replaced (never the incoming one dropped).
-#define VITAL_SIGNS_STORE_SLOTS 64
+// record has to wait here. When full, the oldest record is replaced (never the incoming one
+// dropped). 64 -> 40 slots on 2026-10-14 when v4 grew the record to 97 bytes: Annabelle's DRAM was
+// already full, and 40 x ~116 bytes = ~4.6 KB is still far more devices than one site has.
+#ifndef VITAL_SIGNS_STORE_SLOTS
+#define VITAL_SIGNS_STORE_SLOTS 40
+#endif
 
 struct VitalSignsSlot {
   VitalSignsRecord record;

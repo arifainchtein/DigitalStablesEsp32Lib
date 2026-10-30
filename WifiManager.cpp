@@ -634,6 +634,7 @@ void WifiManager::checkInternetConnectionAvailable()
     ping();
         
     
+    if (!pingVerbose) return;
     _HardSerial.print("called ping, speed=");
     _HardSerial.println(internetPingTime);
 }
@@ -704,7 +705,8 @@ bool WifiManager::setTimeFromInternet(){
         _HardSerial.print(commandTime);
         _HardSerial.print(" returned ");
         _HardSerial.println(toReturn);
-        currentTimerRecord = timeManager.now();
+        // no RTC read here: the sketch's next clock tick refreshes currentTimerRecord (one RTC read
+        // per tick - a read from here raced Daffodil's core-0 INA219 ledger on the Wire buffer)
     }
     return toReturn;
 }
@@ -712,6 +714,7 @@ bool WifiManager::setTimeFromInternet(){
 void WifiManager::ping(){
     HTTPClient http;
     http.setTimeout(5000); // Core 0 watchdog task handles WDT so no 950ms constraint
+    http.setConnectTimeout(4000);  // a dead router/WAN must not hold the caller longer (2026-10-17)
     http.begin("http://clients3.google.com/generate_204");
     unsigned long startTime = millis();
     int httpResponseCode = http.GET();
@@ -720,6 +723,7 @@ void WifiManager::ping(){
 
     internetAvailable = (httpResponseCode > 0);
 
+    if (!pingVerbose) return;
     _HardSerial.print("ping code=");
     _HardSerial.print(httpResponseCode);
     _HardSerial.print(" time=");

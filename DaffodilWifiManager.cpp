@@ -357,14 +357,22 @@ asyncWebServer.on("/DaffodilServlet", HTTP_GET, [this](AsyncWebServerRequest *re
     // Get the formName parameter by name (safer than by index)
     String formName = request->getParam("formName")->value();
     this->_HardSerial.println("formName: " + formName);
-    AsyncResponseStream *response = request->beginResponseStream("text/plain");
     if(formName=="GetWebData"){
+      AsyncResponseStream *response = request->beginResponseStream("text/plain");
       DynamicJsonDocument json(1800);
       this->generateWebData(json, serialNumber);
       serializeJson(json, *response);
       request->send(response);
-	  }
-    //request->send(200, "text/html", formName);    
+    }else if(formName=="GetPowerData"){
+      AsyncResponseStream *response = request->beginResponseStream("text/plain");
+      JsonDocument json;
+      if (powerDataProvider) powerDataProvider(json);
+      serializeJson(json, *response);
+      request->send(response);
+    }else{
+      // Before 2026-10-14 an unknown form got no answer at all and the page just hung.
+      request->send(400, "text/plain", "Unknown form " + formName);
+    }
 });
   
 // asyncWebServer.on("/DaffodilServlet", HTTP_GET, [this](AsyncWebServerRequest *request) {

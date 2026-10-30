@@ -1,4 +1,5 @@
 #include <DeviceIdentityStore.h>
+#include "DeviceSerial.h"
 
 void DeviceIdentityStore::store(const DeviceIdentityRecord& record, float rssi, float snr) {
   int target = -1;
@@ -52,9 +53,7 @@ int DeviceIdentityStore::pushPendingToSerial(HardwareSerial& serial) {
     const DeviceIdentityRecord& r = s.record;
     serial.print("DeviceIdentityDeserializer");
     serial.print(F("#"));
-    for (int b = 0; b < (int)sizeof(r.serialnumberarray); b++) {
-      serial.print(r.serialnumberarray[b], HEX);
-    }
+    serial.print(DeviceSerial::toString(r.serialnumberarray));  // the efuse MAC, as the factory records it
     serial.print(F("#")); serial.print(r.version);
     serial.print(F("#")); serial.print(r.firmwareBuild);
     serial.print(F("#")); serial.print(r.labelBuild);

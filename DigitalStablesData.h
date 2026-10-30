@@ -88,6 +88,7 @@ struct DigitalStablesData{
 	uint8_t temperature=0;
 	float rtcBatVolt=0.0;
 	uint8_t opMode=0;
+	uint8_t chargerStatus=0;  // added 2026-10-19 (Wally18 + Daffodil R31): 0=unknown, 1=not charging, 2=charging (MCP73123 STAT on GPIO27). Sits in the 3 padding bytes before rssi - sizeof stays 244 and no other field moves (checked with xtensa-esp32-elf-g++).
 	float rssi=0;
 	float snr=0;
 	uint8_t operatingStatus=0;

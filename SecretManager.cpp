@@ -17,11 +17,10 @@ SecretManager::SecretManager(TimeManager& t): timeManager(t){
 
 
 long SecretManager::generateCode(){
+	return generateCode(timeManager.getTimeForCodeGeneration());
+}
 
-
-
-	long timestamp = timeManager.getTimeForCodeGeneration();
-
+long SecretManager::generateCode(long timestamp){
 	//char secretCode[SHARED_SECRET_LENGTH];
 	String secretCode = readSecret();
 	TOTP totp = TOTP(secretCode.c_str());
@@ -66,8 +65,12 @@ long* SecretManager::getCommandCodeHistory() {
   }
 
 bool SecretManager::checkCode(long userCode){
+	return checkCode(userCode, timeManager.getTimeForCodeGeneration());
+}
+
+bool SecretManager::checkCode(long userCode, long timestamp){
 	boolean codeOk=false;
-	long code = generateCode();
+	long code = generateCode(timestamp);
 	// Serial.print("code=");
 	//Serial.print(code);
 

@@ -1,4 +1,5 @@
 #include <AnnabelleWifiManager.h>
+#include "esp_heap_caps.h"
 #include <ArduinoJson.h>
 #include <ArduinoJson.h>
 //#include <LittleFS.h>
@@ -36,13 +37,10 @@ void AnnabelleWifiManager::start()
     // the hostname is applied
     //  https://github.com/espressif/arduino-esp32/issues/6700
     WiFi.mode(WIFI_MODE_NULL);
-    if (stationmode && ssid)
+    // A station that can't connect (wrong password saved from the web page, router gone) leaves
+    // Annabelle unreachable except over the Pi's serial line - come up as an access point instead.
+    if (!(stationmode && ssid != "" && connectSTA()))
     {
-        connectSTA();
-    }
-    else
-    {
-
         if(debug) _HardSerial.print("ssids=");
         if(debug) _HardSerial.println(ssids);
 
@@ -50,274 +48,141 @@ void AnnabelleWifiManager::start()
         connectAP();
     }
 
-    asyncWebServer.on("/assets/bootstrap/css/bootstrap.min.css", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-  //this-> _HardSerial.println("request  bootstrap.min.css=");
-    request->send(_fs, "/bootstrap.min.css", String(), false);
-    //delay(5);
-     });
-
-    asyncWebServer.on("/assets/img/Annabelle.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
-    request->send(_fs, "/Annabelle.svg", String(), false);
-   // delay(5); 
+    // Serial is the Pi's command line on Annabelle - nothing here prints unless debug is set.
+    // The whole page - Bootstrap, scripts, images - is one file, data/index.html.gz built from web/
+    // by build_web.py (2026-10-22): the browser used to open 6 connections for it at once, which
+    // ran Annabelle out of memory. Every handler goes through gated() (see WEB_MAX_ACTIVE).
+    asyncWebServer.on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
+        gated(request, [this](AsyncWebServerRequest *r) { sendPage(r); });
     });
 
-
- asyncWebServer.on("/assets/img/Pancho.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
-    request->send(_fs, "/Pancho.svg", String(), false);
- //   delay(5); 
+    asyncWebServer.on("/index.html", HTTP_GET, [this](AsyncWebServerRequest *request){
+        gated(request, [this](AsyncWebServerRequest *r) { sendPage(r); });
     });
 
- asyncWebServer.on("/assets/img/Rosie.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
-    request->send(_fs, "/Rosie.svg", String(), false);
-   // delay(5); 
+    asyncWebServer.on("/GetHostName", HTTP_GET, [this](AsyncWebServerRequest *request){
+        request->send(200, "text/plain", hostname);
     });
 
-asyncWebServer.on("/assets/img/Gloria.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
-    request->send(_fs, "/Gloria.svg", String(), false);
-   // delay(5); 
+    // Settings page (data/settings.js). Parameters are read by name - the old handler took
+    // formName from position 1, which is the SSID, so no form ever matched.
+    asyncWebServer.on("/AnnabelleServlet", HTTP_POST, [this](AsyncWebServerRequest *request){
+      gated(request, [this](AsyncWebServerRequest *request) {
+        auto arg = [request](const char *name) -> String {
+            return request->hasParam(name, true) ? request->getParam(name, true)->value() : String();
+        };
+        String formName = arg("formName");
+        if(debug) _HardSerial.println("AnnabelleServlet POST " + formName);
+
+        if (formName == "ConfigSTA" || formName == "ConfigAP") {
+            String host = arg("host");
+            if (host == "") {
+                request->send(400, "text/plain", "Host name missing");
+                return;
+            }
+            // Saved, then a restart - start() connects with the saved settings and falls back to
+            // the access point if the station can't connect. Connecting from here would drop
+            // the connection this reply goes out on.
+            if (formName == "ConfigSTA") {
+                String newSsid = arg("ssid");
+                if (newSsid == "") {
+                    request->send(400, "text/plain", "SSID missing");
+                    return;
+                }
+                String apSsid = secretManager.getSoftAPSSID();
+                secretManager.saveWifiParameters(newSsid, arg("pass"), apSsid, secretManager.getSoftAPPASS(), host, true);
+            } else {
+                String apSsid = arg("apaddress");
+                if (apSsid == "") {
+                    request->send(400, "text/plain", "Access point name missing");
+                    return;
+                }
+                secretManager.saveWifiParameters(secretManager.getSSID(), secretManager.getWifiPassword(), apSsid, arg("pass"), host, false);
+            }
+            request->send(200, "text/plain", "Saved - Annabelle is restarting");
+            xTaskCreate([](void *) {
+                vTaskDelay(pdMS_TO_TICKS(1500));
+                ESP.restart();
+            }, "webRestart", 2048, nullptr, 1, nullptr);
+            return;
+        }
+
+        // Clock and GPS change the RTC and preferences, which the sketch only touches from
+        // loop() - it queues them and the page reads the outcome from GetWebData.
+        if (settingsAction) {
+            String reply = formName == "DeviceWifi"
+                ? settingsAction(formName, arg("serial"), arg("state"))  // telepathons.js WiFi button
+                : settingsAction(formName, arg(formName == "SetGPS" ? "lat" : "time"), arg("long"));
+            if (reply != "") {
+                request->send(200, "text/plain", reply);
+                return;
+            }
+        }
+        request->send(400, "text/plain", "Unknown form " + formName);
+      });
     });
-
-    asyncWebServer.on("/assets/js/TankAndFlowConstants.js", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-  this-> _HardSerial.println("request TankFlowConstants.js");
-    request->send(_fs, "/TankAndFlowConstants.js", String(), false);
-    //delay(5); 
-    });
-
-    asyncWebServer.on("/assets/js/jquery.min.js", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-  this-> _HardSerial.println(" point 1request  jquery/=");
-
-    request->send(_fs, "/jquery.min.js", String(), false);
-  this-> _HardSerial.println(" point 2request  jquery/=");
-  
-   // delay(5);
-     });
-
-    asyncWebServer.on("/assets/css/slideswitch.css", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-this-> _HardSerial.println("request  slideswitch/=");
-    request->send(_fs, "/slideswitch.css", String(), false);
-  //  delay(5);
-     });
-
-    asyncWebServer.on("/assets/css/styles.css", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-  this-> _HardSerial.println("request styles.css /=");
-    request->send(_fs, "/styles.css", String(), false);
-//    delay(5);
-     });
-
-    asyncWebServer.on("/assets/fonts/fa-solid-900.woff2", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-  this-> _HardSerial.println("request solid woof2 /=");
-    request->send(_fs, "/fa-solid-900.woff2", String(), false);
-   // delay(5); 
-   });
-
-    asyncWebServer.on("/assets/fonts/fa-solid-900.woff", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-  this-> _HardSerial.println("request solid woof900 /=");
-    request->send(_fs, "/fa-solid-900.woff", String(), false);
-   // delay(5);
-    });
-
-    asyncWebServer.on("/assets/fonts/fa-solid-900.ttf", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-  this-> _HardSerial.println("request  solid woof ttf /=");
-    request->send(_fs, "/fa-solid-900.ttf", String(), false);
-  // delay(5); 
-  });
-
-    asyncWebServer.on("/assets/fonts/fontawesome-all.min.css", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
- this-> _HardSerial.println("request fontawesome /=");
-    request->send(_fs, "/fontawesome-all.min.css", String(), false);
-    //delay(5); 
-    
-    });
-
-    asyncWebServer.on("/assets/bootstrap/js/bootstrap.min.js", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
- this-> _HardSerial.println("request  bootstramo min js /=");
-    request->send(_fs, "/bootstrap.min.js", String(), false);
-   // delay(5); 
-   });
-
-    asyncWebServer.on("/js/index.js", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
- // delay(5);
- this-> _HardSerial.println("request  indexjs /=");
-  //delay(5);
-    request->send(_fs, "/index.js", String(), false);
-   // delay(5); 
-   });
-
-    asyncWebServer.on("/", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-	//this-> _HardSerial.println("reqestubg  root =");
-    request->send(_fs, "/index.html", String(), false);
-  //  delay(5); 
-    });
-
-    asyncWebServer.on("/index.html", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-	//this-> _HardSerial.println("reqestubg index.html=");
-    request->send(_fs, "/index.html", String(), false);
- //   delay(5); 
-    });
-
-    asyncWebServer.on("/assets/css/Roboto.css", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-	//this-> _HardSerial.println("reqestubg robottocss=");
-    request->send(_fs, "/Roboto.css", String(), false);
-   // delay(5); 
-    });
-
-    asyncWebServer.on("/assets/fonts/Roboto-Regular.woff", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-  //this-> _HardSerial.println("request solid woof900 /=");
-    request->send(_fs, "/Roboto-Regular.woff", String(), false);
-   // delay(5);
-     });
-
-    asyncWebServer.on("/assets/fonts/Roboto-Regular.woff2", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-  //this-> _HardSerial.println("request solid woof900 /=");
-    request->send(_fs, "/Roboto-Regular.woff2", String(), false);
-   // delay(5); 
-    });
-
-    asyncWebServer.on("/GetHostName", HTTP_GET, [this](AsyncWebServerRequest *request)
-                      {
-  //this-> _HardSerial.println("request solid woof900 /=");
-     request->send_P(200, "text/plain", hostname.c_str()); 
-   // delay(5); 
-    });
-
-    asyncWebServer.on("/AnnabelleServlet", HTTP_POST, [this](AsyncWebServerRequest *request)
-                      {
-    int paramsNr = request->params();
-    this-> _HardSerial.println(paramsNr);
-   
-    const AsyncWebParameter* p = request->getParam(1);
-    //String formName =p->name;
-    String formName =p->value();    
-    this-> _HardSerial.print("in post, formName=");
-    this-> _HardSerial.println(formName);
-    AsyncResponseStream *response = request->beginResponseStream("text/plain");
-
-    if(formName=="ConfigSTA"){
-
-      p = request->getParam(1);
-      String ssid =p->value();    
-  
-      p = request->getParam(2);
-      String password =p->value();  
-
-      p = request->getParam(3);
-      String hostName =p->value();  
-
-      this-> _HardSerial.print("in servet2, about to set to station=");
-     
-      bool staok = this->configWifiSTA(ssid, password, hostName);
-      if (staok) {
-        this-> _HardSerial.print("rebooting ");
-        ESP.restart();
-      } else {
-        this-> _HardSerial.print("failed change to station");
-     
-      }
-    }else  if(formName=="ConfigAP"){
-
-      p = request->getParam(1);
-      String apaddress =p->value();    
-  
-      p = request->getParam(2);
-      String password =p->value();  
-
-      p = request->getParam(3);
-      String hostName =p->value();  
-
-      this-> _HardSerial.print("in servet2, about to set to access point,h=");
-      this-> _HardSerial.print(hostName);
-      this-> _HardSerial.print(" apaddress=");
-      this-> _HardSerial.println(apaddress);
-
-     
-      bool staok = this->configWifiAP(apaddress, password, hostName);
-      if (staok) {
-        this-> _HardSerial.print("rebooting after setting access point ");
-        ESP.restart();
-      } else {
-        this-> _HardSerial.print("failed change to ap");
-     
-      }
-    }else if(formName=="SetTimeViaInternet"){
-      bool r = setTimeFromInternet();
-        DynamicJsonDocument json(1800);
-       this->generateWebData(json,serialNumber);
-        serializeJson(json, *response);
-        request->send(response);
-
-    }else if(formName=="ManualSetTime"){
-       p = request->getParam(1);
-      String timeString =p->value();
-      this-> _HardSerial.print("Settg time manually:");
-      this-> _HardSerial.println(timeString);
-      timeManager.setTime(timeString);
-       DynamicJsonDocument json(1800);
-       this->generateWebData(json, serialNumber);
-       serializeJson(json, *response);
-        request->send(response);
-    }else  if(formName=="SetTimeZone"){
-      p = request->getParam(1);
-      String timezone =p->value();    
-      secretManager.setTimeZone(timezone);
-    }else if(formName=="SetGPS"){
-      p = request->getParam(1);
-      float lat =p->value().toFloat();  
-
-      p = request->getParam(2);
-      float log =p->value().toFloat();  
-      annabelleData.latitude=lat;
-      annabelleData.longitude=log;
-    
-        DynamicJsonDocument json(1800);
-       this->generateWebData(json,serialNumber);
-        serializeJson(json, *response);
-        request->send(response);
-
-    } });
 
     asyncWebServer.on("/AnnabelleServlet", HTTP_GET, [this](AsyncWebServerRequest *request){
-        int paramsNr = request->params();
-        this-> _HardSerial.println(paramsNr);
-
-        const AsyncWebParameter *p = request->getParam(0);
-        // String formName =p->name;
-        String formName = p->value();
-        this-> _HardSerial.print("in servet2, formName=");
-        this-> _HardSerial.println(formName);
-        AsyncResponseStream *response = request->beginResponseStream("text/plain");
+      gated(request, [this](AsyncWebServerRequest *request) {
+        String formName = request->hasParam("formName") ? request->getParam("formName")->value() : String();
+        AsyncResponseStream *response = request->beginResponseStream("application/json");
         if (formName == "GetWebData"){
-            DynamicJsonDocument json(1800);
+            DynamicJsonDocument json(2600);
             this->generateWebData(json, serialNumber);
             serializeJson(json, *response);
             request->send(response);
         } else if (formName == "GetDevicesData"){
             serializeJson(dataManager.completeObject, *response);
             request->send(response);
-        } 
+        } else {
+            request->send(400, "text/plain", "Unknown form " + formName);
+        }
+      });
     });
 
-     asyncWebServer.on("/GetSensorData", HTTP_GET, [this](AsyncWebServerRequest *request){
-       this-> _HardSerial.println("curl request returning");
-        this-> _HardSerial.println(sensorString);
-        request->send_P(200, "text/plain", sensorString.c_str()); 
+    asyncWebServer.on("/GetSensorData", HTTP_GET, [this](AsyncWebServerRequest *request){
+        request->send(200, "text/plain", sensorString);
     });
 
+    // The page's ETag (size and time of index.html.gz): a reload the browser already has gets 304.
+    File page = _fs.open("/index.html.gz", "r");
+    if (page) {
+        char etag[24];
+        snprintf(etag, sizeof(etag), "\"%x-%lx\"", (unsigned)page.size(), (unsigned long)page.getLastWrite());
+        pageEtag = etag;
+        page.close();
+    }
+
+    // The fixed reply memory - allocated once, never freed (see WebJsonArena in the header).
+    if (!jsonArena.base) {
+        jsonArena.base = (uint8_t *)heap_caps_malloc(WEB_JSON_ARENA_BYTES, MALLOC_CAP_8BIT);
+        jsonArena.capacity = jsonArena.base ? WEB_JSON_ARENA_BYTES : 0;
+        replyBuffer = (char *)heap_caps_malloc(WEB_REPLY_BUFFER_BYTES, MALLOC_CAP_8BIT);
+    }
+
+    // Last-heard table of every telepathon, newest card per row, polled by data/telepathons.js.
+    asyncWebServer.on("/Telepathons", HTTP_GET, [this](AsyncWebServerRequest *request){
+        gated(request, [this](AsyncWebServerRequest *r) {
+            sendJsonReply(r, [this](JsonDocument &json) { if (telepathonsProvider) telepathonsProvider(json); });
+        });
+    });
+
+    // All cards kept for one row: /TelepathonHistory?row=3&gen=7 (gen guards against the row
+    // having been reused for another device since the page last polled).
+    asyncWebServer.on("/TelepathonHistory", HTTP_GET, [this](AsyncWebServerRequest *request){
+        int row = request->hasParam("row") ? request->getParam("row")->value().toInt() : -1;
+        int gen = request->hasParam("gen") ? request->getParam("gen")->value().toInt() : -1;
+        gated(request, [this, row, gen](AsyncWebServerRequest *r) {
+            sendJsonReply(r, [this, row, gen](JsonDocument &json) { if (historyProvider) historyProvider(json, row, gen); });
+        });
+    });
+
+    // Radio and memory history, one row per 10 minutes - fetched by the Diagnostics tab.
+    asyncWebServer.on("/RadioHistory", HTTP_GET, [this](AsyncWebServerRequest *request){
+        gated(request, [this](AsyncWebServerRequest *r) {
+            sendJsonReply(r, [this](JsonDocument &json) { if (radioHistoryProvider) radioHistoryProvider(json); });
+        });
+    });
 
   asyncWebServer.begin();
 
@@ -360,6 +225,8 @@ void AnnabelleWifiManager::generateWebData(DynamicJsonDocument& json, String sen
     json["dsLastUpload"]=annabelleData.dsLastUpload;
     json["latitude"]=annabelleData.latitude;
      json["longitude"]=annabelleData.longitude;
+    // Clock, board temperature, settings outcome - kept by the sketch.
+    if (webDataExtras) webDataExtras(json);
   }
 
 int AnnabelleWifiManager::uploadDataToDigitalStables()
@@ -436,3 +303,126 @@ if(debug) _HardSerial.println(httpResponseCode);
 
 
 AnnabelleWifiManager::~AnnabelleWifiManager() {}
+
+// --- Fixed-memory JSON replies (2026-10-17, see WebJsonArena in the header) ---------------------
+
+// Each block carries its size in front, so reallocate() knows how much to copy.
+void *WebJsonArena::allocate(size_t size) {
+	size_t need = ((size + 3) & ~(size_t)3) + 4;
+	if (!base || used + need > capacity) return nullptr;  // ArduinoJson then marks the document overflowed
+	uint8_t *block = base + used;
+	*(uint32_t *)block = (uint32_t)size;
+	last = used;
+	used += need;
+	if (used > peak) peak = used;
+	return block + 4;
+}
+
+void *WebJsonArena::reallocate(void *ptr, size_t newSize) {
+	if (!ptr) return allocate(newSize);
+	uint8_t *block = (uint8_t *)ptr - 4;
+	size_t oldSize = *(uint32_t *)block;
+	if (block == base + last) {  // the newest block: grow or shrink it where it is
+		size_t need = ((newSize + 3) & ~(size_t)3) + 4;
+		if (last + need > capacity) return nullptr;
+		*(uint32_t *)block = (uint32_t)newSize;
+		used = last + need;
+		if (used > peak) peak = used;
+		return ptr;
+	}
+	void *moved = allocate(newSize);
+	if (moved) memcpy(moved, ptr, oldSize < newSize ? oldSize : newSize);
+	return moved;
+}
+
+// Builds a reply in the arena, writes it into the reply buffer and sends it from there. Only one
+// reply is in flight at a time: the buffer is busy until the client has the reply and the
+// connection closes (onDisconnect), or 10 s at most.
+void AnnabelleWifiManager::sendJsonReply(AsyncWebServerRequest *request, std::function<void(JsonDocument&)> fill) {
+	if (replyBusy && millis() - replyBusySinceMs > 10000) replyBusy = false;  // a client that never closed
+	if (!jsonArena.base || !replyBuffer || replyBusy) {
+		replyBusyRejects++;
+		request->send(503, "text/plain", "busy");
+		return;
+	}
+	replyBusy = true;
+	replyBusySinceMs = millis();
+	replyOwner = request;  // webRequestDone() frees the buffer when this connection closes
+	jsonArena.reset();
+	size_t len = 0;
+	bool overflowed = false;
+	{
+		JsonDocument json(&jsonArena);
+		fill(json);
+		overflowed = json.overflowed();
+		if (!overflowed) len = serializeJson(json, replyBuffer, WEB_REPLY_BUFFER_BYTES);
+	}
+	if (overflowed || len == 0 || len >= WEB_REPLY_BUFFER_BYTES - 1) {
+		replyTooBig++;
+		replyBusy = false;
+		replyOwner = nullptr;
+		request->send(507, "text/plain", "reply too big");
+		return;
+	}
+	if (len > replyPeakBytes) replyPeakBytes = len;
+	AsyncWebServerResponse *response = request->beginResponse(200, "application/json", (const uint8_t *)replyBuffer, len);
+	if (!response) {
+		replyBusy = false;
+		replyOwner = nullptr;
+		webLowMemory++;
+		request->send(503, "text/plain", "busy");
+		return;
+	}
+	request->send(response);
+}
+
+// --- Web gate (2026-10-22, see WEB_MAX_ACTIVE in the header) ------------------------------------
+
+bool AnnabelleWifiManager::webMemoryOk() {
+	return ESP.getFreeHeap() >= WEB_MIN_FREE_HEAP
+		&& heap_caps_get_largest_free_block(MALLOC_CAP_8BIT) >= WEB_MIN_FREE_BLOCK;
+}
+
+// Runs handler now if there's room and memory, otherwise answers 503 - the page polls again.
+void AnnabelleWifiManager::gated(AsyncWebServerRequest *request, WebHandler handler) {
+	if (webActive >= WEB_MAX_ACTIVE) {
+		webBusy++;
+		request->send(503, "text/plain", "busy");
+		return;
+	}
+	if (!webMemoryOk()) {
+		webLowMemory++;
+		request->send(503, "text/plain", "busy");
+		return;
+	}
+	webActive++;
+	request->onDisconnect([this, request]() { webRequestDone(request); });
+	handler(request);
+}
+
+// A gated request's connection closed (reply delivered, or the client went away).
+void AnnabelleWifiManager::webRequestDone(AsyncWebServerRequest *request) {
+	if (webActive) webActive--;
+	if (request == replyOwner) {
+		replyOwner = nullptr;
+		replyBusy = false;
+	}
+}
+
+// data/index.html.gz - the library finds the .gz and sends it with Content-Encoding: gzip.
+void AnnabelleWifiManager::sendPage(AsyncWebServerRequest *request) {
+	if (pageEtag.length() && request->hasHeader("If-None-Match")
+		&& request->getHeader("If-None-Match")->value() == pageEtag) {
+		request->send(304);
+		return;
+	}
+	AsyncWebServerResponse *response = request->beginResponse(_fs, "/index.html", "text/html");
+	if (!response) {  // NULL when the file can't be opened - including LittleFS out of memory
+		request->send(503);
+		return;
+	}
+	if (pageEtag.length()) response->addHeader("ETag", pageEtag);
+	response->addHeader("Cache-Control", "no-cache");  // keep it, but ask (304) before using it
+	request->send(response);
+}
+

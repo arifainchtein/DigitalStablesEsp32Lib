@@ -1,4 +1,5 @@
 #include <PanchoTankFlowSerializer.h>
+#include "DeviceSerial.h"
 
 
 void PanchoTankFlowSerializer::pushToSerial(HardwareSerial& serial , PanchoTankFlowData panchoTankFlowData){
@@ -17,9 +18,7 @@ void PanchoTankFlowSerializer::pushToSerial(HardwareSerial& serial , PanchoTankF
         if(panchoTankFlowData.deviceshortname[i]!=NULL &&  panchoTankFlowData.deviceshortname[i]!='\n' &&  panchoTankFlowData.deviceshortname[i]!='\r')Serial.print(panchoTankFlowData.deviceshortname[i]);
     }
     serial.print(F("#"));
-     for(int i = 0; i < sizeof(panchoTankFlowData.serialnumberarray); i++){
-       if(panchoTankFlowData.serialnumberarray[i]!=NULL) Serial.print(panchoTankFlowData.serialnumberarray[i],HEX);
-    }
+     serial.print(DeviceSerial::toString(panchoTankFlowData.serialnumberarray));  // the efuse MAC, as the factory records it
      serial.print(F("#"));
       for(int i = 0; i < sizeof(panchoTankFlowData.groupidentifier); i++){
         if(panchoTankFlowData.groupidentifier[i]!=NULL)Serial.print(panchoTankFlowData.groupidentifier[i]);

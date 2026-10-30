@@ -1,4 +1,5 @@
 #include <DigitalStablesDataSerializer.h>
+#include "DeviceSerial.h"
 
 namespace {
 // Prints a fixed-size char buffer as a proper C string: stops at the first '\0'
@@ -30,11 +31,7 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     serial.print(F("#"));
     printFixedCString(serial, digitalStablesData.deviceshortname, sizeof(digitalStablesData.deviceshortname), true);
     serial.print(F("#"));
-    for (int i = 0; i < sizeof(digitalStablesData.serialnumberarray); i++)
-    {
-        if (digitalStablesData.serialnumberarray[i] != NULL)
-            serial.print(digitalStablesData.serialnumberarray[i], HEX);
-    }
+    serial.print(DeviceSerial::toString(digitalStablesData.serialnumberarray));  // the efuse MAC, as the factory records it
     serial.print(F("#"));
 
     printFixedCString(serial, digitalStablesData.groupidentifier, sizeof(digitalStablesData.groupidentifier));

@@ -1,4 +1,5 @@
 #include <GloriaTankFlowPumpSerializer.h>
+#include "DeviceSerial.h"
 
 void GloriaTankFlowPumpSerializer::pushToSerial(HardwareSerial &serial, GloriaTankFlowPumpData &gloriaTankFlowPumpData)
 {
@@ -28,11 +29,7 @@ void GloriaTankFlowPumpSerializer::pushToSerial(HardwareSerial &serial, GloriaTa
   }
   serial.print(F("#"));
 
-  for (int i = 0; i < sizeof(gloriaTankFlowPumpData.serialnumberarray); i++)
-  {
-    if (gloriaTankFlowPumpData.serialnumberarray[i] != NULL)
-      Serial.print(gloriaTankFlowPumpData.serialnumberarray[i], HEX);
-  }
+  serial.print(DeviceSerial::toString(gloriaTankFlowPumpData.serialnumberarray));  // the efuse MAC, as the factory records it
   serial.print(F("#"));
 
   //  for(int i = 0; i < sizeof(gloriaTankFlowPumpData.groupidentifier); i++){

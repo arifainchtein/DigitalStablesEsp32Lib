@@ -1,4 +1,5 @@
 #include <SeedlingMonitorDataSerializer.h>
+#include "DeviceSerial.h"
 
 void SeedlingMonitorDataSerializer::pushToSerial(HardwareSerial &serial, SeedlingMonitorData seedlingMonitorData)
 {
@@ -26,11 +27,7 @@ void SeedlingMonitorDataSerializer::pushToSerial(HardwareSerial &serial, Seedlin
             serial.print(seedlingMonitorData.deviceshortname[i]);
     }
     serial.print(F("#"));
-    for (int i = 0; i < sizeof(seedlingMonitorData.serialnumberarray); i++)
-    {
-        if (seedlingMonitorData.serialnumberarray[i] != NULL)
-            serial.print(seedlingMonitorData.serialnumberarray[i], HEX);
-    }
+    serial.print(DeviceSerial::toString(seedlingMonitorData.serialnumberarray));  // the efuse MAC, as the factory records it
     serial.print(F("#"));
 
     for (int i = 0; i < sizeof(seedlingMonitorData.groupidentifier); i++)

@@ -3,6 +3,7 @@
 #include "Arduino.h"
 #include <WifiManager.h>
 #include <LangleyData.h>
+#include <functional>
 
 // Langley's web page - same WiFi behaviour as DaffodilWifiManager (station or access-point mode,
 // configurable from the page, mDNS hostname, static files served from the firmware's own "www"
@@ -19,6 +20,9 @@ public:
 	LangleyWifiManager(HardwareSerial& serial, FS &fs, PCF8563TimeManager& t, Esp32SecretManager& e, LangleyData& d);
 	void start();
 	void setGpsSavedCallback(GpsSavedCallback cb);
+	// Fills the Power panel (the bolt under the cog) - same hook as DaffodilWifiManager. Runs on the
+	// web server task, so the provider must only copy values the sketch has already read.
+	void setPowerDataProvider(std::function<void(JsonDocument&)> provider) { powerDataProvider = provider; }
 	void generateWebData(DynamicJsonDocument& json, String s);
 	int uploadDataToDigitalStables();
 
@@ -26,5 +30,6 @@ public:
 
 private:
 	GpsSavedCallback gpsSavedCallback = nullptr;
+	std::function<void(JsonDocument&)> powerDataProvider;
 };
 #endif /* LIBRARIES_DIGITALSTABLES_LANGLEYWIFIMANAGER_H_ */

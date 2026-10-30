@@ -4,6 +4,7 @@
 #include "ChinampaData.h"
 #include "DigitalStablesData.h"
 #include "DataManager.h"
+#include "DeviceSerial.h"
 
 //JsonObject obj;
 // GloriaTankFlowPumpData gloriaTankFlowPumpData;
@@ -451,9 +452,7 @@ void DataManager::exportDSDCSV() {
     Serial.print(", " + String(data.sensor1name));
     Serial.print("," + String(data.sensor2name));
     Serial.print(", " );
-    for(int i = 0; i < 8; i++) {
-        Serial.print(data.serialnumberarray[i], HEX);
-    }
+    Serial.print(DeviceSerial::toString(data.serialnumberarray));
     
     Serial.print(", " + String(data.deviceTypeId));
     Serial.print("," + String(data.secondsTime));
@@ -520,10 +519,7 @@ void DataManager::exportDSDCSV() {
     Serial.println("Group Identifier: " + String(data.groupidentifier));
    
     Serial.print("Serial Number: ");
-    for(int i = 0; i < 8; i++) {
-        Serial.print(data.serialnumberarray[i], HEX);
-        Serial.print(" ");
-    }
+    Serial.print(DeviceSerial::toString(data.serialnumberarray));
     Serial.println();
     
     Serial.println("Device Type ID: " + String(data.deviceTypeId));
@@ -566,10 +562,7 @@ void DataManager::printSeedlingStoreData(const SeedlingMonitorData& data) {
     Serial.println("Group Identifier: " + String(data.groupidentifier));
    
     Serial.print("Serial Number: ");
-    for(int i = 0; i < 8; i++) {
-        Serial.print(data.serialnumberarray[i], HEX);
-        Serial.print(" ");
-    }
+    Serial.print(DeviceSerial::toString(data.serialnumberarray));
     Serial.println();
     
     Serial.println("Device Type ID: " + String(data.deviceTypeId));
@@ -600,10 +593,7 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     Serial.println("Sensor 2 Name: " + String(data.sensor2name));
     
     Serial.print("Serial Number: ");
-    for(int i = 0; i < 8; i++) {
-        Serial.print(data.serialnumberarray[i], HEX);
-        Serial.print(" ");
-    }
+    Serial.print(DeviceSerial::toString(data.serialnumberarray));
     Serial.println();
     
     Serial.println("Device Type ID: " + String(data.deviceTypeId));
@@ -748,9 +738,9 @@ void DataManager::updateChinampaStoredCount(int count) {
   uint8_t checksum = 0;
   for (uint8_t i = 0; i < 8; i++)
   {
-    sn += String(chinampaData.serialnumberarray[i], HEX);
     checksum += static_cast<uint8_t>(chinampaData.serialnumberarray[i]);
   }
+  sn = DeviceSerial::toString(chinampaData.serialnumberarray);  // the efuse MAC, as the factory records it
   checksum &= 0xFF;
   if (debug){
     if(debug)_HardSerial.print("adding a chinampaData  serialNumber=");
@@ -763,7 +753,7 @@ void DataManager::updateChinampaStoredCount(int count) {
     if(debug)_HardSerial.println(chinampaData.checksum);
   }
   enqueueChinampaData(chinampaData);
-  if (chinampaData.checksum == checksum && (sn.length() == 15 || sn.length() == 14))
+  if (chinampaData.checksum == checksum && DeviceSerial::isValid(chinampaData.serialnumberarray))
   {
     if (debug)
     {
@@ -1704,9 +1694,9 @@ void DataManager::storeDigitalStablesData(DigitalStablesData &digitalStablesData
   uint8_t checksum = 0;
   for (uint8_t i = 0; i < 8; i++)
   {
-    sn += String(digitalStablesData.serialnumberarray[i], HEX);
     checksum += static_cast<uint8_t>(digitalStablesData.serialnumberarray[i]);
   }
+  sn = DeviceSerial::toString(digitalStablesData.serialnumberarray);  // the efuse MAC, as the factory records it
   checksum &= 0xFF;
   if (debug){
     if(debug)_HardSerial.print("adding a digitalStablesData  serialNumber=");
@@ -1719,7 +1709,7 @@ void DataManager::storeDigitalStablesData(DigitalStablesData &digitalStablesData
     if(debug)_HardSerial.println(digitalStablesData.checksum);
   }
   enqueueDSData(digitalStablesData);
-  if (digitalStablesData.checksum == checksum && (sn.length() == 15 || sn.length() == 14))
+  if (digitalStablesData.checksum == checksum && DeviceSerial::isValid(digitalStablesData.serialnumberarray))
   {
 
     
@@ -1750,9 +1740,9 @@ void DataManager::storeSeedlingMonitorData(SeedlingMonitorData &seedlingMonitorD
   uint8_t checksum = 0;
   for (uint8_t i = 0; i < 8; i++)
   {
-    sn += String(seedlingMonitorData.serialnumberarray[i], HEX);
     checksum += static_cast<uint8_t>(seedlingMonitorData.serialnumberarray[i]);
   }
+  sn = DeviceSerial::toString(seedlingMonitorData.serialnumberarray);  // the efuse MAC, as the factory records it
   checksum &= 0xFF;
   if (debug){
     if(debug)_HardSerial.print("adding a seedlingMonitorData  serialNumber=");
@@ -1765,7 +1755,7 @@ void DataManager::storeSeedlingMonitorData(SeedlingMonitorData &seedlingMonitorD
     if(debug)_HardSerial.println(seedlingMonitorData.checksum);
   }
   enqueueSeedlingData(seedlingMonitorData);
-  if (seedlingMonitorData.checksum == checksum && (sn.length() == 15 || sn.length() == 14))
+  if (seedlingMonitorData.checksum == checksum && DeviceSerial::isValid(seedlingMonitorData.serialnumberarray))
   {
     if (debug)
     {
@@ -1908,11 +1898,11 @@ void DataManager::storeGloria(GloriaTankFlowPumpData &gloriaTankFlowPumpData)
   uint8_t checksum = 0;
   for (uint8_t i = 0; i < 8; i++)
   {
-    sn += String(gloriaTankFlowPumpData.serialnumberarray[i], HEX);
     checksum += static_cast<uint8_t>(gloriaTankFlowPumpData.serialnumberarray[i]);
   }
+  sn = DeviceSerial::toString(gloriaTankFlowPumpData.serialnumberarray);  // the efuse MAC, as the factory records it
   checksum &= 0xFF;
-  if (gloriaTankFlowPumpData.checksum == checksum && (sn.length() == 13 || sn.length() == 15 || sn.length() == 14))
+  if (gloriaTankFlowPumpData.checksum == checksum && DeviceSerial::isValid(gloriaTankFlowPumpData.serialnumberarray))
   {
     // if(serialNumber.length()==15){
 
@@ -2013,13 +2003,13 @@ void DataManager::storePancho(PanchoTankFlowData &panchoTankFlowData)
   uint8_t checksum = 0;
   for (uint8_t i = 0; i < 8; i++)
   {
-    sn += String(panchoTankFlowData.serialnumberarray[i], HEX);
     checksum += static_cast<uint8_t>(panchoTankFlowData.serialnumberarray[i]);
   }
+  sn = DeviceSerial::toString(panchoTankFlowData.serialnumberarray);  // the efuse MAC, as the factory records it
   checksum &= 0xFF;
  if(debug) _HardSerial.print("adding a pancho serialNumber=");
  if(debug) _HardSerial.print(sn);
-  if (panchoTankFlowData.checksum == checksum && sn.length() == 15)
+  if (panchoTankFlowData.checksum == checksum && DeviceSerial::isValid(panchoTankFlowData.serialnumberarray))
   {
     // if(serialNumber.length()==15){
     obj = completeObject.createNestedObject(sn);
@@ -2041,9 +2031,9 @@ void DataManager::storeDaffodil(DaffodilData &daffodilData)
   uint8_t checksum = 0;
   for (uint8_t i = 0; i < 8; i++)
   {
-    sn += String(daffodilData.serialnumberarray[i], HEX);
     checksum += static_cast<uint8_t>(daffodilData.serialnumberarray[i]);
   }
+  sn = DeviceSerial::toString(daffodilData.serialnumberarray);  // the efuse MAC, as the factory records it
   checksum &= 0xFF;
  if(debug) _HardSerial.print("adding a daffodilData  serialNumber=");
  if(debug) _HardSerial.print(sn);
@@ -2054,7 +2044,7 @@ void DataManager::storeDaffodil(DaffodilData &daffodilData)
  if(debug) _HardSerial.print(" daffodilData.checksum=");
  if(debug) _HardSerial.println(daffodilData.checksum);
 
-  if (daffodilData.checksum == checksum && (sn.length() == 15 || sn.length() == 14))
+  if (daffodilData.checksum == checksum && DeviceSerial::isValid(daffodilData.serialnumberarray))
   {
     DynamicJsonDocument json(1800);
     generateDaffodilWebData(daffodilData, json);
@@ -2077,11 +2067,11 @@ void DataManager::storeRosie(RosieData &rosieData)
   uint8_t checksum = 0;
   for (uint8_t i = 0; i < 8; i++)
   {
-    sn += String(rosieData.serialnumberarray[i], HEX);
     checksum += static_cast<uint8_t>(rosieData.serialnumberarray[i]);
   }
+  sn = DeviceSerial::toString(rosieData.serialnumberarray);  // the efuse MAC, as the factory records it
   checksum &= 0xFF;
-  if (rosieData.checksum == checksum && sn.length() == 15)
+  if (rosieData.checksum == checksum && DeviceSerial::isValid(rosieData.serialnumberarray))
   {
     // if(){
     obj = completeObject.createNestedObject(sn);

@@ -1,4 +1,5 @@
 #include <LangleyDataSerializer.h>
+#include "DeviceSerial.h"
 
 void LangleyDataSerializer::pushToSerial(HardwareSerial& serial, LangleyData data) {
     serial.print("LangleyDataDeserializer");
@@ -13,10 +14,7 @@ void LangleyDataSerializer::pushToSerial(HardwareSerial& serial, LangleyData dat
             serial.print(data.deviceshortname[i]);
     }
     serial.print(F("#"));
-    for (int i = 0; i < (int)sizeof(data.serialnumberarray); i++) {
-        if (data.serialnumberarray[i] != 0)
-            serial.print(data.serialnumberarray[i], HEX);
-    }
+    serial.print(DeviceSerial::toString(data.serialnumberarray));  // the efuse MAC, as the factory records it
     serial.print(F("#"));
     serial.print(data.secondsTime);
     serial.print(F("#"));
@@ -44,11 +42,11 @@ void LangleyDataSerializer::pushToSerial(HardwareSerial& serial, LangleyData dat
     serial.print(F("#"));
     serial.print(data.operatingStatus);
     serial.print(F("#"));
-    serial.print(data.wpsFrequencySeconds);
+    serial.print(data.sleepTime);
     serial.print(F("#"));
-    serial.print(data.maxWPSVoltage);
+    serial.print(data.wifiStatus);
     serial.print(F("#"));
-    serial.print(data.minWPSVoltage);
+    serial.print(data.opMode);
     serial.print(F("#"));
     serial.print(data.secondsSinceLastPulse);
     serial.print(F("#"));
