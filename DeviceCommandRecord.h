@@ -20,9 +20,23 @@
 
 #define DEVICE_COMMAND_WIFI_ON  1   // minutes = how long (0 = the device's default)
 #define DEVICE_COMMAND_WIFI_OFF 2
+// Signal survey ping (2026-11-03, Paula's Nearby Devices map): "who can hear me from here?". Sent by
+// Paula to every device at once - serialnumberarray all 0xFF - with reserved[0..1] = Paula's ping
+// number (little endian). Every listening device that accepts it answers with a LinkAckRecord
+// (LinkAckRecord.h). Same code/clock checks as the other commands, but nothing is saved: the replay
+// check is in RAM (a repeated ping only costs an extra answer). Firmware older than this ignores it,
+// since the serial is not its own.
+#define DEVICE_COMMAND_PING     3
 
 #define DEVICE_COMMAND_SENDER_ANNABELLE 1
 #define DEVICE_COMMAND_SENDER_PAULA     2
+
+// True for a ping addressed to everyone.
+inline bool isBroadcastPing(const uint8_t *serial, uint8_t command) {
+  if (command != DEVICE_COMMAND_PING) return false;
+  for (int i = 0; i < 8; i++) if (serial[i] != 0xFF) return false;
+  return true;
+}
 
 #pragma pack(push, 1)
 struct DeviceCommandRecord {
