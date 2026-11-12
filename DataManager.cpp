@@ -629,6 +629,10 @@ void DataManager::printDigitalStablesData(const DigitalStablesData& data) {
     functionname="DAFFODIL_WATER_TROUGH_TANK1";
    }else if(data.currentFunctionValue== DAFFODIL_2_WATER_TROUGH){
     functionname="DAFFODIL_2_WATER_TROUGH";
+   }else if(data.currentFunctionValue== DAFFODIL_WATER_TROUGH_WATER_TEMP){
+    functionname="DAFFODIL_WATER_TROUGH_WATER_TEMP";
+   }else if(data.currentFunctionValue== DAFFODIL_VIEWER){
+    functionname="DAFFODIL_VIEWER";
    }
     Serial.println("Current Function Value: " + functionname);
     

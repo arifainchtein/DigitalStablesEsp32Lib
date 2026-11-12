@@ -97,6 +97,16 @@ void LangleyWifiManager::start(){
 			this->generateWebData(json, serialNumber);
 			serializeJson(json, *response);
 			request->send(response);
+		}else if(formName=="SetRelay"){
+			// on=1|0, dbm = the strong-signal limit (0 = relay everything), left out = keep it
+			bool on = postParam(request, "on").toInt() > 0;
+			String d = postParam(request, "dbm");
+			String v = postParam(request, "minv");
+			if(relaySet) relaySet(on, d.length() ? d.toInt() : 1, v.length() ? v.toFloat() : NAN);
+			DynamicJsonDocument json(3000);
+			this->generateWebData(json, serialNumber);
+			serializeJson(json, *response);
+			request->send(response);
 		}else if(formName=="SetGPS"){
 			float lat = postParam(request, "lat").toFloat();
 			float lon = postParam(request, "long").toFloat();
@@ -188,6 +198,7 @@ void LangleyWifiManager::generateWebData(DynamicJsonDocument& json, String sentB
 	json["internetAvailable"] = internetAvailable;
 	json["internetPingTime"] = internetPingTime;
 	json["ipAddress"] = ipAddress;
+	if(relayStatus) relayStatus(json.createNestedObject("relay"));
 }
 
 // Langley reports upstream over LoRa, not to devices.digitalstables.com - kept only because

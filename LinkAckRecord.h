@@ -28,6 +28,8 @@
 
 #define LINK_ACK_KIND_ANNABELLE 1
 #define LINK_ACK_KIND_DAFFODIL  2
+#define LINK_ACK_KIND_LANGLEY   3
+#define LINK_ACK_KIND_CHINAMPA  4   // 2026-11-10
 
 #define LINK_ACK_GATEWAY_UNKNOWN_AGE 0xFFFF   // never heard Annabelle (or it is Annabelle)
 

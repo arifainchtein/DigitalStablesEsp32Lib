@@ -247,6 +247,7 @@ asyncWebServer.on("/ChinampaServlet", HTTP_POST, [this](AsyncWebServerRequest *r
       float log =p2->value().toFloat();  
       chinampaData.latitude=lat;
       chinampaData.longitude=log;
+      if (gpsSavedCallback != nullptr) gpsSavedCallback(lat, log);  // kept across reboots (2026-11-11)
     
         DynamicJsonDocument json(1800);
        this->generateWebData(json,serialNumber);
@@ -314,7 +315,7 @@ void ChinampaWifiManager::generateWebData(DynamicJsonDocument& json, String sent
     json["fishtankoutflowflowRate"]=chinampaData.fishtankoutflowflowRate;
 
     json["minimumSumpTroughLevel"] = chinampaData.minimumSumpTroughLevel;
-    json["maximumSumpTroughHemaximumSumpTroughLevelight"] = chinampaData.maximumSumpTroughLevel;
+    json["maximumSumpTroughLevel"] = chinampaData.maximumSumpTroughLevel;
     json["sumpTroughMeasuredHeight"]=chinampaData.sumpTroughMeasuredHeight;
     json["sumpTroughHeight"]=chinampaData.sumpTroughHeight;
     json["sumpTroughStaleDataSeconds"]=chinampaData.sumpTroughStaleDataSeconds;

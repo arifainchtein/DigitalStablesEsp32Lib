@@ -1,5 +1,6 @@
 #include <ChinampaDataSerializer.h>
 #include "DeviceSerial.h"
+#include "SentBy.h"
 
 void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData chinampaData)
 {
@@ -39,10 +40,10 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
     serial.print(chinampaData.dataSamplingSec);
     serial.print(F("#"));
 
-    serial.print(chinampaData.latitude);
+    serial.print(chinampaData.latitude, 6);  // 6 decimals (2026-11-11): the default 2 put it ~1 km off
     serial.print(F("#"));
 
-    serial.print(chinampaData.longitude);
+    serial.print(chinampaData.longitude, 6);
     serial.print(F("#"));
     
     // Purpose
@@ -138,7 +139,12 @@ void ChinampaDataSerializer::pushToSerial(HardwareSerial &serial, ChinampaData c
     serial.print(F("#"));
     serial.print(chinampaData.outdoortemperature);
     serial.print(F("#"));
-    serial.println(chinampaData.outdoorhumidity);
+    serial.print(chinampaData.outdoorhumidity);
+    serial.print(F("#"));
+    printSentByToken(serial, chinampaData.sentbyarray);  // 2026-11-11 - see SentBy.h
+    serial.print(F("#"));
+    printRoutesToken(serial, chinampaData.serialnumberarray, chinampaData.secondsTime);  // last token
+    serial.println();
 
 }
 

@@ -18,6 +18,8 @@
 #define DAFFODIL_WATER_TROUGH_TANK1 11
 #define DAFFODIL_WATER_TROUGH_WATER_TEMP 13  // trough UART ultrasonic on pin18 + waterproof DS18B20 on pin33; water temp (°C) carried in measuredHeight2 (no struct change) - added 2026-10-02, switch position 0001
 #define DAFFODIL_2_WATER_TROUGH 12  // 2 independent troughs, UART ultrasonic sensors on Serial1/Serial2 - added 2026-09-01, reclaims switch position 0011 (was a duplicate DAFFODIL_WATER_TROUGH slot). Sensor-reading/display code not yet implemented - pending hardware.
+#define DAFFODIL_VIEWER 14  // LoRa data viewer: shows configured fields from other devices (e.g. ChinampaData) + forecast on the LEDs - added 2026-11-06, switch position 1001. Switch 5 = solar as usual. Not yet implemented.
+#define DAFFODIL_SONAR_TROUGH 15  // trough via echo/trigger ultrasonic, trigger 32 / echo 33 (older boards: DaffodilBuild14 / Pancho Build 15 wiring) - added 2026-11-10, switch position 0101 (1101 reads the same)
 
 	// const uint8_t tank[] = {
 	//   TSEG_F | TSEG_G | TSEG_D | TSEG_E,                  // t

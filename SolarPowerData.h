@@ -33,6 +33,58 @@
     };
     #pragma pack(pop)
 
+    // 8-slot forecast (2026-11-07): the same broadcast as WeatherForecastUpdate but 24 h instead of
+    // 12 h, so a morning low (frost) is known from the afternoon before. WeatherForecast is 40 bytes
+    // (ints and doubles), so 8 of them don't fit in a LoRa packet; this carries each slot in 19 bytes
+    // - plain floats, no scaling. Same header/trailer fields and rules as WeatherForecastUpdate
+    // (totpcode calculated at annabelleTime). Packed: 161 bytes - unique among the LoRa packet
+    // structs (nearest: LangleyData 156, WeatherForecastUpdate 169). Annabelle sends this first and
+    // then the 4-slot packet for receivers that don't know this one yet.
+    #define WEATHER_FORECAST8_SLOTS 8
+    #pragma pack(push, 1)
+    struct WeatherForecastSlot {
+        uint8_t hour;          // local hour, as WeatherForecast.hour
+        float temperature;
+        uint8_t cloudiness;    // percentage
+        uint8_t humidity;      // percentage
+        float pressure;        // hPa
+        uint32_t secondsTime;  // OWM UTC timestamp
+        float rain;            // mm over the 3h window
+    };
+    struct WeatherForecast8Update {
+        long totpcode=0;
+        WeatherForecastSlot forecasts[WEATHER_FORECAST8_SLOTS];
+        uint32_t annabelleTime=0;
+        uint8_t flags=0;       // WEATHER_FLAG_DST
+    };
+    #pragma pack(pop)
+    static_assert(sizeof(WeatherForecastSlot) == 19, "WeatherForecastSlot must be 19 bytes");
+    static_assert(sizeof(WeatherForecast8Update) == 161, "WeatherForecast8Update must be 161 bytes - receivers tell packets apart by size");
+
+    inline WeatherForecastSlot weatherForecastToSlot(const WeatherForecast &f) {
+        WeatherForecastSlot s;
+        s.hour = (uint8_t)f.hour;
+        s.temperature = (float)f.temperature;
+        s.cloudiness = (uint8_t)constrain(f.cloudiness, 0, 100);
+        s.humidity = (uint8_t)constrain((int)lround(f.humidity), 0, 100);
+        s.pressure = (float)f.pressure;
+        s.secondsTime = (uint32_t)f.secondsTime;
+        s.rain = f.rain;
+        return s;
+    }
+
+    inline WeatherForecast weatherForecastFromSlot(const WeatherForecastSlot &s) {
+        WeatherForecast f;
+        f.hour = s.hour;
+        f.temperature = s.temperature;
+        f.cloudiness = s.cloudiness;
+        f.humidity = s.humidity;
+        f.pressure = s.pressure;
+        f.secondsTime = (long)s.secondsTime;
+        f.rain = s.rain;
+        return f;
+    }
+
     // Overnight battery forecast sent by Annabelle from Cerebellum GraveyardShift task.
     // Fields mirror buildAnnabelleCommand() in GraveyardShift.java.
     // Total size: 19 bytes (must stay unique relative to other LoRa packet structs).

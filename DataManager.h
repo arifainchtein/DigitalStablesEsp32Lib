@@ -220,8 +220,11 @@ struct SeedlingIndex {
   const char* DSD_OVERFLOW_INDEX_FILE = "/ov_dsd_idx.dat";
 
   #define MAX_OVERFLOW_LANGLEY_RECORDS 600
-  const char* LANGLEY_OVERFLOW_DATA_FILE = "/ov_langley.dat";
-  const char* LANGLEY_OVERFLOW_INDEX_FILE = "/ov_langley_idx.dat";
+  // "2" since 2026-11-11: LangleyData grew 156 -> 164 bytes (sentbyarray), and the overflow file holds
+  // fixed-size slots - records in the old file would be read at the wrong size. The old file is left
+  // behind, unread.
+  const char* LANGLEY_OVERFLOW_DATA_FILE = "/ov_langley2.dat";
+  const char* LANGLEY_OVERFLOW_INDEX_FILE = "/ov_langley2_idx.dat";
 
   #define MAX_OVERFLOW_GLORIA_RECORDS 250
   const char* GLORIA_OVERFLOW_DATA_FILE = "/ov_gloria.dat";

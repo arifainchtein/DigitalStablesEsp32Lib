@@ -105,6 +105,7 @@ bool WeatherForecastManager::downloadWeatherData(SolarInfo* solarInfo) {
 }
 
 bool WeatherForecastManager::downloadWeatherData() {
+    if (extended) return downloadExtended();
     HTTPClient http;
 
     // cnt=8 limits response to 8 x 3-hour slots (~24h), keeping payload ~3KB
@@ -159,6 +160,121 @@ bool WeatherForecastManager::downloadWeatherData() {
 
     saveForecasts(forecasts);
     hasForecastData = true;
+    lastDownloadMs = millis() | 1;   // never 0, which means "none yet"
+    return true;
+}
+
+bool WeatherForecastManager::enableExtendedForecast(int maxSlots) {
+    if (extended) return true;
+    if (maxSlots < 8) maxSlots = 8;
+    if (maxSlots > 40) maxSlots = 40;   // OpenWeather's 5 day / 3 hour forecast has 40
+    WeatherForecastExtended* e = (WeatherForecastExtended*)calloc(1, sizeof(WeatherForecastExtended));
+    WeatherForecastExtSlot* a = (WeatherForecastExtSlot*)calloc(maxSlots, sizeof(WeatherForecastExtSlot));
+    WeatherForecastExtSlot* b = (WeatherForecastExtSlot*)calloc(maxSlots, sizeof(WeatherForecastExtSlot));
+    if (!e || !a || !b) {
+        free(e); free(a); free(b);
+        if(debug)_HardSerial.println("enableExtendedForecast: no room on the heap, staying with 8 slots");
+        return false;
+    }
+    e->slots = a;
+    e->spare = b;
+    e->maxSlots = (uint8_t)maxSlots;
+    extended = e;
+    return true;
+}
+
+// The long forecast, read one slot at a time (ArduinoJson's "one array element at a time"): the 40-slot
+// response is ~16 KB, too much to hold whole next to everything else on Annabelle, and each slot alone is
+// small. HTTP/1.0, so the stream is the plain JSON (no chunked encoding). Read into the spare slots and
+// swapped in only when it all worked, so a failed download keeps the previous forecast whole.
+bool WeatherForecastManager::downloadExtended() {
+    HTTPClient http;
+    String url = "http://api.openweathermap.org/data/2.5/forecast?lat=" + String(lat) + "&lon=" + String(lon) + "&appid=" + apiKey + "&units=metric&cnt=" + String(extended->maxSlots);
+    if(debug)_HardSerial.println(url);
+    http.useHTTP10(true);
+    http.setTimeout(30000);
+    http.setConnectTimeout(5000);
+    http.begin(url);
+    int httpCode = http.GET();
+    if (httpCode != 200) {
+        if(debug)_HardSerial.printf("HTTP error: %s\n", http.errorToString(httpCode).c_str());
+        http.end();
+        return false;
+    }
+    WiFiClient& stream = http.getStream();
+    if (!stream.find("\"list\":[")) {
+        if(debug)_HardSerial.println("forecast: no list in the response");
+        http.end();
+        return false;
+    }
+
+    JsonDocument filter;
+    filter["dt"] = true;
+    filter["main"]["temp"] = true;
+    filter["main"]["humidity"] = true;
+    filter["main"]["pressure"] = true;
+    filter["clouds"]["all"] = true;
+    filter["rain"]["3h"] = true;
+    filter["wind"]["speed"] = true;
+    filter["pop"] = true;
+    filter["weather"][0]["id"] = true;
+
+    JsonDocument doc;
+    WeatherForecastExtSlot* out = extended->spare;
+    int n = 0;
+    do {
+        DeserializationError error = deserializeJson(doc, stream, DeserializationOption::Filter(filter));
+        if (error) {
+            if(debug)_HardSerial.printf("forecast slot %d: JSON error %s\n", n, error.c_str());
+            http.end();
+            return false;
+        }
+        WeatherForecastExtSlot& s = out[n];
+        s.secondsTime = doc["dt"].as<uint32_t>();
+        s.temperature = doc["main"]["temp"].as<float>();
+        s.humidity    = (uint8_t)constrain(doc["main"]["humidity"].as<int>(), 0, 100);
+        s.pressure    = (uint16_t)constrain((int)lround(doc["main"]["pressure"].as<float>()), 0, 2000);
+        s.cloudiness  = (uint8_t)constrain(doc["clouds"]["all"].as<int>(), 0, 100);
+        s.rain        = doc["rain"]["3h"] | 0.0f;
+        s.wind        = doc["wind"]["speed"] | 0.0f;
+        s.pop         = (uint8_t)constrain((int)lround((doc["pop"] | 0.0f) * 100), 0, 100);
+        s.code        = (uint16_t)(doc["weather"][0]["id"] | 0);
+        if (s.secondsTime == 0) {
+            if(debug)_HardSerial.printf("forecast slot %d: no time\n", n);
+            http.end();
+            return false;
+        }
+        n++;
+    } while (n < extended->maxSlots && stream.findUntil(",", "]"));
+
+    // "city" comes after "list": its "timezone" is the farm's offset from UTC, in seconds
+    int32_t tz = extended->timezoneOffset;
+    if (stream.find("\"timezone\":")) tz = (int32_t)stream.parseInt();
+    http.end();
+
+    // the first 8 for LoRa and Preferences, as the 8-slot download does
+    for (int i = 0; i < n && i < 8; i++) {
+        const WeatherForecastExtSlot& s = out[i];
+        forecasts[i].secondsTime = s.secondsTime;
+        time_t t = (time_t)s.secondsTime;
+        struct tm* localTime = localtime(&t);
+        forecasts[i].hour = localTime ? localTime->tm_hour : 0;
+        forecasts[i].temperature = s.temperature;
+        forecasts[i].humidity    = s.humidity;
+        forecasts[i].cloudiness  = s.cloudiness;
+        forecasts[i].pressure    = s.pressure;
+        forecasts[i].rain        = s.rain;
+    }
+    saveForecasts(forecasts);
+    hasForecastData = true;
+
+    extended->spare = extended->slots;
+    extended->slots = out;
+    extended->count = (uint8_t)n;
+    extended->timezoneOffset = tz;
+    extended->downloads++;
+    lastDownloadMs = millis() | 1;
+    if(debug){ _HardSerial.print("forecast slots="); _HardSerial.println(n); }
     return true;
 }
 

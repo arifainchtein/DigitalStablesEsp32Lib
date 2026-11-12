@@ -78,7 +78,7 @@ void Esp32SecretManager::getChinampaParameters( double& fishq) {
     
     // Check if latitude and longitude are available, if not set default values  
     if (!preferences.isKey("fishq")) {
-        fishq = 67;
+        fishq = 63;  // never set: Chinampa's long-standing fixed 63 (2026-11-12, was 67 - unused until now)
 	//	serial.println("line 55, columnheight");
     } else {
         fishq = preferences.getDouble("fishq", 67);

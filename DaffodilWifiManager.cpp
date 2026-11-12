@@ -53,108 +53,29 @@ void DaffodilWifiManager::start(){
 
 
 
- asyncWebServer.on("/assets/bootstrap/css/bootstrap.min.css", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("request bootstrap.min.css=");
-    request->send(_fs, "/bootstrap.min.css", String(), false);
-    delay(5);
-});
-
-asyncWebServer.on("/assets/img/Daffodil.svg", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("request Daffodil.svg");
-    request->send(_fs, "/Daffodil.svg", String(), false);
-    delay(5);
-});
-
-asyncWebServer.on("/assets/js/TankAndFlowConstants.js", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("request TankFlowConstants.js");
-    request->send(_fs, "/TankAndFlowConstants.js", String(), false);
-    delay(5);
-});
-
-asyncWebServer.on("/assets/js/jquery.min.js", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("request jquery/=");
-    request->send(_fs, "/jquery.min.js", String(), false);
-    delay(5);
-});
-
-asyncWebServer.on("/assets/css/slideswitch.css", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("request slideswitch/=");
-    request->send(_fs, "/slideswitch.css", String(), false);
-    delay(5);
-});
-
-asyncWebServer.on("/assets/css/styles.css", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("request styles.css /=");
-    request->send(_fs, "/styles.css", String(), false);
-    delay(5);
-});
-
-asyncWebServer.on("/assets/fonts/fa-solid-900.woff2", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("request solid woof2 /=");
-    request->send(_fs, "/fa-solid-900.woff2", String(), false);
-    delay(5);
-});
-
-asyncWebServer.on("/assets/fonts/fa-solid-900.woff", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("request solid woof900 /=");
-    request->send(_fs, "/fa-solid-900.woff", String(), false);
-    delay(5);
-});
-
-asyncWebServer.on("/assets/fonts/fa-solid-900.ttf", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("request solid woof ttf /=");
-    request->send(_fs, "/fa-solid-900.ttf", String(), false);
-    delay(5);
-});
-
-asyncWebServer.on("/assets/fonts/fontawesome-all.min.css", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("request fontawesome /=");
-    request->send(_fs, "/fontawesome-all.min.css", String(), false);
-    delay(5);
-});
-
-asyncWebServer.on("/assets/bootstrap/js/bootstrap.min.js", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("request bootstramo min js /=");
-    request->send(_fs, "/bootstrap.min.js", String(), false);
-    delay(5);
-});
-
-asyncWebServer.on("/js/index.js", HTTP_GET, [this](AsyncWebServerRequest *request){
-    delay(5);
-    // this->_HardSerial.println("request indexjs /=");
-    delay(5);
-    request->send(_fs, "/index.js", String(), false);
-    delay(5);
-});
+// The whole page - Bootstrap, scripts, fonts, logo - is one file, data/index.html.gz built from
+// web/ by build_web.py (2026-11-06, as on Annabelle). The 16 separate files it replaced were fetched
+// over several connections at once, and over the soft AP the page never finished loading
+// (HorseTrough, 2026-11-06). The page's ETag is the file's size and time: a reload the browser
+// already has gets 304.
+{
+  File page = _fs.open("/index.html.gz", "r");
+  if (page) {
+    char etag[24];
+    snprintf(etag, sizeof(etag), "\"%x-%lx\"", (unsigned)page.size(), (unsigned long)page.getLastWrite());
+    pageEtag = etag;
+    page.close();
+  } else {
+    this->_HardSerial.println("www: /index.html.gz missing - run build_web.py and ./uploadData.sh");
+  }
+}
 
 asyncWebServer.on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("requesting root =");
-    request->send(_fs, "/index.html", String(), false);
-    
+    sendPage(request);
 });
 
 asyncWebServer.on("/index.html", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("requesting index.html=");
-    request->send(_fs, "/index.html", String(), false);
-    delay(5);
-});
-
-asyncWebServer.on("/assets/css/Roboto.css", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("requesting robottocss=");
-    request->send(_fs, "/Roboto.css", String(), false);
-    delay(5);
-});
-
-asyncWebServer.on("/assets/fonts/Roboto-Regular.woff", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("request solid woof900 /=");
-    request->send(_fs, "/Roboto-Regular.woff", String(), false);
-    delay(5);
-});
-
-asyncWebServer.on("/assets/fonts/Roboto-Regular.woff2", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->_HardSerial.println("request solid woof900 /=");
-    request->send(_fs, "/Roboto-Regular.woff2", String(), false);
-    delay(5);
+    sendPage(request);
 });
   
 
@@ -329,6 +250,23 @@ asyncWebServer.on("/DaffodilServlet", HTTP_POST, [this](AsyncWebServerRequest *r
         serializeJson(json, *response);
         request->send(response);
 
+    }else if(formName=="SetViewerConfig"){
+      String err = "Viewer not available";
+      if (viewerConfigSetter && request->hasParam("config", true)) {
+        err = viewerConfigSetter(request->getParam("config", true)->value());
+      } else if (viewerConfigSetter) {
+        err = "missing config";
+      }
+      if (err == "") {
+        JsonDocument json;
+        if (viewerDataProvider) viewerDataProvider(json);
+        serializeJson(json, *response);
+        request->send(response);
+      } else {
+        delete response;  // built above for the success path - not sent
+        request->send(400, "text/plain", err);
+      }
+
     }else if(formName=="SetScepticRange"){
          
       float height =request->getParam("height",true)->value().toFloat();  
@@ -367,6 +305,12 @@ asyncWebServer.on("/DaffodilServlet", HTTP_GET, [this](AsyncWebServerRequest *re
       AsyncResponseStream *response = request->beginResponseStream("text/plain");
       JsonDocument json;
       if (powerDataProvider) powerDataProvider(json);
+      serializeJson(json, *response);
+      request->send(response);
+    }else if(formName=="GetViewerConfig"){
+      AsyncResponseStream *response = request->beginResponseStream("text/plain");
+      JsonDocument json;
+      if (viewerDataProvider) viewerDataProvider(json);
       serializeJson(json, *response);
       request->send(response);
     }else{
@@ -471,10 +415,18 @@ void DaffodilWifiManager::generateWebData(DynamicJsonDocument& json, String sent
     json["latitude"]=digitalStablesData.latitude;
      json["longitude"]=digitalStablesData.longitude;
 
-    json["flow1name"] = digitalStablesData.sensor1name;
-    json["flow2name"] = digitalStablesData.sensor2name;
-    json["tank1name"] = digitalStablesData.sensor1name;
-    json["tank2name"] = digitalStablesData.sensor2name;
+    // Names are fixed char[6] fields that may lack a terminator (2026-11-06: an unterminated name ran on
+    // into binary bytes, the control characters went out raw and the browser rejected the whole JSON).
+    // Read at most the field's size and keep printable characters only.
+    auto boundedName = [](const char *s, size_t n) {
+      String out;
+      for (size_t i = 0; i < n && s[i]; i++) if (s[i] >= 32 && s[i] < 127) out += s[i];
+      return out;
+    };
+    json["flow1name"] = boundedName(digitalStablesData.sensor1name, sizeof(digitalStablesData.sensor1name));
+    json["flow2name"] = boundedName(digitalStablesData.sensor2name, sizeof(digitalStablesData.sensor2name));
+    json["tank1name"] = boundedName(digitalStablesData.sensor1name, sizeof(digitalStablesData.sensor1name));
+    json["tank2name"] = boundedName(digitalStablesData.sensor2name, sizeof(digitalStablesData.sensor2name));
     json["qfactor1"] = digitalStablesData.qfactor1;
     json["qfactor2"] = digitalStablesData.qfactor2;
     json["flowrate"] = digitalStablesData.flowRate;
@@ -553,4 +505,29 @@ int DaffodilWifiManager::uploadDataToDigitalStables(){
 DaffodilWifiManager::~DaffodilWifiManager() {
     _isValid = false;
     asyncWebServer.end();
+}
+
+// data/index.html.gz - the web library finds the .gz for /index.html and sends it with
+// Content-Encoding: gzip. At most WEB_PAGE_MAX_ACTIVE page replies at once (each holds ~10 KB until
+// its connection closes); more get 503 and the browser simply reloads.
+void DaffodilWifiManager::sendPage(AsyncWebServerRequest *request) {
+  if (pageEtag.length() && request->hasHeader("If-None-Match")
+      && request->getHeader("If-None-Match")->value() == pageEtag) {
+    request->send(304);
+    return;
+  }
+  if (pageActive >= WEB_PAGE_MAX_ACTIVE) {
+    request->send(503, "text/plain", "busy");
+    return;
+  }
+  AsyncWebServerResponse *response = request->beginResponse(_fs, "/index.html", "text/html");
+  if (!response) {  // NULL when the file can't be opened
+    request->send(503, "text/plain", "page missing - run build_web.py and ./uploadData.sh");
+    return;
+  }
+  pageActive++;
+  request->onDisconnect([this]() { if (pageActive) pageActive--; });
+  if (pageEtag.length()) response->addHeader("ETag", pageEtag);
+  response->addHeader("Cache-Control", "no-cache");  // keep it, but ask (304) before using it
+  request->send(response);
 }

@@ -1,4 +1,5 @@
 #include <DigitalStablesDataSerializer.h>
+#include "SentBy.h"
 #include "DeviceSerial.h"
 
 namespace {
@@ -177,6 +178,10 @@ void DigitalStablesDataSerializer::pushToSerial(HardwareSerial &serial, DigitalS
     serial.print(digitalStablesData.measuredHeight2);
     serial.print(F("#"));
     serial.print(digitalStablesData.maximumScepticHeight2);
+    serial.print(F("#"));
+    printSentByToken(serial, digitalStablesData.sentbyarray);  // 2026-11-11 - see SentBy.h
+    serial.print(F("#"));
+    printRoutesToken(serial, digitalStablesData.serialnumberarray, digitalStablesData.secondsTime);  // last token
     serial.println(F("#"));
 }
 

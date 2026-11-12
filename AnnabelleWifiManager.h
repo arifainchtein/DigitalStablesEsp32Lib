@@ -50,11 +50,15 @@ class AnnabelleWifiManager : public WifiManager{
 
 
 
+	FS _webFs;  // the page's file system - see setWebFs()
 public:
     DataManager& dataManager;
 	AnnabelleData& annabelleData;
 	boolean debug=false;
 	AnnabelleWifiManager(HardwareSerial& serial ,FS &fs,DataManager& d,PCF8563TimeManager& t, Esp32SecretManager& e, AnnabelleData& tf) ;
+	// Where the page (index.html.gz) is served from (2026-11-11): the "www" partition once its image
+	// has been flashed, else the data LittleFS it was uploaded to before. Call before start().
+	void setWebFs(FS &fs) { _webFs = fs; }
 	void start( );
 	void generateWebData(DynamicJsonDocument& json, String s);
 	int uploadDataToDigitalStables();	

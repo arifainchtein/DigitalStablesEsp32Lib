@@ -14,6 +14,11 @@ struct LangleyData{
   // "Langley_East") register itself automatically, and gives devicename a second, corruption-
   // resistant field to be cross-checked against - see conversation 2026-07-20.
   uint8_t serialnumberarray[8];
+  // Who resent this packet (2026-11-11), the same field DigitalStablesData/ChinampaData have: all zero
+  // when the Langley sent it itself, the relay's name ("Paula", "Chinamp") when a relay resent it -
+  // the relay recomputes the checksum. Langley_W's final spot is far from Annabelle and will need a
+  // relay. Grew the packet 156 -> 164 bytes: Langley and every receiver are rebuilt together.
+  uint8_t sentbyarray[8];
   long secondsTime=0L;
   float externalBatteryVoltage=0.0;
   // Energizer's own battery (separate from Langley's own system battery above) - read from
@@ -92,6 +97,13 @@ struct LangleyData{
   float latitude;
   float longitude;
   float altitude;
+
+  // The Langley's own battery temperature, C, from Valentino's thermistor (J5 NTC on ADS1115 AIN0, also the
+  // BQ24650 TS pin - see readSensorData() in Langley.ino). -127 = no thermistor fitted / no reading, as the
+  // DS18B20 convention. Added 2026-11-12 (Ari): it was only on Langley's own page. Grew the packet 164 -> 168
+  // bytes: Langley and every receiver (Annabelle, the relays that resend LangleyData) are rebuilt together -
+  // Annabelle's LoRaPacketSizeCheck makes sure 168 is no other packet's size.
+  float batteryTemperature = -127.0f;
 
   uint8_t checksum=0; // XOR checksum over every other byte, see calculateChecksum() in Langley.ino
 };

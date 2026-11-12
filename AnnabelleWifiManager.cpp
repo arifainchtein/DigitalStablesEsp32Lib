@@ -6,7 +6,7 @@
 //#define _fs LittleFS
 
 
-AnnabelleWifiManager::AnnabelleWifiManager(HardwareSerial &serial, FS &fs,DataManager &d, PCF8563TimeManager &t, Esp32SecretManager &e, AnnabelleData &tf) : WifiManager(serial, fs,t, e), dataManager(d), annabelleData(tf) {}
+AnnabelleWifiManager::AnnabelleWifiManager(HardwareSerial &serial, FS &fs,DataManager &d, PCF8563TimeManager &t, Esp32SecretManager &e, AnnabelleData &tf) : WifiManager(serial, fs,t, e), _webFs(fs), dataManager(d), annabelleData(tf) {}
 
 
 
@@ -145,7 +145,7 @@ void AnnabelleWifiManager::start()
     });
 
     // The page's ETag (size and time of index.html.gz): a reload the browser already has gets 304.
-    File page = _fs.open("/index.html.gz", "r");
+    File page = _webFs.open("/index.html.gz", "r");
     if (page) {
         char etag[24];
         snprintf(etag, sizeof(etag), "\"%x-%lx\"", (unsigned)page.size(), (unsigned long)page.getLastWrite());
@@ -416,7 +416,7 @@ void AnnabelleWifiManager::sendPage(AsyncWebServerRequest *request) {
 		request->send(304);
 		return;
 	}
-	AsyncWebServerResponse *response = request->beginResponse(_fs, "/index.html", "text/html");
+	AsyncWebServerResponse *response = request->beginResponse(_webFs, "/index.html", "text/html");
 	if (!response) {  // NULL when the file can't be opened - including LittleFS out of memory
 		request->send(503);
 		return;

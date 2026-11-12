@@ -1,4 +1,5 @@
 #include <LangleyDataSerializer.h>
+#include "SentBy.h"
 #include "DeviceSerial.h"
 
 void LangleyDataSerializer::pushToSerial(HardwareSerial& serial, LangleyData data) {
@@ -82,7 +83,16 @@ void LangleyDataSerializer::pushToSerial(HardwareSerial& serial, LangleyData dat
     serial.print(F("#"));
     serial.print(data.altitude, 2);
     serial.print(F("#"));
-    serial.println(data.checksum);
+    serial.print(data.checksum);
+    serial.print(F("#"));
+    // keyed, so a framework that reads the fixed tokens 0-34 ignores it (2026-11-12); empty: no thermistor
+    serial.print(F("battemp:"));
+    if (data.batteryTemperature > -100.0f) serial.print(data.batteryTemperature, 1);
+    serial.print(F("#"));
+    printSentByToken(serial, data.sentbyarray);  // 2026-11-11 - see SentBy.h
+    serial.print(F("#"));
+    printRoutesToken(serial, data.serialnumberarray, data.secondsTime);  // last token
+    serial.println();
 }
 
 LangleyDataSerializer::~LangleyDataSerializer() {}
